@@ -48,3 +48,23 @@ class AgentError(AetherMLError):
 
 class AgentNotImplementedError(AgentError):
     """Raised by agent stubs that have not been implemented yet."""
+
+
+class LLMError(AetherMLError):
+    """Raised when an LLM operation fails."""
+
+
+class LLMTimeoutError(LLMError):
+    """Raised when an LLM API call exceeds the configured timeout."""
+
+
+class LLMAuthenticationError(LLMError):
+    """Raised when LLM API credentials are missing or invalid."""
+
+
+class RAGError(AetherMLError):
+    """Raised when a RAG operation fails."""
+
+
+class QdrantConnectionError(RAGError):
+    """Raised when the Qdrant vector store is unreachable."""

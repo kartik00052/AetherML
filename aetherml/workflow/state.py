@@ -15,6 +15,8 @@ Design rationale:
   not every agent runs.
 
 Field ownership map:
+    run_id                          → [metadata] pipeline identifier
+    status                          → [metadata] pipeline status
     raw_data                        → upload agent
     data_path                       → upload agent (input)
     file_format                     → upload agent
@@ -56,6 +58,16 @@ class WorkflowState(BaseModel):
     correctly — only the fields populated by the agents that actually
     run will have values.
     """
+
+    # ── Pipeline metadata ────────────────────────────────────────────
+    run_id: str | None = Field(
+        default=None,
+        description="[metadata] Unique identifier for this pipeline run.",
+    )
+    status: str | None = Field(
+        default=None,
+        description="[metadata] Current pipeline status (running, completed, failed).",
+    )
 
     # ── Upload agent ────────────────────────────────────────────────
     data_path: str | None = Field(

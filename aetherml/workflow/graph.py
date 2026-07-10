@@ -39,8 +39,10 @@ from aetherml.workflow.router import (
     route_after_eda,
     route_after_etl,
     route_after_evaluation,
+    route_after_explainability,
     route_after_feature_engineering,
     route_after_model_selection,
+    route_after_reporting,
     route_after_target_detection,
     route_after_upload,
     route_after_validation,
@@ -76,6 +78,8 @@ _STAGE_ROUTERS: dict[str, Any] = {
     "feature_engineering": route_after_feature_engineering,
     "model_selection": route_after_model_selection,
     "evaluation": route_after_evaluation,
+    "explainability": route_after_explainability,
+    "reporting": route_after_reporting,
 }
 
 

@@ -76,9 +76,13 @@ def _compose_agents(
         "feature_engineering": FeatureEngineeringAgent(engine=engine),
         "model_selection": ModelSelectionAgent(engine=engine),
         "evaluation": EvaluationAgent(engine=engine),
-        "explainability": ExplainabilityAgent(),
+        "explainability": ExplainabilityAgent(engine=engine),
         "rag": RAGAgent(),
-        "reporting": ReportingAgent(),
+        "reporting": ReportingAgent(
+            llm_config=config.llm,
+            rag_config=config.rag,
+            qdrant_config=config.qdrant,
+        ),
         "storage": StorageAgent(),
     }
     return agents
@@ -220,4 +224,20 @@ def _extract_summary(state: dict[str, Any]) -> dict[str, Any]:
             if evaluation_report is not None
             else None
         ),
+        "explanation_sampled": (
+            state["explanation_report"].get("sampled")
+            if state.get("explanation_report") is not None
+            else None
+        ),
+        "explanation_explainer_type": (
+            state["explanation_report"].get("explainer_type")
+            if state.get("explanation_report") is not None
+            else None
+        ),
+        "final_report_length": (
+            len(state["final_report"])
+            if state.get("final_report") is not None
+            else None
+        ),
+        "narrative_generation_status": state.get("narrative_generation_status"),
     }

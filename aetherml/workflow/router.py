@@ -121,11 +121,36 @@ def route_after_model_selection(state: Any) -> Literal["proceed", "__end__"]:
 def route_after_evaluation(state: Any) -> Literal["proceed", "__end__"]:
     """Route after the Evaluation node.
 
-    If evaluation produced a report, proceed to the next stage
-    (explainability when implemented).  Otherwise, end the workflow.
+    If evaluation produced a report, proceed to explainability.
+    Otherwise, end the workflow.
     """
     if getattr(state, "evaluation_report", None) is not None:
-        logger.info("Evaluation succeeded — proceeding.")
+        logger.info("Evaluation succeeded — proceeding to explainability.")
         return "proceed"
     logger.warning("Evaluation produced no report — ending workflow.")
+    return "__end__"
+
+
+def route_after_explainability(state: Any) -> Literal["proceed", "__end__"]:
+    """Route after the Explainability node.
+
+    If explanation was produced, proceed to reporting.
+    Otherwise, end the workflow.
+    """
+    if getattr(state, "explanation_report", None) is not None:
+        logger.info("Explainability succeeded — proceeding to reporting.")
+        return "proceed"
+    logger.warning("Explainability produced no report — ending workflow.")
+    return "__end__"
+
+
+def route_after_reporting(state: Any) -> Literal["proceed", "__end__"]:
+    """Route after the Reporting node.
+
+    Reporting is the last stage. Always end.
+    """
+    if getattr(state, "final_report", None) is not None:
+        logger.info("Report assembled — workflow complete.")
+    else:
+        logger.warning("Report assembly produced no output — ending.")
     return "__end__"
