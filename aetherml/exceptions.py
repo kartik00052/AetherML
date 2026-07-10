@@ -26,6 +26,10 @@ class DataTransformError(DataError):
     """Raised when a data transformation fails."""
 
 
+class DataValidationError(DataError):
+    """Raised when data fails schema or quality validation checks."""
+
+
 class EngineError(AetherMLError):
     """Raised when a computation engine operation fails."""
 

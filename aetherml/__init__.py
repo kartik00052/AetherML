@@ -68,10 +68,10 @@ def _compose_agents(
     # Instantiate agents with their dependencies
     agents: dict[str, BaseAgent] = {
         "upload": UploadAgent(engine=engine),
-        "validation": ValidationAgent(),
+        "validation": ValidationAgent(engine=engine),
         "engine_selection": EngineSelectionAgent(),
         "etl": ETLAgent(config=ETLConfig(null_strategy="drop")),
-        "eda": EDAAgent(),
+        "eda": EDAAgent(engine=engine),
         "feature_engineering": FeatureEngineeringAgent(),
         "target_detection": TargetDetectionAgent(),
         "model_selection": ModelSelectionAgent(),
@@ -88,14 +88,15 @@ async def run_pipeline(
     data_path: str,
     engine_preference: str | None = None,
     null_strategy: str = "drop",
+    stages: list[str] | None = None,
     config: AetherMLConfig | None = None,
 ) -> dict[str, Any]:
-    """Run the full AetherML pipeline on a dataset.
+    """Run the AetherML pipeline on a dataset.
 
     This is the primary public API.  It:
     1. Builds configuration (from *config* or defaults).
     2. Composes agents via manual DI.
-    3. Constructs the LangGraph workflow.
+    3. Constructs the LangGraph workflow with the requested stages.
     4. Executes the graph with the initial state.
 
     Args:
@@ -103,6 +104,8 @@ async def run_pipeline(
         engine_preference: Force a specific engine (``"pandas"``, ``"polars"``,
             ``"spark"``).  ``None`` for auto-selection.
         null_strategy: Null handling strategy (``"drop"``, ``"fill"``, ``"flag"``).
+        stages: Ordered list of pipeline stages to execute.  If ``None``,
+            defaults to ``["upload", "etl"]``.
         config: Optional pre-built configuration.  If ``None``, a config is
             constructed from the other arguments.
 
@@ -123,7 +126,7 @@ async def run_pipeline(
     agents = _compose_agents(config, data_path)
 
     # 2. Build workflow graph
-    graph = build_graph(agents)
+    graph = build_graph(agents, stages=stages)
 
     # 3. Build initial state
     initial_state = WorkflowState(data_path=data_path)
@@ -140,29 +143,45 @@ async def run_pipeline(
 
     # Extract summary from the final state
     if isinstance(final_state, dict):
-        return {
-            "row_count": final_state.get("row_count"),
-            "column_count": (
-                len(final_state["processed_data"].columns)
-                if final_state.get("processed_data") is not None
-                else None
-            ),
-            "transformations": (
-                len(final_state["transform_log"])
-                if final_state.get("transform_log") is not None
-                else 0
-            ),
-        }
+        return _extract_summary(final_state)
+    return _extract_summary(final_state.model_dump())
+
+
+def _extract_summary(state: dict[str, Any]) -> dict[str, Any]:
+    """Build a summary dict from the final workflow state."""
+    processed = state.get("processed_data")
+    validated = state.get("validated_data")
+    profile = state.get("data_profile")
+
     return {
-        "row_count": final_state.row_count,
+        "row_count": state.get("row_count"),
         "column_count": (
-            len(final_state.processed_data.columns)
-            if final_state.processed_data is not None
-            else None
+            len(processed.columns)
+            if processed is not None
+            else (
+                len(validated.columns)
+                if validated is not None
+                else None
+            )
         ),
         "transformations": (
-            len(final_state.transform_log)
-            if final_state.transform_log is not None
+            len(state["transform_log"])
+            if state.get("transform_log") is not None
             else 0
+        ),
+        "validation_passed": (
+            state["validation_report"].get("passed")
+            if state.get("validation_report") is not None
+            else None
+        ),
+        "numeric_columns": (
+            profile.get("numeric_columns")
+            if profile is not None
+            else None
+        ),
+        "categorical_columns": (
+            profile.get("categorical_columns")
+            if profile is not None
+            else None
         ),
     }
