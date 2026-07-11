@@ -1,20 +1,19 @@
 <div align="center">
 
-# AetherML
+<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=700&size=45&pause=1200&color=00D9FF&center=true&vCenter=true&repeat=true&width=900&lines=AetherML;Agentic+Machine+Learning;Production+Ready+ML+Framework;Open+Source+SDK"/>
 
-### An Open-Source Agentic Machine Learning Framework
+<h3>An Open-Source Agentic Machine Learning Framework</h3>
 
-**Transform raw datasets into production-ready machine learning workflows through intelligent multi-agent orchestration.**
+<p>
+Transform raw datasets into production-ready machine learning workflows through intelligent multi-agent orchestration.
+</p>
+
+<br>
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/)
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](#)
+[![Python](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/)
+[![Build](https://img.shields.io/badge/build-passing-brightgreen.svg)](#)
 [![Docs](https://img.shields.io/badge/docs-latest-blue.svg)](#)
-[![Tests](https://img.shields.io/badge/tests-passing-brightgreen.svg)](#)
-[![PyPI](https://img.shields.io/badge/pypi-v0.1.0-blue.svg)](#)
-[![Downloads](https://img.shields.io/badge/downloads-0%2Fmonth-lightgrey.svg)](#)
-
-<!-- ![AetherML Logo](docs/assets/logo.png) -->
 
 </div>
 
