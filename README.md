@@ -1,14 +1,12 @@
-<!-- Hero Section -->
+<p align="center">
+
+<img src="https://capsule-render.vercel.app/api?type=waving&height=250&color=0:0F2027,50:203A43,100:2C5364&text=AetherML&fontSize=70&fontColor=ffffff&animation=fadeIn&fontAlignY=40&desc=Open-Source%20Agentic%20Machine%20Learning%20Framework&descAlignY=60"/>
+
+</p>
 
 <div align="center">
 
-<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=700&size=45&pause=1200&color=00D9FF&center=true&vCenter=true&repeat=true&width=900&lines=AetherML;Agentic+Machine+Learning;Production+Ready+ML+Framework;Open+Source+SDK"/>
-
-<h3>An Open-Source Agentic Machine Learning Framework</h3>
-
-<p>
-Transform raw datasets into production-ready machine learning workflows through intelligent multi-agent orchestration.
-</p>
+<h3>🚀 Build Production-Ready Machine Learning Pipelines with Intelligent Multi-Agent Orchestration</h3>
 
 <br>
 
@@ -18,6 +16,7 @@ Transform raw datasets into production-ready machine learning workflows through 
 [![Docs](https://img.shields.io/badge/docs-latest-blue.svg)](#)
 
 </div>
+
 ---
 
 ## Table of Contents
