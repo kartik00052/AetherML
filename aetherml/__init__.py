@@ -6,6 +6,14 @@ surface.
 
 Usage::
 
+    # Beginner API (recommended)
+    from aetherml import AetherML
+
+    ml = AetherML("data.csv")
+    ml.run()
+    print(ml.report())
+
+    # Advanced API (full control)
     import aetherml
 
     result = await aetherml.run_pipeline(data_path="data.csv")
@@ -18,6 +26,17 @@ from typing import Any
 
 from aetherml.configs.settings import AetherMLConfig
 from aetherml.exceptions import AetherMLError, ConfigurationError, WorkflowError
+from aetherml.sdk import (
+    AetherML,
+    DatasetSummary,
+    EDAReport,
+    EvaluationMetrics,
+    ExplanationReport,
+    FeatureReport,
+    ModelInfo,
+    TargetInfo,
+    ValidationReport,
+)
 from aetherml.workflow.state import WorkflowState
 
 logger = logging.getLogger(__name__)
@@ -25,13 +44,24 @@ logger = logging.getLogger(__name__)
 __version__ = "0.1.0"
 
 __all__ = [
+    # ── Beginner API ────────────────────────────────────
+    "AetherML",
+    "DatasetSummary",
+    "EDAReport",
+    "EvaluationMetrics",
+    "ExplanationReport",
+    "FeatureReport",
+    "ModelInfo",
+    "TargetInfo",
+    "ValidationReport",
+    # ── Advanced API ────────────────────────────────────
     "AetherMLConfig",
     "AetherMLError",
     "ConfigurationError",
     "WorkflowError",
     "WorkflowState",
-    "__version__",
     "run_pipeline",
+    "__version__",
 ]
 
 
