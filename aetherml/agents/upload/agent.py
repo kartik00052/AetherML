@@ -33,6 +33,7 @@ class UploadAgent:
 
     Args:
         engine: The active computation engine used for data loading.
+
     """
 
     name = "upload"
@@ -106,7 +107,7 @@ class UploadAgent:
                     "data_path": {
                         "type": "string",
                         "description": "Path to the data file",
-                    }
+                    },
                 },
-            )
+            ),
         ]

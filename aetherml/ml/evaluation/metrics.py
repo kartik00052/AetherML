@@ -64,6 +64,7 @@ def evaluate_model(
     Returns:
         A dict with keys: ``task_type``, ``metrics``, ``model_info``,
         ``ambiguity_caveat``, ``mlflow_logged``.
+
     """
     features = df[feature_names].values
     target = df[target_column].values

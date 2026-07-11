@@ -7,8 +7,8 @@ required attributes and methods with the correct signatures.
 
 Design rationale:
 - ``Protocol`` over ABC: avoids diamond-inheritance issues when agents
-  also need domain-specific base classes (e.g. LLM-backed agents).
-- ``async run``: agents may perform I/O (file reads, LLM calls, DB
+  also need domain-specific base classes (e.g. domain-specific agents).
+- ``async run``: agents may perform I/O (file reads, DB
   queries) and async keeps the workflow non-blocking.
 - ``AgentResult``: a lightweight return type that carries the agent's
   output payload and optional metadata, keeping the contract uniform
@@ -18,6 +18,8 @@ Design rationale:
 from __future__ import annotations
 
 from typing import Any, Protocol, runtime_checkable
+
+__all__ = ["AgentResult", "BaseAgent", "Tool"]
 
 from pydantic import BaseModel, Field
 
@@ -37,6 +39,7 @@ class AgentResult(BaseModel):
             diagnostics.  May be ``None`` for configuration/validation
             errors that do not originate from an exception.
         metadata: Arbitrary key-value metadata (e.g. row counts, timings).
+
     """
 
     success: bool = True
@@ -47,7 +50,7 @@ class AgentResult(BaseModel):
 
 
 class Tool(BaseModel):
-    """Descriptor for a tool an agent exposes to the workflow or LLM.
+    """Descriptor for a tool an agent exposes to the workflow.
 
     This is a data descriptor, not a callable — the actual tool
     implementation lives in the agent; the ``Tool`` object is a
@@ -71,7 +74,7 @@ class BaseAgent(Protocol):
     name: str
     description: str
 
-    async def run(self, state: Any) -> AgentResult:  # noqa: ANN401
+    async def run(self, state: Any) -> AgentResult:
         """Execute the agent's core logic against the current workflow state.
 
         Agents MUST return an ``AgentResult`` — they MUST NOT raise
@@ -88,6 +91,7 @@ class BaseAgent(Protocol):
 
         Returns:
             An ``AgentResult`` carrying the agent's output.
+
         """
         ...
 
@@ -108,10 +112,9 @@ class _StubAgent:
         self.name = name
         self.description = description
 
-    async def run(self, state: Any) -> AgentResult:  # noqa: ANN401
-        raise AgentNotImplementedError(
-            f"Agent '{self.name}' has not been implemented yet."
-        )
+    async def run(self, state: Any) -> AgentResult:
+        msg = f"Agent '{self.name}' has not been implemented yet."
+        raise AgentNotImplementedError(msg)
 
     def get_tools(self) -> list[Tool]:
         return []

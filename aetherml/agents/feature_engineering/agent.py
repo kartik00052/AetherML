@@ -46,6 +46,7 @@ class FeatureEngineeringAgent:
 
     Args:
         engine: The active computation engine used for data operations.
+
     """
 
     name = "feature_engineering"
@@ -125,5 +126,5 @@ class FeatureEngineeringAgent:
                         "description": "Whether to flag outliers (default: true).",
                     },
                 },
-            )
+            ),
         ]

@@ -7,7 +7,7 @@ and writes the best model to the state.
 
 Responsibilities:
 - **Model recommendation**: rule-based on dataset metadata (task type,
-  dataset size, feature count, feature types).  No LLM calls.
+  dataset size, feature count, feature types).
 - **Train/test split**: stratified for classification, random for
   regression.  Respects the target/feature split from Target Detection
   and Feature Engineering.
@@ -57,6 +57,7 @@ class ModelSelectionAgent:
             Enforced as a hard ceiling — search stops when exceeded.
         max_time_seconds: Maximum total wall-clock seconds for HPO.
             Checked via monotonic clock before each trial.
+
     """
 
     name = "model_selection"
@@ -211,7 +212,7 @@ class ModelSelectionAgent:
                         ),
                     },
                 },
-            )
+            ),
         ]
 
 

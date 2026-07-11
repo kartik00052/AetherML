@@ -7,7 +7,7 @@
 **Transform raw datasets into production-ready machine learning workflows through intelligent multi-agent orchestration.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
+[![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](#)
 [![Docs](https://img.shields.io/badge/docs-latest-blue.svg)](#)
 [![Tests](https://img.shields.io/badge/tests-passing-brightgreen.svg)](#)
@@ -84,7 +84,7 @@ AetherML is **SDK-first**. The CLI, the (planned) FastAPI service, and any futur
 | **Explainability** | Post-training analysis producing feature importance and model-behavior summaries. | Implemented |
 | **Reporting** | Structured, versionable output artifacts summarizing every stage of the run. | Implemented |
 | **Modular Architecture** | Clear separation between agents, services, engines, and interfaces; no layer reaches across another's boundary. | Implemented |
-| **Plugin System** | Extension points for custom agents, models, engines, storage backends, and LLM providers without modifying core code. | Planned |
+| **Plugin System** | Extension points for custom agents, models, engines, and storage backends without modifying core code. | Planned |
 | **Offline-First Design** | Core pipeline stages run without requiring network access or hosted services. | Implemented |
 | **SDK-First Philosophy** | Every interface (CLI, API, GUI) is a client of the SDK — never a place where business logic lives. | Implemented |
 
@@ -195,29 +195,42 @@ The folder structure is the clearest expression of AetherML's architecture. Ever
 
 ```
 aetherml/
-├── agents/
-├── workflow/
-├── engines/
-├── services/
-├── ml/
-├── configs/
-├── exceptions/
-├── interfaces/
-├── cli/
-├── api/
-├── reports/
-├── storage/
-├── plugins/
-├── tests/
-├── docs/
-└── examples/
+├── __init__.py          # Public SDK surface
+├── exceptions.py        # Exception hierarchy
+├── agents/              # Pipeline agents
+│   ├── base.py          # BaseAgent, AgentResult, Tool
+│   ├── upload/          # Data loading agent
+│   ├── etl/             # ETL cleaning agent
+│   ├── validation/      # Data validation agent
+│   ├── eda/             # Exploratory data analysis
+│   ├── target_detection/# Target column detection
+│   ├── feature_engineering/ # Feature engineering
+│   ├── model_selection/ # Model recommendation & training
+│   ├── evaluation/      # Model evaluation
+│   ├── explainability/  # SHAP-based explainability
+│   ├── reporting/       # Report assembly
+│   └── ...              # Additional agents
+├── configs/             # Pydantic configuration
+├── data/                # Data loading, validation, profiling
+├── database/            # Qdrant vector store client
+├── engines/             # Pandas/Polars/Spark engine abstraction
+├── interfaces/          # CLI and future API
+├── ml/                  # ML pipeline components
+│   ├── automl/          # AutoML model selection
+│   ├── evaluation/      # Metrics and evaluation
+│   ├── explainability/  # SHAP explanations
+│   ├── feature_engineering/ # Feature engineering
+│   ├── reports/         # Report builder and templates
+│   └── target_detection/ # Target detection heuristics
+├── rag/                 # RAG infrastructure
+└── workflow/            # LangGraph workflow orchestration
 ```
 
 ### `agents/`
 
 **Purpose:** Houses every pipeline agent — the units of work that perform one pipeline responsibility each (validation, EDA, feature engineering, target detection, model recommendation, explainability, reporting, and so on).
 
-**Responsibilities:** An agent reads relevant fields from the shared `WorkflowState`, invokes one or more `services/` functions to do the actual computation, and writes its results back onto `WorkflowState`. Agents contain orchestration-adjacent logic (e.g., "should I skip this step given the current state?") but delegate all substantial domain logic to `services/`.
+**Responsibilities:** An agent reads relevant fields from the shared `WorkflowState`, invokes domain logic (from `ml/`, `data/`, or `engines/`) to do the actual computation, and writes its results back onto `WorkflowState`. Agents contain orchestration-adjacent logic (e.g., "should I skip this step given the current state?") but delegate all substantial domain logic to their respective modules.
 
 **Key classes/modules:** `base.py` (defines the `BaseAgent` interface every agent implements), `validation_agent.py`, `profiling_agent.py`, `etl_agent.py`, `eda_agent.py`, `feature_engineering_agent.py`, `target_detection_agent.py`, `model_recommendation_agent.py`, `training_agent.py`, `evaluation_agent.py`, `explainability_agent.py`, `reporting_agent.py`.
 
@@ -323,7 +336,7 @@ aetherml/
 
 **Interaction with other modules:** Implemented by classes throughout `agents/`, `engines/`, and `storage/`; referenced (not implemented) by `workflow/`.
 
-**Future extensions:** Additional interfaces as new extension points (custom LLM providers, custom report formats) are introduced.
+**Future extensions:** Additional interfaces as new extension points (custom report formats, custom storage backends) are introduced.
 
 ### `cli/`
 
@@ -381,7 +394,7 @@ aetherml/
 
 ### `plugins/`
 
-**Purpose:** Reserved for the **planned** plugin system that will let third parties extend agents, models, data engines, reports, storage backends, and LLM providers without modifying core framework code.
+**Purpose:** Reserved for the **planned** plugin system that will let third parties extend agents, models, data engines, reports, and storage backends without modifying core framework code.
 
 **Responsibilities (planned):** Discover, load, and validate externally registered plugins against the `interfaces/` contracts.
 
@@ -464,77 +477,69 @@ AetherML is designed to be used as an imported library first, and a CLI second. 
 ### Basic Analysis
 
 ```python
-from aetherml import AetherML
+import asyncio
+from aetherml import run_pipeline
 
-sdk = AetherML()
+async def main():
+    result = await run_pipeline(data_path="data/customers.csv")
+    print(result)
 
-result = sdk.run(dataset_path="data/customers.csv")
-
-print(result.summary())
+asyncio.run(main())
 ```
 
 ### Running Selected Stages
 
 ```python
-from aetherml import AetherML
+import asyncio
+from aetherml import run_pipeline
 
-sdk = AetherML()
+async def main():
+    result = await run_pipeline(
+        data_path="data/customers.csv",
+        stages=["upload", "etl", "validation"],
+    )
+    print(result)
 
-# Run only validation, profiling, and EDA — skip modeling entirely.
-result = sdk.run(
-    dataset_path="data/customers.csv",
-    stages=["validation", "profiling", "eda"],
-)
-
-print(result.eda_summary)
+asyncio.run(main())
 ```
 
 ### Custom Configuration
 
 ```python
-from aetherml import AetherML
-from aetherml.configs import PipelineConfig
+import asyncio
+from aetherml import AetherMLConfig, run_pipeline
 
-config = PipelineConfig(
-    engine="polars",              # force Polars instead of auto-selection
-    target_column="churned",      # skip automatic target detection
-    task_type="classification",
-    validation_strictness="high",
-)
+async def main():
+    config = AetherMLConfig()
+    config.engine.preferred = "polars"  # force Polars instead of auto-selection
 
-sdk = AetherML(config=config)
-result = sdk.run(dataset_path="data/customers.csv")
+    result = await run_pipeline(
+        data_path="data/customers.csv",
+        config=config,
+    )
+    print(result)
+
+asyncio.run(main())
 ```
 
 ### Error Handling
 
 ```python
-from aetherml import AetherML
-from aetherml.exceptions import ValidationError, EngineSelectionError
+import asyncio
+from aetherml import run_pipeline
+from aetherml.exceptions import DataValidationError, EngineSelectionError, WorkflowError
 
-sdk = AetherML()
+async def main():
+    try:
+        result = await run_pipeline(data_path="data/customers.csv")
+    except DataValidationError as e:
+        print(f"Dataset failed validation: {e}")
+    except EngineSelectionError as e:
+        print(f"Could not select a data engine: {e}")
+    except WorkflowError as e:
+        print(f"Pipeline failed: {e}")
 
-try:
-    result = sdk.run(dataset_path="data/customers.csv")
-except ValidationError as e:
-    print(f"Dataset failed validation: {e}")
-except EngineSelectionError as e:
-    print(f"Could not select a data engine: {e}")
-```
-
-### Advanced Usage: Custom Agent Injection
-
-```python
-from aetherml import AetherML
-from aetherml.configs import PipelineConfig
-from my_project.agents import CustomFairnessAuditAgent
-
-config = PipelineConfig(
-    extra_agents=[CustomFairnessAuditAgent()],  # requires plugins system — see Roadmap
-)
-
-sdk = AetherML(config=config)
-result = sdk.run(dataset_path="data/customers.csv")
+asyncio.run(main())
 ```
 
 > **Note:** Custom agent injection depends on the plugin system, which is currently **planned**, not implemented. This example illustrates the intended future API shape.
@@ -549,17 +554,11 @@ The CLI is a thin wrapper around the SDK, intended for quick, scriptable runs wi
 # Run the full pipeline on a dataset
 aetherml run data/customers.csv
 
-# Run only specific stages
-aetherml run data/customers.csv --stages validation,profiling,eda
-
 # Force a specific data engine
 aetherml run data/customers.csv --engine polars
 
-# Validate a dataset without running the rest of the pipeline
-aetherml validate data/customers.csv
-
-# Output the run report to a specific location
-aetherml run data/customers.csv --output ./reports/customers_run/
+# View SDK info
+aetherml info
 ```
 
 Each command maps directly onto an SDK call — `aetherml run` calls `AetherML.run(...)`, `aetherml validate` calls the validation stage in isolation. No command contains logic that isn't already present in the SDK.
@@ -602,14 +601,13 @@ The rationale for this boundary: if business logic ever leaked into `api/`, the 
 
 > **Status: Planned.** The `plugins/` directory and the plugin-loading mechanism described below do not yet exist in the codebase.
 
-AetherML's `interfaces/` module already defines the contracts (`BaseAgent`, `DataEngine`, `StorageBackend`, and future `ModelBackend`/`ReportFormat`/`LLMProvider` interfaces) that make a plugin system possible. The planned plugin architecture will allow third parties to extend the framework in the following ways, without modifying core framework code:
+AetherML's `interfaces/` module already defines the contracts (`BaseAgent`, `DataEngine`, `StorageBackend`, and future `ModelBackend`/`ReportFormat` interfaces) that make a plugin system possible. The planned plugin architecture will allow third parties to extend the framework in the following ways, without modifying core framework code:
 
 - **Agents** — Register a custom agent (implementing `BaseAgent`) as an additional or replacement node in the workflow graph.
 - **Models** — Register a custom model backend (implementing a future `ModelBackend` interface) to be considered during model recommendation and training.
 - **Data Engines** — Register a new `DataEngine` implementation (e.g., DuckDB) alongside Pandas, Polars, and PySpark.
 - **Reports** — Register a custom report format or renderer implementing a future `ReportFormat` interface.
 - **Storage** — Register a custom `StorageBackend` (e.g., S3, GCS) implementing the existing `StorageBackend` interface.
-- **LLMs** — Register a custom LLM provider for any agent that uses language-model-assisted reasoning (e.g., a future natural-language reporting agent).
 
 The mechanism under consideration is a Python entry-points-based discovery system, similar in spirit to how pytest and Flake8 discover plugins — packages installed alongside AetherML that declare an `aetherml.plugins` entry point will be automatically discovered and validated against the relevant `interfaces/` contract at startup.
 
@@ -647,7 +645,7 @@ The mechanism under consideration is a Python entry-points-based discovery syste
 
 ## Installation
 
-**Requirements:** Python 3.10 or newer.
+**Requirements:** Python 3.11 or newer.
 
 ### Standard Installation
 

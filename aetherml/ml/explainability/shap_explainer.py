@@ -12,7 +12,7 @@ Resource bounds:
   output flags that explanations are based on a sample, not the full
   dataset.  This is visible in the result, not a silent truncation.
 
-Explainer selection (rule-based, not LLM):
+Explainer selection (rule-based):
 - Tree-based models (RandomForest, GradientBoosting, XGBoost, etc.):
   ``shap.TreeExplainer`` — exact, fast.
 - Linear models (LinearRegression, LogisticRegression, etc.):
@@ -82,9 +82,10 @@ def compute_shap_explanations(
         name → mean absolute SHAP value), ``explainer_type`` (str),
         ``sampled`` (bool), ``n_samples_used`` (int),
         ``max_samples`` (int).
+
     """
     try:
-        import shap  # noqa: F811
+        import shap
     except ImportError as exc:
         msg = (
             "SHAP library is required for explainability. "
@@ -146,7 +147,7 @@ def _create_explainer(
 
     Returns a tuple of (explainer_type_name, explainer_instance).
 
-    Selection logic (rule-based, not LLM):
+    Selection logic (rule-based):
     - Tree-based models → TreeExplainer (exact, fast)
     - Linear models → LinearExplainer (exact for linear)
     - Everything else → KernelExplainer (approximate, universal)

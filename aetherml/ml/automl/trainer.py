@@ -83,6 +83,7 @@ def train_models(
 
     Raises:
         AgentError: If no model could be trained successfully.
+
     """
     # ── Prepare data ─────────────────────────────────────────────────
     feature_cols = [c for c in df.columns if c != target_column]

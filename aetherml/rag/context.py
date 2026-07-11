@@ -58,6 +58,7 @@ def get_rag_context(
     Returns:
         Dict with keys: ``chunks`` (list), ``query`` (str),
         ``status`` (str).  Empty chunks on any failure.
+
     """
     result: dict[str, Any] = {
         "chunks": [],

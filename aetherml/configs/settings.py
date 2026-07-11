@@ -10,6 +10,14 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field
 
+__all__ = [
+    "AetherMLConfig",
+    "DataConfig",
+    "EngineConfig",
+    "QdrantConfig",
+    "RAGConfig",
+]
+
 
 class EngineConfig(BaseModel):
     """Engine selection preferences."""
@@ -50,50 +58,6 @@ class DataConfig(BaseModel):
     )
 
 
-class LLMConfig(BaseModel):
-    """LLM configuration for narrative generation.
-
-    All fields are optional — the LLM integration is entirely opt-in.
-    When ``use_narrative`` is False (the default), no LLM calls are made
-    and the pipeline runs fully deterministically.
-    """
-
-    use_narrative: bool = Field(
-        default=False,
-        description=(
-            "Enable LLM-generated narrative summaries in the report. "
-            "When False (default), no LLM calls are made."
-        ),
-    )
-    api_key: str | None = Field(
-        default=None,
-        description=(
-            "API key for the LLM provider. Read from "
-            "AETHERML_LLM_API_KEY env var if not set."
-        ),
-    )
-    model_id: str = Field(
-        default="gemma-2-9b",
-        description="Model identifier for the LLM backend.",
-    )
-    timeout_seconds: float = Field(
-        default=30.0,
-        description="Maximum seconds to wait for an LLM API response.",
-    )
-    max_retries: int = Field(
-        default=2,
-        description="Maximum number of retries on transient LLM API failures.",
-    )
-    max_sample_rows: int = Field(
-        default=5,
-        description="Maximum number of data rows to include in prompts.",
-    )
-    max_columns: int = Field(
-        default=20,
-        description="Maximum number of column names to include in prompts.",
-    )
-
-
 class QdrantConfig(BaseModel):
     """Qdrant vector store configuration.
 
@@ -129,7 +93,7 @@ class RAGConfig(BaseModel):
     enabled: bool = Field(
         default=False,
         description=(
-            "Enable RAG context retrieval for LLM narrative generation. "
+            "Enable RAG context retrieval for enhanced reporting. "
             "When False (default), no retrieval is performed."
         ),
     )
@@ -152,7 +116,6 @@ class AetherMLConfig(BaseModel):
 
     engine: EngineConfig = Field(default_factory=EngineConfig)
     data: DataConfig = Field(default_factory=DataConfig)
-    llm: LLMConfig = Field(default_factory=LLMConfig)
     qdrant: QdrantConfig = Field(default_factory=QdrantConfig)
     rag: RAGConfig = Field(default_factory=RAGConfig)
 

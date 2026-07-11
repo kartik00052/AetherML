@@ -3,7 +3,7 @@
 Selects a ranked list of candidate models based on the task type
 (classification / regression / ambiguous), dataset size, feature count,
 and feature types.  This is a deterministic, inspectable heuristic —
-no LLM calls, no black-box selection.
+no black-box selection.
 
 Candidate sets are intentionally small and explicit per task type.
 The caller (``ml.automl.trainer``) evaluates each candidate with
@@ -36,6 +36,7 @@ class CandidateModel:
             to search over.  An empty dict means use sklearn defaults
             with no HPO.
         tags: Free-form metadata (e.g. ``{"linear": True}``).
+
     """
 
     name: str
@@ -174,6 +175,7 @@ def recommend_models(
     Returns:
         A list of ``CandidateModel`` instances, ordered by estimated
         suitability (best first).
+
     """
     if task_type == "classification":
         candidates = list(_CLASSIFICATION_CANDIDATES)

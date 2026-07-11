@@ -45,7 +45,7 @@ def _estimate_file_size(path: str | Path) -> int:
 def select_engine(
     config: AetherMLConfig | None = None,
     data_path: str | Path | None = None,
-    df: Any = None,  # noqa: ANN401
+    df: Any = None,
 ) -> BaseEngine:
     """Select and return the most appropriate engine.
 
@@ -58,6 +58,7 @@ def select_engine(
 
     Returns:
         An initialised ``BaseEngine`` instance.
+
     """
     if config is None:
         config = AetherMLConfig()

@@ -99,6 +99,7 @@ def build_graph(
 
     Returns:
         A compiled LangGraph ``StateGraph`` ready for execution.
+
     """
     if stages is None:
         stages = ["upload", "etl"]

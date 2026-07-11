@@ -28,6 +28,7 @@ FE adds model-ready signal on top.
 from __future__ import annotations
 
 import logging
+import warnings
 from typing import Any
 
 from aetherml.engines.base_engine import BaseEngine
@@ -86,6 +87,7 @@ def engineer_features(
 
     Returns:
         A tuple of ``(transformed_df, log_entry_dict)``.
+
     """
     collected = engine.collect(df)
     dtypes = engine.dtypes(df)
@@ -101,7 +103,7 @@ def engineer_features(
 
     # ── Step 1: Handle remaining nulls ───────────────────────────────
     result, null_log = _handle_remaining_nulls(
-        result, feature_cols, null_strategy, fill_value
+        result, feature_cols, null_strategy, fill_value,
     )
     transform_log.append(null_log)
 
@@ -118,14 +120,14 @@ def engineer_features(
     # ── Step 4: Outlier detection ────────────────────────────────────
     if detect_outliers:
         result, outlier_log = _detect_outliers(
-            result, numeric_cols, drop_outlier_rows
+            result, numeric_cols, drop_outlier_rows,
         )
         transform_log.append(outlier_log)
 
     # ── Step 5: Feature selection ────────────────────────────────────
     if select_features and target_column is not None:
         result, select_log = _select_features(
-            result, feature_cols, target_column
+            result, feature_cols, target_column,
         )
         transform_log.append(select_log)
 
@@ -164,7 +166,9 @@ def _handle_remaining_nulls(
         return df, {"action": "fill_nulls", "columns_affected": 0}
 
     if strategy == "fill":
-        df[target_cols] = df[target_cols].fillna(fill_value)
+        import pandas as pd
+        with pd.option_context("future.no_silent_downcasting", True):
+            df[target_cols] = df[target_cols].fillna(fill_value).infer_objects(copy=False)
     elif strategy == "flag":
         for col in target_cols:
             df[f"{col}_is_null"] = df[col].isnull().astype(int)
@@ -302,7 +306,9 @@ def _select_features(
     target_col_obj = df[target_column]
     target_is_numeric = target_col_obj.dtype in ("float64", "int64", "float32", "int32", "float16")
     if target_is_numeric:
-        correlations = df[numeric_features].corrwith(target_col_obj).abs()
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", RuntimeWarning)
+            correlations = df[numeric_features].corrwith(target_col_obj).abs()
         low_corr = [c for c in numeric_features if correlations.get(c, 0) < _CORRELATION_THRESHOLD]
 
     # Union of features to drop

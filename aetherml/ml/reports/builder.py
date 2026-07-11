@@ -1,8 +1,8 @@
 """Template-based Markdown report builder for AetherML pipelines.
 
 Assembles a Markdown report from WorkflowState data across all pipeline
-stages.  No LLM involved — pure string formatting with graceful
-degradation for missing/None fields.
+stages.  Pure string formatting with graceful degradation for
+missing/None fields.
 
 The report is assembled from individual section builders, each of which
 handles one pipeline stage.  If a section has no data (e.g. because the
@@ -42,12 +42,13 @@ def build_report(state: Any, narrative: str | None = None) -> str:
     Args:
         state: The WorkflowState (or compatible dataclass) containing
             outputs from all pipeline stages.
-        narrative: Optional LLM-generated narrative summary.  If ``None``,
+        narrative: Optional narrative summary string.  If ``None``,
             a stub message is inserted.  This is additive — the structured
             data sections remain the source of truth.
 
     Returns:
         A Markdown-formatted report string.
+
     """
     run_id = getattr(state, "run_id", "unknown")
     status = getattr(state, "status", "unknown")
@@ -83,13 +84,13 @@ def build_report(state: Any, narrative: str | None = None) -> str:
 
 
 def _build_narrative_section(narrative: str | None) -> str:
-    """Build the narrative section from LLM output.
+    """Build the narrative section from a summary string.
 
     If no narrative is provided, a stub message is inserted indicating
     that the narrative was not generated.
     """
     if narrative is None:
-        return "_Narrative summary not generated (LLM narrative disabled)._"
+        return "_Narrative summary not generated._"
     if not narrative.strip():
         return "_Narrative summary was empty._"
     return narrative
@@ -303,7 +304,7 @@ def _build_explainability_section(state: Any) -> str:
         if sampled and n_used is not None:
             lines.append(
                 f"\n> **Note:** Explanations based on a sample of {n_used} rows "
-                f"(max_samples={max_s}). Full dataset may differ."
+                f"(max_samples={max_s}). Full dataset may differ.",
             )
     else:
         lines.append(f"Explanation report type: {type(report).__name__}")
@@ -321,7 +322,7 @@ def _build_notes_section(state: Any) -> str:
         notes.append(f"- **Ambiguity detected:** {ambiguity}")
         notes.append(
             "- The task type could not be definitively determined. "
-            "Results should be interpreted with caution."
+            "Results should be interpreted with caution.",
         )
 
     eval_report = getattr(state, "evaluation_report", None)
@@ -334,7 +335,7 @@ def _build_notes_section(state: Any) -> str:
     if isinstance(explanation, dict) and explanation.get("sampled"):
         notes.append(
             "- **Explainability sampling:** Feature importance is based on a "
-            "sampled subset of the data, not the full dataset."
+            "sampled subset of the data, not the full dataset.",
         )
 
     if not notes:

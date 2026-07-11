@@ -5,6 +5,22 @@ the entire SDK surface with a single clause while still being able to
 target specific failure modes.
 """
 
+__all__ = [
+    "AetherMLError",
+    "AgentError",
+    "AgentNotImplementedError",
+    "ConfigurationError",
+    "DataError",
+    "DataLoadError",
+    "DataTransformError",
+    "DataValidationError",
+    "EngineError",
+    "EngineSelectionError",
+    "QdrantConnectionError",
+    "RAGError",
+    "WorkflowError",
+]
+
 
 class AetherMLError(Exception):
     """Base exception for all AetherML errors."""
@@ -48,6 +64,7 @@ class AgentError(AetherMLError):
     Attributes:
         cause: Original exception object from the agent, preserving
             type, traceback, and cause chain for diagnostics.
+
     """
 
     def __init__(self, message: str, *, cause: BaseException | None = None) -> None:
@@ -57,18 +74,6 @@ class AgentError(AetherMLError):
 
 class AgentNotImplementedError(AgentError):
     """Raised by agent stubs that have not been implemented yet."""
-
-
-class LLMError(AetherMLError):
-    """Raised when an LLM operation fails."""
-
-
-class LLMTimeoutError(LLMError):
-    """Raised when an LLM API call exceeds the configured timeout."""
-
-
-class LLMAuthenticationError(LLMError):
-    """Raised when LLM API credentials are missing or invalid."""
 
 
 class RAGError(AetherMLError):

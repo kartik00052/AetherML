@@ -44,6 +44,7 @@ def handle_nulls(
 
     Returns:
         A tuple of (transformed DataFrame, log entry dict).
+
     """
     if strategy not in ("drop", "fill", "flag"):
         msg = f"Unknown null strategy: {strategy!r}. Use 'drop', 'fill', or 'flag'."
@@ -97,6 +98,7 @@ def cast_dtypes(
 
     Raises:
         DataTransformError: If a column does not exist or casting fails.
+
     """
     result = df.copy()
     casted: list[str] = []
@@ -139,6 +141,7 @@ def encode_categoricals(
 
     Raises:
         DataTransformError: If an unsupported strategy is provided.
+
     """
     if strategy != "label":
         msg = f"Unsupported encoding strategy: {strategy!r}. Only 'label' is supported."

@@ -35,6 +35,7 @@ class EDAAgent:
 
     Args:
         engine: The active computation engine used for data operations.
+
     """
 
     name = "eda"
@@ -101,7 +102,7 @@ class EDAAgent:
                         "type": "array",
                         "items": {"type": "string"},
                         "description": "Specific columns to profile (default: all).",
-                    }
+                    },
                 },
-            )
+            ),
         ]

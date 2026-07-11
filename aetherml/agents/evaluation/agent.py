@@ -38,6 +38,7 @@ class EvaluationAgent:
 
     Args:
         engine: The active computation engine (for data operations).
+
     """
 
     name = "evaluation"
@@ -151,5 +152,5 @@ class EvaluationAgent:
                         "description": "Optional MLflow experiment name.",
                     },
                 },
-            )
+            ),
         ]

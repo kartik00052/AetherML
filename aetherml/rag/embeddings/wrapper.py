@@ -24,6 +24,7 @@ class EmbeddingWrapper:
 
     Args:
         model_name: Name of the sentence-transformers model.
+
     """
 
     def __init__(self, model_name: str = "all-MiniLM-L6-v2") -> None:
@@ -57,6 +58,7 @@ class EmbeddingWrapper:
 
         Returns:
             List of embedding vectors, or None on failure.
+
         """
         if not texts:
             return []
@@ -78,6 +80,7 @@ class EmbeddingWrapper:
 
         Returns:
             Embedding vector, or None on failure.
+
         """
         result = self.embed([text])
         if result and len(result) == 1:

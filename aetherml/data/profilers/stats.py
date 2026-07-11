@@ -46,6 +46,7 @@ def profile_dataset(
     Returns:
         A dict with keys ``columns``, ``numeric_summary``,
         ``categorical_summary``, ``shape``, and ``memory_bytes``.
+
     """
     collected = engine.collect(df)
     dtypes = engine.dtypes(df)

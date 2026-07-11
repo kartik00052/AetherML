@@ -73,7 +73,7 @@ def _chunk_text(text: str, max_chars: int = _MAX_CHUNK_CHARS) -> list[str]:
     if current:
         chunks.append(current)
 
-    return chunks if chunks else []
+    return chunks or []
 
 
 def _make_doc_id(source: str, chunk_index: int, content: str) -> str:
@@ -100,6 +100,7 @@ def ingest_text(
 
     Returns:
         Number of chunks successfully ingested.
+
     """
     chunks = _chunk_text(text)
     if not chunks:
@@ -127,7 +128,7 @@ def ingest_text(
     success = client.upsert(ids=ids, vectors=embeddings, payloads=payloads)
     if success:
         logger.info(
-            "Ingested %d chunks from source=%s", len(chunks), source
+            "Ingested %d chunks from source=%s", len(chunks), source,
         )
         return len(chunks)
     return 0
@@ -150,6 +151,7 @@ def ingest_pipeline_state(
 
     Returns:
         Total chunks ingested.
+
     """
     total = 0
 

@@ -48,6 +48,7 @@ class TargetDetectionAgent:
         and ``ambiguity_reason`` is populated.  This threshold is
         defined in ``ml.target_detection.detector`` and must match
         the value stated here.
+
     """
 
     name = "target_detection"
@@ -115,7 +116,7 @@ class TargetDetectionAgent:
                     "target_hint": {
                         "type": "string",
                         "description": "Optional user-provided hint for the target column name.",
-                    }
+                    },
                 },
-            )
+            ),
         ]

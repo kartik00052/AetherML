@@ -32,6 +32,7 @@ class QdrantClient:
             ``AETHERML_QDRANT_API_KEY`` env var.
         collection_name: Name of the collection to operate on.
         timeout_seconds: Timeout for Qdrant operations.
+
     """
 
     def __init__(
@@ -95,6 +96,7 @@ class QdrantClient:
 
         Returns:
             True if the collection exists or was created successfully.
+
         """
         try:
             client = self._get_client()
@@ -139,6 +141,7 @@ class QdrantClient:
 
         Returns:
             True if upsert succeeded.
+
         """
         try:
             client = self._get_client()
@@ -178,6 +181,7 @@ class QdrantClient:
         Returns:
             List of result dicts with ``id``, ``score``, and ``payload``.
             Returns an empty list on any failure.
+
         """
         try:
             client = self._get_client()
@@ -209,6 +213,7 @@ class QdrantClient:
 
         Returns:
             True if deletion succeeded.
+
         """
         try:
             client = self._get_client()

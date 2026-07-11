@@ -42,6 +42,7 @@ def validate_dataframe(
 
     Raises:
         DataValidationError: If the DataFrame is empty or has zero columns.
+
     """
     report: dict[str, Any] = {}
 

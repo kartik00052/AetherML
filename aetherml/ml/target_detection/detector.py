@@ -71,6 +71,7 @@ def detect_target(
         A dict with keys: ``target_column``, ``task_type``,
         ``confidence``, ``ambiguity_reason`` (``None`` if unambiguous),
         ``candidates`` (list of scored candidates for transparency).
+
     """
     collected = engine.collect(df)
     dtypes = engine.dtypes(df)

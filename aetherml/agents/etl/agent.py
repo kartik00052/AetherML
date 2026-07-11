@@ -42,6 +42,7 @@ class ETLConfig:
             If ``None``, no casting is performed.
         encode_columns: Columns to label-encode.  If ``None``, all
             object-dtype columns are encoded.
+
     """
 
     def __init__(
@@ -63,6 +64,7 @@ class ETLAgent:
     Args:
         config: ETL configuration.  Uses defaults (drop nulls, no casting,
             auto-encode categoricals) if ``None``.
+
     """
 
     name = "etl"
@@ -148,5 +150,5 @@ class ETLAgent:
                         "description": "Column → dtype mapping",
                     },
                 },
-            )
+            ),
         ]

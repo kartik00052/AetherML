@@ -25,11 +25,11 @@ logger = logging.getLogger(__name__)
 __version__ = "0.1.0"
 
 __all__ = [
+    "AetherMLConfig",
+    "AetherMLError",
+    "WorkflowState",
     "__version__",
     "run_pipeline",
-    "AetherMLConfig",
-    "WorkflowState",
-    "AetherMLError",
 ]
 
 
@@ -77,11 +77,7 @@ def _compose_agents(
         "evaluation": EvaluationAgent(engine=engine),
         "explainability": ExplainabilityAgent(engine=engine),
         "rag": RAGAgent(),
-        "reporting": ReportingAgent(
-            llm_config=config.llm,
-            rag_config=config.rag,
-            qdrant_config=config.qdrant,
-        ),
+        "reporting": ReportingAgent(),
         "storage": StorageAgent(),
     }
     return agents
@@ -117,6 +113,7 @@ async def run_pipeline(
 
     Raises:
         WorkflowError: If the workflow graph execution fails.
+
     """
     if config is None:
         config = AetherMLConfig()
@@ -248,5 +245,4 @@ def _extract_summary(state: dict[str, Any]) -> dict[str, Any]:
             if state.get("final_report") is not None
             else None
         ),
-        "narrative_generation_status": state.get("narrative_generation_status"),
     }

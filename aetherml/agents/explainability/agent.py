@@ -53,6 +53,7 @@ class ExplainabilityAgent:
         max_samples: Maximum rows for SHAP computation.  Enforced as
             a hard ceiling — prevents resource exhaustion for non-tree
             explainers.  Default 100.
+
     """
 
     name = "explainability"
@@ -164,5 +165,5 @@ class ExplainabilityAgent:
                         ),
                     },
                 },
-            )
+            ),
         ]

@@ -33,6 +33,7 @@ class ValidationAgent:
 
     Args:
         engine: The active computation engine used for data introspection.
+
     """
 
     name = "validation"
@@ -56,7 +57,7 @@ class ValidationAgent:
 
         try:
             validated_data, report = validate_dataframe(
-                processed_data, self._engine
+                processed_data, self._engine,
             )
 
             logger.info(
@@ -93,7 +94,7 @@ class ValidationAgent:
                         "type": "array",
                         "items": {"type": "string"},
                         "description": "Validation checks to run (default: all).",
-                    }
+                    },
                 },
-            )
+            ),
         ]

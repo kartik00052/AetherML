@@ -38,6 +38,7 @@ def retrieve_context(
     Returns:
         List of dicts with ``text``, ``source``, ``score`` keys.
         Empty list on any failure.
+
     """
     if not query or not query.strip():
         return []
@@ -107,6 +108,7 @@ def build_retrieval_query(
 
     Returns:
         A query string suitable for embedding.
+
     """
     parts: list[str] = []
 

@@ -61,7 +61,7 @@ def run(
 
     try:
         result = asyncio.run(
-            _run_pipeline(data_path=data_path, engine=engine, null_strategy=null_strategy)
+            _run_pipeline(data_path=data_path, engine=engine, null_strategy=null_strategy),
         )
         console.print("[bold green]Pipeline completed successfully.[/bold green]")
         console.print(f"Rows processed: {result.get('row_count', 'N/A')}")
@@ -78,7 +78,7 @@ async def _run_pipeline(
     null_strategy: str,
 ) -> dict[str, Any]:
     """Internal async pipeline runner — calls the SDK public API."""
-    from aetherml import run_pipeline  # noqa: F811
+    from aetherml import run_pipeline
 
     return await run_pipeline(
         data_path=data_path,

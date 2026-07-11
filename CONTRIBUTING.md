@@ -22,22 +22,33 @@ Thank you for your interest in contributing to AetherML! This guide will help yo
    pip install -e ".[dev]"
    ```
 
+4. **Install pre-commit hooks (optional but recommended):**
+   ```bash
+   pip install pre-commit
+   pre-commit install
+   ```
+
 ## Code Quality
 
 ### Linting
 ```bash
-ruff check .
-ruff format .
+ruff check aetherml/
+ruff format aetherml/
 ```
 
 ### Type Checking
 ```bash
-mypy src/aetherml --ignore-missing-imports
+mypy aetherml/ --ignore-missing-imports
 ```
 
 ### Running Tests
 ```bash
 pytest
+```
+
+### Full Check
+```bash
+ruff check aetherml/ && mypy aetherml/ --ignore-missing-imports && pytest
 ```
 
 ## Branch Strategy
@@ -51,7 +62,7 @@ pytest
 
 1. Create a feature branch from `main`
 2. Make your changes with tests
-3. Ensure all checks pass: `ruff check .`, `mypy src/aetherml --ignore-missing-imports`, `pytest`
+3. Ensure all checks pass: `ruff check aetherml/`, `mypy aetherml/ --ignore-missing-imports`, `pytest`
 4. Submit a PR with a clear description of the change
 
 ## Commit Messages

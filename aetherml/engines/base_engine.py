@@ -19,6 +19,8 @@ Design rationale:
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+
+__all__ = ["BaseEngine", "EngineType"]
 from enum import StrEnum
 from pathlib import Path
 from typing import Any

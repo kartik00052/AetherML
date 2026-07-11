@@ -36,6 +36,7 @@ def make_node(agent: BaseAgent) -> Any:
 
     Returns:
         An async callable suitable for use as a LangGraph node.
+
     """
 
     async def node_fn(state: Any) -> dict[str, Any]:
@@ -47,14 +48,14 @@ def make_node(agent: BaseAgent) -> Any:
             return {}
         except Exception as exc:
             logger.exception("Agent '%s' raised an unhandled exception.", agent.name)
-            raise AgentError(
-                f"Agent '{agent.name}' raised an unexpected error: {exc}"
-            ) from exc
+            msg = f"Agent '{agent.name}' raised an unexpected error: {exc}"
+            raise AgentError(msg) from exc
 
         if not result.success:
             logger.error("Agent '%s' failed: %s", agent.name, result.error)
+            msg = f"Agent '{agent.name}' failed: {result.error}"
             raise AgentError(
-                f"Agent '{agent.name}' failed: {result.error}",
+                msg,
                 cause=result.exception,
             )
 

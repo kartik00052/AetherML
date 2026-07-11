@@ -39,6 +39,7 @@ def detect_format(path: str | Path) -> str:
 
     Raises:
         DataLoadError: If the format cannot be determined.
+
     """
     suffix = Path(path).suffix.lower()
     for fmt, extensions in _FORMAT_EXTENSIONS.items():
@@ -69,6 +70,7 @@ def load_file(
 
     Raises:
         DataLoadError: If loading fails for any reason.
+
     """
     path = Path(path)
     if not path.exists():
