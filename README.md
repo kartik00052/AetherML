@@ -1,3 +1,5 @@
+<!-- Hero Section -->
+
 <div align="center">
 
 <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=700&size=45&pause=1200&color=00D9FF&center=true&vCenter=true&repeat=true&width=900&lines=AetherML;Agentic+Machine+Learning;Production+Ready+ML+Framework;Open+Source+SDK"/>
@@ -16,7 +18,6 @@ Transform raw datasets into production-ready machine learning workflows through 
 [![Docs](https://img.shields.io/badge/docs-latest-blue.svg)](#)
 
 </div>
-
 ---
 
 ## Table of Contents
