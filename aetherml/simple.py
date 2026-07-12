@@ -25,10 +25,13 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from collections.abc import Coroutine
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, TypeVar
 
 logger = logging.getLogger(__name__)
+
+_T = TypeVar("_T")
 
 
 # ── Typed return objects ─────────────────────────────────────────
@@ -221,7 +224,7 @@ _STAGES_TRAIN = [
 # ── Internal helpers ─────────────────────────────────────────────
 
 
-def _run_sync(coro: Any) -> Any:
+def _run_sync(coro: Coroutine[Any, Any, _T]) -> _T:
     """Run a coroutine synchronously, detecting nested event loops."""
     try:
         asyncio.get_running_loop()

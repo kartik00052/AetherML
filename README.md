@@ -29,6 +29,11 @@
 6. [Multi-Agent Architecture](#multi-agent-architecture)
 7. [Data Engine Abstraction](#data-engine-abstraction)
 8. [SDK Usage](#sdk-usage)
+   - [Quick Start](#quick-start-zero-friction)
+   - [Individual Steps](#individual-steps)
+   - [Async Variants](#async-variants)
+   - [Error Handling](#error-handling)
+   - [Advanced Usage](#advanced-usage)
 9. [CLI Usage](#cli-usage)
 10. [Future FastAPI Interface](#future-fastapi-interface)
 11. [Plugin Architecture](#plugin-architecture)
@@ -471,9 +476,101 @@ AetherML supports three dataframe backends — **Pandas**, **Polars**, and **PyS
 
 ## SDK Usage
 
-AetherML is designed to be used as an imported library first, and a CLI second. All of the examples below assume `pip install aetherml` (or an editable install — see [Installation](#installation)).
+AetherML is designed to be used as an imported library first, and a CLI second. All examples assume `pip install aetherml` (or an editable install — see [Installation](#installation)).
 
-### Basic Analysis
+### Quick Start (Zero-Friction)
+
+The simplest way to use AetherML — one function call, no configuration objects, no async boilerplate:
+
+```python
+from aetherml import analyze, train
+
+# Profile a dataset
+profile = analyze("data/customers.csv")
+print(f"{profile.shape[0]} rows, {profile.shape[1]} columns")
+
+# Run the full ML pipeline
+result = train("data/customers.csv")
+print(f"Best model: {result.best_model_type} ({result.best_score:.4f})")
+print(f"Report length: {len(result.report)} chars")
+```
+
+### Individual Steps
+
+Run only the stages you need — each returns a typed result object:
+
+```python
+from aetherml import clean, validate, detect_target, engineer, select_model, explain, report
+
+# Clean data
+result = clean("data/customers.csv", null_strategy="fill")
+print(f"Cleaned {result.n_rows} rows")
+
+# Validate
+result = validate("data/customers.csv")
+if not result.passed:
+    for issue in result.issues:
+        print(issue)
+
+# Detect prediction target
+result = detect_target("data/customers.csv")
+print(f"Target: {result.column} ({result.task_type})")
+
+# Engineer features
+result = engineer("data/customers.csv", variance_threshold=0.005)
+print(f"{result.n_features} features")
+
+# Select and evaluate a model
+result = select_model("data/customers.csv")
+print(f"Best: {result.best_model_type} ({result.best_score:.4f})")
+
+# Explain predictions
+result = explain("data/customers.csv")
+for feature, importance in result.feature_importance.items():
+    print(f"  {feature}: {importance:.4f}")
+
+# Generate a Markdown report
+print(report("data/customers.csv"))
+```
+
+### Async Variants
+
+Every function has an `_async` variant for FastAPI, Jupyter async mode, or other async contexts:
+
+```python
+from aetherml import analyze_async, train_async
+import asyncio
+
+async def main():
+    profile = await analyze_async("data/customers.csv")
+    result = await train_async("data/customers.csv")
+
+asyncio.run(main())
+```
+
+### Error Handling
+
+```python
+from aetherml import train
+from aetherml.exceptions import DataValidationError, EngineSelectionError, WorkflowError
+
+try:
+    result = train("data/customers.csv")
+except DataValidationError as e:
+    print(f"Dataset failed validation: {e}")
+except EngineSelectionError as e:
+    print(f"Could not select a data engine: {e}")
+except WorkflowError as e:
+    print(f"Pipeline failed: {e}")
+```
+
+---
+
+### Advanced Usage
+
+For power users who need fine-grained control over the pipeline, the advanced API is fully available:
+
+#### Full Pipeline (Async)
 
 ```python
 import asyncio
@@ -486,7 +583,7 @@ async def main():
 asyncio.run(main())
 ```
 
-### Running Selected Stages
+#### Running Selected Stages
 
 ```python
 import asyncio
@@ -502,7 +599,7 @@ async def main():
 asyncio.run(main())
 ```
 
-### Custom Configuration
+#### Custom Configuration
 
 ```python
 import asyncio
@@ -521,24 +618,14 @@ async def main():
 asyncio.run(main())
 ```
 
-### Error Handling
+#### Object-Oriented API
 
 ```python
-import asyncio
-from aetherml import run_pipeline
-from aetherml.exceptions import DataValidationError, EngineSelectionError, WorkflowError
+from aetherml import AetherML
 
-async def main():
-    try:
-        result = await run_pipeline(data_path="data/customers.csv")
-    except DataValidationError as e:
-        print(f"Dataset failed validation: {e}")
-    except EngineSelectionError as e:
-        print(f"Could not select a data engine: {e}")
-    except WorkflowError as e:
-        print(f"Pipeline failed: {e}")
-
-asyncio.run(main())
+ml = AetherML("data/customers.csv")
+ml.run()  # upload → ETL → validation → EDA → ... → storage
+print(ml.report())
 ```
 
 > **Note:** Custom agent injection depends on the plugin system, which is currently **planned**, not implemented. This example illustrates the intended future API shape.
