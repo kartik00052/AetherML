@@ -1,9 +1,10 @@
 """Demo 3 — Advanced API: run_pipeline with AetherMLConfig."""
 import asyncio
-from aetherml import run_pipeline, AetherMLConfig
+
+from aetherml import AetherMLConfig, run_pipeline
 
 
-async def main():
+async def main() -> None:
     print("=" * 60)
     print("DEMO 3a: run_pipeline() — full async pipeline")
     print("=" * 60)
@@ -35,7 +36,7 @@ async def main():
         data_path="demo/customers.csv",
         config=config,
     )
-    print(f"  Engine: Pandas (forced)")
+    print("  Engine: Pandas (forced)")
     print(f"  Model:  {result3['best_model_type']}")
     print(f"  Score:  {result3['best_model_score']:.4f}")
 

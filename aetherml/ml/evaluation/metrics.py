@@ -219,7 +219,7 @@ def _log_to_mlflow(
 
         mlflow.set_experiment(experiment_name or "aetherml_default")
 
-        with mlflow.start_run(log_output=False) as run:
+        with mlflow.start_run() as run:
             # Log params
             for key, value in params.items():
                 mlflow.log_param(key, value)

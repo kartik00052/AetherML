@@ -21,7 +21,7 @@ print(f"  Score:      {result.best_score:.4f}")
 print(f"  Task:       {result.task_type}")
 print(f"  Train cost: {result.estimated_training_cost}")
 print(f"  Explainer:  {result.explainer_type}")
-print(f"  Top features:")
+print("  Top features:")
 for feat, imp in sorted(result.feature_importance.items(), key=lambda x: -x[1])[:5]:
     print(f"    {feat:20s} {imp:.4f}")
 print(f"  Report length: {len(result.report)} chars")
