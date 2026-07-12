@@ -147,6 +147,7 @@ class ModelResult:
     task_type: str | None
     evaluation_metrics: dict[str, Any] | None
     ambiguity_caveat: str | None
+    estimated_training_cost: str = "unknown"
 
 
 @dataclass(frozen=True)
@@ -186,6 +187,7 @@ class TrainResult:
     explainer_type: str
     report: str
     artifact_uri: str | None
+    estimated_training_cost: str = "unknown"
 
 
 # ── Pipeline stage constants ─────────────────────────────────────
@@ -195,29 +197,58 @@ _STAGES_CLEAN = ["upload", "etl"]
 _STAGES_VALIDATE = ["upload", "etl", "validation"]
 _STAGES_DETECT_TARGET = ["upload", "etl", "validation", "eda", "target_detection"]
 _STAGES_ENGINEER = [
-    "upload", "etl", "validation", "eda",
-    "target_detection", "feature_engineering",
+    "upload",
+    "etl",
+    "validation",
+    "eda",
+    "target_detection",
+    "feature_engineering",
 ]
 _STAGES_SELECT_MODEL = [
-    "upload", "etl", "validation", "eda",
-    "target_detection", "feature_engineering",
-    "model_selection", "evaluation",
+    "upload",
+    "etl",
+    "validation",
+    "eda",
+    "target_detection",
+    "feature_engineering",
+    "model_selection",
+    "evaluation",
 ]
 _STAGES_EXPLAIN = [
-    "upload", "etl", "validation", "eda",
-    "target_detection", "feature_engineering",
-    "model_selection", "evaluation", "explainability",
+    "upload",
+    "etl",
+    "validation",
+    "eda",
+    "target_detection",
+    "feature_engineering",
+    "model_selection",
+    "evaluation",
+    "explainability",
 ]
 _STAGES_REPORT = [
-    "upload", "etl", "validation", "eda",
-    "target_detection", "feature_engineering",
-    "model_selection", "evaluation", "explainability", "reporting",
+    "upload",
+    "etl",
+    "validation",
+    "eda",
+    "target_detection",
+    "feature_engineering",
+    "model_selection",
+    "evaluation",
+    "explainability",
+    "reporting",
 ]
 _STAGES_TRAIN = [
-    "upload", "etl", "validation", "eda",
-    "target_detection", "feature_engineering",
-    "model_selection", "evaluation", "explainability",
-    "reporting", "storage",
+    "upload",
+    "etl",
+    "validation",
+    "eda",
+    "target_detection",
+    "feature_engineering",
+    "model_selection",
+    "evaluation",
+    "explainability",
+    "reporting",
+    "storage",
 ]
 
 
@@ -427,6 +458,7 @@ def _build_model_result(ml: Any) -> ModelResult:
         task_type=state.task_type,
         evaluation_metrics=eval_report.get("metrics"),
         ambiguity_caveat=eval_report.get("ambiguity_caveat"),
+        estimated_training_cost=bp.get("estimated_training_cost", "unknown"),
     )
 
 
@@ -457,6 +489,7 @@ def _build_train_result(ml: Any) -> TrainResult:
         explainer_type=er.get("explainer_type", "none"),
         report=str(state.final_report or ""),
         artifact_uri=state.artifact_uri,
+        estimated_training_cost=bp.get("estimated_training_cost", "unknown"),
     )
 
 
@@ -673,14 +706,16 @@ def engineer(
         result = engineer("data.csv", variance_threshold=0.005)
         print(f"{result.n_features} features engineered")
     """
-    return _run_sync(engineer_async(
-        path,
-        engine=engine,
-        null_strategy=null_strategy,
-        variance_threshold=variance_threshold,
-        correlation_threshold=correlation_threshold,
-        min_features=min_features,
-    ))
+    return _run_sync(
+        engineer_async(
+            path,
+            engine=engine,
+            null_strategy=null_strategy,
+            variance_threshold=variance_threshold,
+            correlation_threshold=correlation_threshold,
+            min_features=min_features,
+        )
+    )
 
 
 async def engineer_async(
@@ -715,6 +750,7 @@ def select_model(
     variance_threshold: float = 0.01,
     correlation_threshold: float = 0.05,
     min_features: int = 1,
+    cv: int | None = None,
 ) -> ModelResult:
     """Select and evaluate the best model for a dataset.
 
@@ -728,6 +764,9 @@ def select_model(
         variance_threshold: Drop features with variance below this.
         correlation_threshold: Drop features with target correlation below this.
         min_features: Minimum number of features to retain.
+        cv: Number of cross-validation folds.  If ``None`` (default),
+            uses a single train/test split.  Pass an integer ≥ 2 to
+            enable k-fold cross-validation.
 
     Returns:
         A ``ModelResult`` with model type, score, and metrics.
@@ -739,14 +778,17 @@ def select_model(
         result = select_model("data.csv")
         print(f"Best: {result.best_model_type} ({result.best_score:.4f})")
     """
-    return _run_sync(select_model_async(
-        path,
-        engine=engine,
-        null_strategy=null_strategy,
-        variance_threshold=variance_threshold,
-        correlation_threshold=correlation_threshold,
-        min_features=min_features,
-    ))
+    return _run_sync(
+        select_model_async(
+            path,
+            engine=engine,
+            null_strategy=null_strategy,
+            variance_threshold=variance_threshold,
+            correlation_threshold=correlation_threshold,
+            min_features=min_features,
+            cv=cv,
+        )
+    )
 
 
 async def select_model_async(
@@ -757,6 +799,7 @@ async def select_model_async(
     variance_threshold: float = 0.01,
     correlation_threshold: float = 0.05,
     min_features: int = 1,
+    cv: int | None = None,
 ) -> ModelResult:
     """Async variant of :func:`select_model`."""
     from aetherml.sdk import AetherML
@@ -769,6 +812,14 @@ async def select_model_async(
         min_features=min_features,
     )
     ml = AetherML(path, config=config)
+    if cv is not None:
+        from aetherml.agents.model_selection.agent import ModelSelectionAgent
+
+        ml._get_agents()  # ensure agents exist
+        ml._agents["model_selection"] = ModelSelectionAgent(
+            engine=ml._eng,
+            cv=cv,
+        )
     await _run_stages_async(ml, _STAGES_SELECT_MODEL)
     return _build_model_result(ml)
 
@@ -807,14 +858,16 @@ def explain(
         for feature, importance in result.feature_importance.items():
             print(f"  {feature}: {importance:.4f}")
     """
-    return _run_sync(explain_async(
-        path,
-        engine=engine,
-        null_strategy=null_strategy,
-        variance_threshold=variance_threshold,
-        correlation_threshold=correlation_threshold,
-        min_features=min_features,
-    ))
+    return _run_sync(
+        explain_async(
+            path,
+            engine=engine,
+            null_strategy=null_strategy,
+            variance_threshold=variance_threshold,
+            correlation_threshold=correlation_threshold,
+            min_features=min_features,
+        )
+    )
 
 
 async def explain_async(
@@ -872,14 +925,16 @@ def report(
 
         print(report("data.csv"))
     """
-    return _run_sync(report_async(
-        path,
-        engine=engine,
-        null_strategy=null_strategy,
-        variance_threshold=variance_threshold,
-        correlation_threshold=correlation_threshold,
-        min_features=min_features,
-    ))
+    return _run_sync(
+        report_async(
+            path,
+            engine=engine,
+            null_strategy=null_strategy,
+            variance_threshold=variance_threshold,
+            correlation_threshold=correlation_threshold,
+            min_features=min_features,
+        )
+    )
 
 
 async def report_async(
@@ -914,6 +969,7 @@ def train(
     variance_threshold: float = 0.01,
     correlation_threshold: float = 0.05,
     min_features: int = 1,
+    cv: int | None = None,
 ) -> TrainResult:
     """Run the full ML pipeline and return trained model details.
 
@@ -928,6 +984,9 @@ def train(
         variance_threshold: Drop features with variance below this.
         correlation_threshold: Drop features with target correlation below this.
         min_features: Minimum number of features to retain.
+        cv: Number of cross-validation folds.  If ``None`` (default),
+            uses a single train/test split.  Pass an integer ≥ 2 to
+            enable k-fold cross-validation.
 
     Returns:
         A ``TrainResult`` with model, explanation, report, and
@@ -941,14 +1000,17 @@ def train(
         print(f"Model: {result.best_model_type}")
         print(f"Report length: {len(result.report)} chars")
     """
-    return _run_sync(train_async(
-        path,
-        engine=engine,
-        null_strategy=null_strategy,
-        variance_threshold=variance_threshold,
-        correlation_threshold=correlation_threshold,
-        min_features=min_features,
-    ))
+    return _run_sync(
+        train_async(
+            path,
+            engine=engine,
+            null_strategy=null_strategy,
+            variance_threshold=variance_threshold,
+            correlation_threshold=correlation_threshold,
+            min_features=min_features,
+            cv=cv,
+        )
+    )
 
 
 async def train_async(
@@ -959,6 +1021,7 @@ async def train_async(
     variance_threshold: float = 0.01,
     correlation_threshold: float = 0.05,
     min_features: int = 1,
+    cv: int | None = None,
 ) -> TrainResult:
     """Async variant of :func:`train`."""
     from aetherml.sdk import AetherML
@@ -971,5 +1034,13 @@ async def train_async(
         min_features=min_features,
     )
     ml = AetherML(path, config=config)
+    if cv is not None:
+        from aetherml.agents.model_selection.agent import ModelSelectionAgent
+
+        ml._get_agents()
+        ml._agents["model_selection"] = ModelSelectionAgent(
+            engine=ml._eng,
+            cv=cv,
+        )
     await _run_stages_async(ml, _STAGES_TRAIN)
     return _build_train_result(ml)

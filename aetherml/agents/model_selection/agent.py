@@ -38,7 +38,11 @@ from typing import Any
 
 from aetherml.agents.base import AgentResult, Tool
 from aetherml.engines.base_engine import BaseEngine
-from aetherml.ml.automl.auto_selector import candidate_to_dict, recommend_models
+from aetherml.ml.automl.auto_selector import (
+    candidate_to_dict,
+    estimate_training_cost,
+    recommend_models,
+)
 from aetherml.ml.automl.trainer import (
     DEFAULT_MAX_TIME_SECONDS,
     DEFAULT_MAX_TRIALS,
@@ -68,10 +72,12 @@ class ModelSelectionAgent:
         engine: BaseEngine,
         max_trials: int = DEFAULT_MAX_TRIALS,
         max_time_seconds: int = DEFAULT_MAX_TIME_SECONDS,
+        cv: int | None = None,
     ) -> None:
         self._engine = engine
         self._max_trials = max_trials
         self._max_time_seconds = max_time_seconds
+        self._cv = cv
 
     async def run(self, state: Any) -> AgentResult:
         """Recommend models and train the best one.
@@ -160,6 +166,7 @@ class ModelSelectionAgent:
                 task_type=task_type,
                 max_trials=self._max_trials,
                 max_time_seconds=self._max_time_seconds,
+                cv=self._cv,
             )
         except Exception as exc:
             msg = f"Model training failed: {exc}"
@@ -173,6 +180,7 @@ class ModelSelectionAgent:
 
         # ── Build output ─────────────────────────────────────────────
         candidate_dicts = [candidate_to_dict(c) for c in candidates]
+        cost = estimate_training_cost(n_rows, n_features, candidates)
 
         best_pipeline = {
             "model_type": train_result["best_model"].__class__.__name__,
@@ -181,6 +189,7 @@ class ModelSelectionAgent:
             "trials_used": train_result["trials_used"],
             "time_elapsed": train_result["time_elapsed"],
             "truncated": train_result["truncated"],
+            "estimated_training_cost": cost,
         }
 
         logger.info(

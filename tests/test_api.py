@@ -117,6 +117,11 @@ class TestCapabilitiesEndpoint:
         data = client.get("/capabilities").json()["data"]
         assert "max_upload_size_mb" in data["limits"]
 
+    def test_job_persistence_documented(self, client: Any) -> None:
+        data = client.get("/capabilities").json()["data"]
+        assert "job_persistence" in data
+        assert data["job_persistence"] == "in-memory-single-process"
+
 
 # ── Middleware ────────────────────────────────────────────────────
 
@@ -239,7 +244,7 @@ class TestFileUploadValidation:
 
 
 class TestPipelineEndpoints:
-    """POST /analyze, /clean, /validate, /profile, /eda, etc."""
+    """POST /analyze, /clean, /validate, etc."""
 
     @pytest.mark.parametrize(
         "endpoint",
@@ -247,8 +252,6 @@ class TestPipelineEndpoints:
             "/analyze",
             "/clean",
             "/validate",
-            "/profile",
-            "/eda",
             "/detect-target",
             "/engineer",
             "/recommend-model",
@@ -273,8 +276,6 @@ class TestPipelineEndpoints:
             "/analyze",
             "/clean",
             "/validate",
-            "/profile",
-            "/eda",
             "/detect-target",
             "/engineer",
             "/recommend-model",

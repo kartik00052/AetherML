@@ -105,6 +105,14 @@ class CapabilitiesData(BaseModel):
         ...,
         description="System limits (max upload size, etc.).",
     )
+    job_persistence: str = Field(
+        default="in-memory-single-process",
+        description=(
+            "Job storage backend. 'in-memory-single-process' means jobs "
+            "are lost on restart and not shared across processes/workers. "
+            "For production, use a persistent backend (Redis, database)."
+        ),
+    )
 
 
 # ── Constants (derived from SDK, not duplicated) ────────────────

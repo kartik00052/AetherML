@@ -146,13 +146,14 @@ def _classification_metrics(
     y_true: np.ndarray[Any, Any],
     y_pred: np.ndarray[Any, Any],
 ) -> dict[str, Any]:
-    """Compute classification metrics: accuracy, precision, recall, F1, confusion matrix."""
+    """Compute classification metrics: accuracy, precision, recall, F1, ROC-AUC, CM."""
     from sklearn.metrics import (
         accuracy_score,
         confusion_matrix,
         f1_score,
         precision_score,
         recall_score,
+        roc_auc_score,
     )
 
     accuracy = float(accuracy_score(y_true, y_pred))
@@ -161,11 +162,24 @@ def _classification_metrics(
     f1 = float(f1_score(y_true, y_pred, average="macro", zero_division=0))
     cm = confusion_matrix(y_true, y_pred)
 
+    # ROC-AUC: requires probability estimates or binary labels
+    with contextlib.suppress(ValueError, TypeError):
+        roc_auc = float(roc_auc_score(y_true, y_pred))
+        return {
+            "accuracy": accuracy,
+            "precision_macro": precision,
+            "recall_macro": recall,
+            "f1_macro": f1,
+            "roc_auc": roc_auc,
+            "confusion_matrix": cm.tolist(),
+        }
+
     return {
         "accuracy": accuracy,
         "precision_macro": precision,
         "recall_macro": recall,
         "f1_macro": f1,
+        "roc_auc": None,
         "confusion_matrix": cm.tolist(),
     }
 

@@ -29,6 +29,7 @@ Scalability:
 
 from __future__ import annotations
 
+import contextlib
 import importlib
 import logging
 import time
@@ -60,6 +61,7 @@ def train_models(
     max_time_seconds: int = DEFAULT_MAX_TIME_SECONDS,
     test_size: float = DEFAULT_TEST_SIZE,
     random_state: int = DEFAULT_RANDOM_STATE,
+    cv: int | None = None,
 ) -> dict[str, Any]:
     """Train candidate models and return the best one.
 
@@ -75,6 +77,9 @@ def train_models(
             Enforced via monotonic clock check before each trial.
         test_size: Fraction of data to hold out for evaluation.
         random_state: Random seed for reproducibility.
+        cv: Number of cross-validation folds.  If ``None`` (default),
+            uses a single train/test split.  If an integer ≥ 2, uses
+            k-fold cross-validation to score each trial.
 
     Returns:
         A dict with keys: ``best_model``, ``best_params``,
@@ -90,13 +95,21 @@ def train_models(
     features = df[feature_cols].values
     target = df[target_column].values
 
-    features_train, features_test, target_train, target_test = _split_data(
-        features,
-        target,
-        task_type,
-        test_size,
-        random_state,
-    )
+    use_cv = cv is not None and cv >= 2
+
+    if use_cv:
+        features_train = features
+        features_test = features
+        target_train = target
+        target_test = target
+    else:
+        features_train, features_test, target_train, target_test = _split_data(
+            features,
+            target,
+            task_type,
+            test_size,
+            random_state,
+        )
 
     # ── Search state ─────────────────────────────────────────────────
     best_score = -float("inf")
@@ -161,8 +174,22 @@ def train_models(
                     model = model_class(**params, random_state=random_state)
                 except TypeError:
                     model = model_class(**params)
-                model.fit(features_train, target_train)
-                score = model.score(features_test, target_test)
+
+                if use_cv:
+                    from sklearn.model_selection import cross_val_score
+
+                    cv_scores = cross_val_score(
+                        model,
+                        features_train,
+                        target_train,
+                        cv=cv,
+                        scoring="accuracy" if task_type == "classification" else "r2",
+                    )
+                    score = float(cv_scores.mean())
+                else:
+                    model.fit(features_train, target_train)
+                    score = model.score(features_test, target_test)
+
                 trials_used += 1
 
                 result_entry = {
@@ -205,6 +232,11 @@ def train_models(
             f"trials ({elapsed:.1f}s). Check data quality and candidate models."
         )
         raise AgentError(msg)
+
+    # Refit best model on all data when using CV (cross_val_score doesn't refit)
+    if use_cv:
+        with contextlib.suppress(Exception):
+            best_model.fit(features, target)
 
     logger.info(
         "Training complete: best=%s, score=%.4f, trials=%d, time=%.1fs, truncated=%s",

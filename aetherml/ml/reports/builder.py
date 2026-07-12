@@ -87,6 +87,113 @@ def build_report(state: Any, narrative: str | None = None) -> str:
     )
 
 
+def build_html_report(state: Any, narrative: str | None = None) -> str:
+    """Build a complete HTML report from WorkflowState.
+
+    Uses the same section builders as the Markdown report but wraps
+    the output in proper HTML structure.
+
+    Args:
+        state: The WorkflowState (or compatible dataclass) containing
+            outputs from all pipeline stages.
+        narrative: Optional narrative summary string.
+
+    Returns:
+        An HTML-formatted report string.
+    """
+    import html as html_mod
+
+    run_id = html_mod.escape(str(getattr(state, "run_id", "unknown")))
+    status = html_mod.escape(str(getattr(state, "status", "unknown")))
+
+    def _md_to_html(text: str) -> str:
+        """Minimal Markdown → HTML for report sections."""
+        import re
+
+        # Horizontal rules
+        text = re.sub(r"^---+$", "<hr>", text, flags=re.MULTILINE)
+        # Bold: **text**
+        text = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", text)
+        # Inline code: `text`
+        text = re.sub(r"`(.+?)`", r"<code>\1</code>", text)
+        # Italic: _text_
+        text = re.sub(r"(?<!\w)_(.+?)_(?!\w)", r"<em>\1</em>", text)
+        # Headings: ### text
+        text = re.sub(r"^### (.+)$", r"<h4>\1</h4>", text, flags=re.MULTILINE)
+        text = re.sub(r"^## (.+)$", r"<h3>\1</h3>", text, flags=re.MULTILINE)
+        text = re.sub(r"^# (.+)$", r"<h2>\1</2>", text, flags=re.MULTILINE)
+        # Blockquote: > text
+        text = re.sub(r"^> (.+)$", r"<blockquote>\1</blockquote>", text, flags=re.MULTILINE)
+        # Numbered list: 1. text
+        text = re.sub(r"^\d+\. (.+)$", r"<li>\1</li>", text, flags=re.MULTILINE)
+        # Unordered list: - text
+        text = re.sub(r"^- (.+)$", r"<li>\1</li>", text, flags=re.MULTILINE)
+        # Wrap consecutive <li> in <ul>
+        text = re.sub(r"((?:<li>.*?</li>\n?)+)", r"<ul>\1</ul>", text)
+        # Paragraphs: wrap remaining loose lines
+        lines = text.split("\n")
+        result: list[str] = []
+        for line in lines:
+            stripped = line.strip()
+            if stripped and not stripped.startswith("<"):
+                result.append(f"<p>{html_mod.escape(stripped)}</p>")
+            else:
+                result.append(line)
+        return "\n".join(result)
+
+    sections = [
+        ("Summary", _build_summary_section(state)),
+        ("Narrative Summary", _build_narrative_section(narrative)),
+        ("Data Validation", _build_validation_section(state)),
+        ("Exploratory Data Analysis", _build_eda_section(state)),
+        ("Target Detection", _build_target_detection_section(state)),
+        ("Feature Engineering", _build_feature_engineering_section(state)),
+        ("Model Selection", _build_model_selection_section(state)),
+        ("Model Evaluation", _build_evaluation_section(state)),
+        ("Model Explainability", _build_explainability_section(state)),
+        ("Notes", _build_notes_section(state)),
+    ]
+
+    body_sections = "\n".join(
+        f"<section><h2>{html_mod.escape(title)}</h2>{_md_to_html(content)}</section>"
+        for title, content in sections
+    )
+
+    return f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AetherML Report — {run_id}</title>
+<style>
+  body {{ font-family: system-ui, -apple-system, sans-serif; max-width: 900px;
+         margin: 2rem auto; padding: 0 1rem; color: #1a1a1a; line-height: 1.6; }}
+  h1 {{ border-bottom: 2px solid #e0e0e0; padding-bottom: 0.5rem; }}
+  h2 {{ color: #2c3e50; margin-top: 2rem; }}
+  h3, h4 {{ color: #34495e; }}
+  section {{ margin-bottom: 1.5rem; padding: 1rem; border: 1px solid #eee;
+             border-radius: 6px; background: #fafafa; }}
+  pre {{ background: #f4f4f4; padding: 0.75rem; border-radius: 4px;
+         overflow-x: auto; }}
+  code {{ background: #f4f4f4; padding: 0.15em 0.35em; border-radius: 3px;
+          font-size: 0.9em; }}
+  blockquote {{ border-left: 3px solid #3498db; margin: 0.5rem 0;
+                padding: 0.5rem 1rem; background: #eef6fb; }}
+  ul {{ margin: 0.25rem 0 0.5rem 1.5rem; }}
+  hr {{ border: none; border-top: 1px solid #ddd; margin: 1.5rem 0; }}
+  .meta {{ color: #666; font-size: 0.9rem; margin-bottom: 1rem; }}
+</style>
+</head>
+<body>
+<h1>AetherML Pipeline Report</h1>
+<p class="meta"><strong>Pipeline Run:</strong> {run_id} &mdash;
+<strong>Status:</strong> {status}</p>
+<hr>
+{body_sections}
+</body>
+</html>"""
+
+
 # ── Section builders ─────────────────────────────────────────────────
 
 

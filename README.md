@@ -30,10 +30,12 @@
 7. [Data Engine Abstraction](#data-engine-abstraction)
 8. [SDK Usage](#sdk-usage)
    - [Quick Start](#quick-start-zero-friction)
-   - [Individual Steps](#individual-steps)
+   - [Incremental Usage](#incremental-usage)
+   - [Simple API](#simple-api-one-liner-functions)
+   - [Individual Steps](#individual-steps-simple-api)
    - [Async Variants](#async-variants)
    - [Error Handling](#error-handling)
-   - [Advanced Usage](#advanced-usage)
+   - [Advanced Usage (Low-Level API)](#advanced-usage-low-level-api)
 9. [CLI Usage](#cli-usage)
 10. [Future FastAPI Interface](#future-fastapi-interface)
 11. [Plugin Architecture](#plugin-architecture)
@@ -480,7 +482,44 @@ AetherML is designed to be used as an imported library first, and a CLI second. 
 
 ### Quick Start (Zero-Friction)
 
-The simplest way to use AetherML — one function call, no configuration objects, no async boilerplate:
+The simplest way to use AetherML — one class, no configuration objects, no async boilerplate:
+
+```python
+from aetherml import AetherML
+
+ml = AetherML("data/customers.csv")
+ml.run()  # upload → ETL → validation → EDA → … → storage
+print(ml.report())
+```
+
+### Incremental Usage
+
+Run only the stages you need, with optional overrides:
+
+```python
+from aetherml import AetherML
+
+ml = AetherML("data/customers.csv")
+ml.load()           # just load the data
+print(ml.summary()) # lightweight stats — no ML
+
+ml.clean(null_strategy="fill")  # override the default null strategy
+ml.validate()
+ml.eda()
+
+# Detect the target, then train a specific model type
+ml.detect_target()
+result = ml.train()  # or ml.recommend_model() for the same result
+print(f"Best model: {result.model_type} ({result.score:.4f})")
+
+# Full evaluation and explainability
+print(ml.evaluate())
+print(ml.explain())
+```
+
+### Simple API (One-Liner Functions)
+
+For scripts where you want a single function call per stage:
 
 ```python
 from aetherml import analyze, train
@@ -492,12 +531,11 @@ print(f"{profile.shape[0]} rows, {profile.shape[1]} columns")
 # Run the full ML pipeline
 result = train("data/customers.csv")
 print(f"Best model: {result.best_model_type} ({result.best_score:.4f})")
-print(f"Report length: {len(result.report)} chars")
 ```
 
-### Individual Steps
+### Individual Steps (Simple API)
 
-Run only the stages you need — each returns a typed result object:
+Each simple-API function returns a typed result object:
 
 ```python
 from aetherml import clean, validate, detect_target, engineer, select_model, explain, report
@@ -566,9 +604,9 @@ except WorkflowError as e:
 
 ---
 
-### Advanced Usage
+### Advanced Usage (Low-Level API)
 
-For power users who need fine-grained control over the pipeline, the advanced API is fully available:
+For power users who need fine-grained control over the pipeline, the advanced API provides direct access to the workflow graph:
 
 #### Full Pipeline (Async)
 
@@ -618,18 +656,6 @@ async def main():
 asyncio.run(main())
 ```
 
-#### Object-Oriented API
-
-```python
-from aetherml import AetherML
-
-ml = AetherML("data/customers.csv")
-ml.run()  # upload → ETL → validation → EDA → ... → storage
-print(ml.report())
-```
-
-> **Note:** Custom agent injection depends on the plugin system, which is currently **planned**, not implemented. This example illustrates the intended future API shape.
-
 ---
 
 ## CLI Usage
@@ -651,35 +677,17 @@ Each command maps directly onto an SDK call — `aetherml run` calls `AetherML.r
 
 ---
 
-## Future FastAPI Interface
+## FastAPI Interface
 
-> **Status: Planned.** The `api/` directory is currently a placeholder; no FastAPI service exists yet.
+The `api/` module provides a REST interface built on top of the SDK, with background job execution, file upload endpoints, and OpenAPI documentation.
 
-The intended design, once implemented, mirrors the CLI's relationship to the SDK: **FastAPI will contain no business logic.** Every route handler will do nothing more than parse the incoming request into SDK call parameters, invoke the SDK, and serialize the SDK's result into an HTTP response.
+```bash
+# Start the server
+uvicorn aetherml.interfaces.api.app:app --reload
 
-Planned shape:
-
-```python
-# api/routers/run.py  (planned, not yet implemented)
-
-from fastapi import APIRouter
-from aetherml import AetherML
-from api.schemas import RunRequest, RunResponse
-
-router = APIRouter()
-sdk = AetherML()
-
-@router.post("/run", response_model=RunResponse)
-def run_pipeline(request: RunRequest) -> RunResponse:
-    result = sdk.run(
-        dataset_path=request.dataset_path,
-        stages=request.stages,
-        config=request.config,
-    )
-    return RunResponse.from_sdk_result(result)
+# Or install with API extras
+pip install aetherml[api]
 ```
-
-The rationale for this boundary: if business logic ever leaked into `api/`, the SDK would stop being the single source of truth, and behavior could silently diverge between users who call the SDK directly and users who call it over HTTP. Keeping `api/` deliberately "dumb" is a design constraint, not an oversight.
 
 ---
 

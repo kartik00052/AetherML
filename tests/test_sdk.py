@@ -285,12 +285,13 @@ class TestEDA:
         assert "std" in fa
 
 
-class TestProfile:
-    def test_returns_dataset_summary(self, csv_path: str) -> None:
+class TestEDA:
+    def test_returns_eda_report(self, csv_path: str) -> None:
         ml = AetherML(csv_path)
-        p = ml.profile()
-        assert isinstance(p, DatasetSummary)
-        assert p.rows == 10
+        e = ml.eda()
+        assert isinstance(e, EDAReport)
+        assert e.shape[0] == 10
+        assert len(e.numeric_columns) > 0
 
 
 class TestDetectTarget:
@@ -515,3 +516,47 @@ class TestBackwardCompatibility:
         state = WorkflowState(data_path="test.csv")
         assert config.engine.preferred is None
         assert state.data_path == "test.csv"
+
+
+class TestNoRedundantRecomputation:
+    """The SDK must not re-run stages that already completed."""
+
+    def test_clean_then_eda_skips_upload_and_etl(self, csv_path: str) -> None:
+        """After .clean(), calling .eda() must not re-run upload or ETL."""
+        from unittest.mock import patch
+
+        ml = AetherML(csv_path)
+        agents = ml._get_agents()
+
+        upload_calls = [0]
+        etl_calls = [0]
+
+        original_upload_run = agents["upload"].run
+        original_etl_run = agents["etl"].run
+
+        async def count_upload(state):
+            upload_calls[0] += 1
+            return await original_upload_run(state)
+
+        async def count_etl(state):
+            etl_calls[0] += 1
+            return await original_etl_run(state)
+
+        with (
+            patch.object(agents["upload"], "run", count_upload),
+            patch.object(agents["etl"], "run", count_etl),
+        ):
+            ml.clean()
+            clean_upload = upload_calls[0]
+            clean_etl = etl_calls[0]
+
+            ml.eda()
+            eda_upload = upload_calls[0]
+            eda_etl = etl_calls[0]
+
+        # upload and etl each run exactly once during .clean()
+        assert clean_upload == 1, f"upload ran {clean_upload}x during clean"
+        assert clean_etl == 1, f"etl ran {clean_etl}x during clean"
+        # .eda() must NOT re-run upload or etl
+        assert eda_upload == 1, f"upload ran {eda_upload}x total (should be 1)"
+        assert eda_etl == 1, f"etl ran {eda_etl}x total (should be 1)"

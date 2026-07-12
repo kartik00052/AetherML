@@ -223,9 +223,7 @@ async def analyze(
     try:
         from aetherml.simple import analyze_async
 
-        return await _submit_job(
-            _run_and_cleanup(analyze_async, tmp_path, engine, null_strategy)
-        )
+        return await _submit_job(_run_and_cleanup(analyze_async, tmp_path, engine, null_strategy))
     except HTTPException:
         _cleanup_path(tmp_path)
         raise
@@ -242,9 +240,7 @@ async def clean(
     try:
         from aetherml.simple import clean_async
 
-        return await _submit_job(
-            _run_and_cleanup(clean_async, tmp_path, engine, null_strategy)
-        )
+        return await _submit_job(_run_and_cleanup(clean_async, tmp_path, engine, null_strategy))
     except HTTPException:
         _cleanup_path(tmp_path)
         raise
@@ -261,47 +257,7 @@ async def validate(
     try:
         from aetherml.simple import validate_async
 
-        return await _submit_job(
-            _run_and_cleanup(validate_async, tmp_path, engine, null_strategy)
-        )
-    except HTTPException:
-        _cleanup_path(tmp_path)
-        raise
-
-
-@router.post("/profile", response_model=None, tags=["pipeline"])
-async def profile(
-    file: UploadFile = File(..., description="Dataset file."),  # noqa: B008
-    engine: str | None = Form(None),  # noqa: B008
-    null_strategy: str = Form("drop"),  # noqa: B008
-) -> APIResponse:
-    """Profile a dataset (upload → ETL → validation → EDA)."""
-    tmp_path = await _save_upload(file)
-    try:
-        from aetherml.simple import analyze_async
-
-        return await _submit_job(
-            _run_and_cleanup(analyze_async, tmp_path, engine, null_strategy)
-        )
-    except HTTPException:
-        _cleanup_path(tmp_path)
-        raise
-
-
-@router.post("/eda", response_model=None, tags=["pipeline"])
-async def eda(
-    file: UploadFile = File(..., description="Dataset file."),  # noqa: B008
-    engine: str | None = Form(None),  # noqa: B008
-    null_strategy: str = Form("drop"),  # noqa: B008
-) -> APIResponse:
-    """Run exploratory data analysis on a dataset."""
-    tmp_path = await _save_upload(file)
-    try:
-        from aetherml.simple import analyze_async
-
-        return await _submit_job(
-            _run_and_cleanup(analyze_async, tmp_path, engine, null_strategy)
-        )
+        return await _submit_job(_run_and_cleanup(validate_async, tmp_path, engine, null_strategy))
     except HTTPException:
         _cleanup_path(tmp_path)
         raise
@@ -364,6 +320,7 @@ async def recommend_model(
     variance_threshold: float = Form(0.01),  # noqa: B008
     correlation_threshold: float = Form(0.05),  # noqa: B008
     min_features: int = Form(1),  # noqa: B008
+    cv: int | None = Form(None, description="Cross-validation folds (None=default split)."),  # noqa: B008
 ) -> APIResponse:
     """Recommend the best ML algorithm without training."""
     tmp_path = await _save_upload(file)
@@ -379,6 +336,7 @@ async def recommend_model(
                 variance_threshold=variance_threshold,
                 correlation_threshold=correlation_threshold,
                 min_features=min_features,
+                cv=cv,
             )
         )
     except HTTPException:
@@ -394,6 +352,7 @@ async def train(
     variance_threshold: float = Form(0.01),  # noqa: B008
     correlation_threshold: float = Form(0.05),  # noqa: B008
     min_features: int = Form(1),  # noqa: B008
+    cv: int | None = Form(None, description="Cross-validation folds (None=default split)."),  # noqa: B008
 ) -> APIResponse:
     """Train the recommended model on a dataset (full pipeline)."""
     tmp_path = await _save_upload(file)
@@ -409,6 +368,7 @@ async def train(
                 variance_threshold=variance_threshold,
                 correlation_threshold=correlation_threshold,
                 min_features=min_features,
+                cv=cv,
             )
         )
     except HTTPException:
@@ -424,6 +384,7 @@ async def evaluate(
     variance_threshold: float = Form(0.01),  # noqa: B008
     correlation_threshold: float = Form(0.05),  # noqa: B008
     min_features: int = Form(1),  # noqa: B008
+    cv: int | None = Form(None, description="Cross-validation folds (None=default split)."),  # noqa: B008
 ) -> APIResponse:
     """Evaluate models on a dataset (includes model selection + evaluation)."""
     tmp_path = await _save_upload(file)
@@ -439,6 +400,7 @@ async def evaluate(
                 variance_threshold=variance_threshold,
                 correlation_threshold=correlation_threshold,
                 min_features=min_features,
+                cv=cv,
             )
         )
     except HTTPException:
@@ -518,9 +480,7 @@ async def _run_and_cleanup(
 ) -> dict[str, Any]:
     """Run a simple-API async function and clean up the temp file."""
     try:
-        result = await func(
-            path, engine=engine, null_strategy=null_strategy, **kwargs
-        )
+        result = await func(path, engine=engine, null_strategy=null_strategy, **kwargs)
         return _dataclass_to_dict(result)
     finally:
         _cleanup_path(path)

@@ -88,9 +88,7 @@ async def _request_timing_middleware(request: Request, call_next: Any) -> JSONRe
 
 
 @app.exception_handler(RequestValidationError)
-async def _validation_error_handler(
-    _req: Request, exc: RequestValidationError
-) -> JSONResponse:
+async def _validation_error_handler(_req: Request, exc: RequestValidationError) -> JSONResponse:
     """Convert FastAPI validation errors to standard error envelope."""
     body = APIResponse(
         success=False,
@@ -105,9 +103,7 @@ async def _validation_error_handler(
 
 
 @app.exception_handler(HTTPException)
-async def _http_exception_handler(
-    _req: Request, exc: HTTPException
-) -> JSONResponse:
+async def _http_exception_handler(_req: Request, exc: HTTPException) -> JSONResponse:
     """Forward structured HTTPException detail to the response."""
     return JSONResponse(status_code=exc.status_code, content=exc.detail)
 

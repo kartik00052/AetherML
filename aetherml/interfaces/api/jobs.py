@@ -28,9 +28,7 @@ class Job:
 
     id: str = field(default_factory=lambda: str(uuid.uuid4()))
     status: str = "queued"
-    created_at: str = field(
-        default_factory=lambda: datetime.now(UTC).isoformat()
-    )
+    created_at: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
     started_at: str | None = None
     completed_at: str | None = None
     result: dict[str, Any] | None = None

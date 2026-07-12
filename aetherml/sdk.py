@@ -113,6 +113,7 @@ class ModelInfo:
     truncated: bool
     trials_used: int
     time_elapsed: float
+    estimated_training_cost: str = "unknown"
 
 
 @dataclass(frozen=True)
@@ -123,6 +124,7 @@ class EvaluationMetrics:
     precision_macro: float | None = None
     recall_macro: float | None = None
     f1_macro: float | None = None
+    roc_auc: float | None = None
     confusion_matrix: list[list[int]] | None = None
     rmse: float | None = None
     mae: float | None = None
@@ -296,12 +298,10 @@ class AetherML:
         if not needed:
             return
 
-        # The graph needs all stages up to the furthest requested
-        max_idx = max(stages.index(s) for s in needed)
-        graph_stages = stages[: max_idx + 1]
-
+        # Build graph with only the needed stages — previously executed
+        # stages are skipped; their outputs already live in self._state.
         agents = self._get_agents()
-        graph = build_graph(agents, stages=graph_stages)
+        graph = build_graph(agents, stages=needed)
 
         if self._start_time is None:
             self._start_time = time.monotonic()
@@ -466,34 +466,6 @@ class AetherML:
             raw=report,
         )
 
-    def profile(self) -> DatasetSummary:
-        """Alias for ``summary()`` — returns dataset profile.
-
-        This is a convenience alias.  The underlying EDA stage
-        enriches the internal state with statistical profiles.
-
-        Returns:
-            A ``DatasetSummary``.
-        """
-        self._ensure_sync(_EDA)
-        base = self.summary()
-        # Merge EDA profile data into the summary if available
-        profile = self._state.data_profile
-        if profile is not None:
-            return DatasetSummary(
-                rows=base.rows,
-                columns=base.columns,
-                column_names=base.column_names,
-                dtypes=base.dtypes,
-                memory_bytes=profile.get("memory_bytes", base.memory_bytes),
-                missing_values=base.missing_values,
-                duplicate_rows=base.duplicate_rows,
-                numeric_columns=profile.get("numeric_columns", base.numeric_columns),
-                categorical_columns=profile.get("categorical_columns", base.categorical_columns),
-                preview=base.preview,
-            )
-        return base
-
     def eda(self) -> EDAReport:
         """Run exploratory data analysis.
 
@@ -566,16 +538,29 @@ class AetherML:
             features=df,
         )
 
-    def recommend_model(self) -> ModelInfo:
+    def recommend_model(self, cv: int | None = None) -> ModelInfo:
         """Recommend and train the best model for the dataset.
 
         Evaluates multiple candidate models and selects the best one
         based on cross-validation performance.
 
+        Args:
+            cv: Number of cross-validation folds.  If ``None``
+                (default), uses a single train/test split.  Pass an
+                integer ≥ 2 to enable k-fold cross-validation.
+
         Returns:
             A ``ModelInfo`` with the selected model, score, candidates,
-            and training details.
+            training details, and estimated cost.
         """
+        if cv is not None:
+            from aetherml.agents.model_selection.agent import ModelSelectionAgent
+
+            agents = self._get_agents()
+            agents["model_selection"] = ModelSelectionAgent(
+                engine=self._eng,
+                cv=cv,
+            )
         self._ensure_sync(_MODEL)
 
         bp = self._state.best_pipeline or {}
@@ -587,17 +572,22 @@ class AetherML:
             truncated=bp.get("truncated", False),
             trials_used=bp.get("trials_used", 0),
             time_elapsed=bp.get("time_elapsed", 0.0),
+            estimated_training_cost=bp.get("estimated_training_cost", "unknown"),
         )
 
-    def train(self) -> ModelInfo:
+    def train(self, cv: int | None = None) -> ModelInfo:
         """Alias for ``recommend_model()``.
 
         Trains the recommended model on the engineered features.
 
+        Args:
+            cv: Number of cross-validation folds.  If ``None``
+                (default), uses a single train/test split.
+
         Returns:
             A ``ModelInfo``.
         """
-        return self.recommend_model()
+        return self.recommend_model(cv=cv)
 
     def evaluate(self) -> EvaluationMetrics:
         """Evaluate the trained model.
@@ -618,6 +608,7 @@ class AetherML:
             precision_macro=metrics.get("precision_macro"),
             recall_macro=metrics.get("recall_macro"),
             f1_macro=metrics.get("f1_macro"),
+            roc_auc=metrics.get("roc_auc"),
             confusion_matrix=metrics.get("confusion_matrix"),
             rmse=metrics.get("rmse"),
             mae=metrics.get("mae"),
@@ -659,6 +650,33 @@ class AetherML:
         """
         self._ensure_sync(_REPORT)
         return str(self._state.final_report or "")
+
+    def generate_report(self, format: str = "markdown") -> str:
+        """Generate a pipeline report in the specified format.
+
+        Args:
+            format: Output format.  ``"markdown"`` (default) returns
+                a Markdown string.  ``"html"`` returns a self-contained
+                HTML document.  ``"pdf"`` raises ``NotImplementedError``.
+
+        Returns:
+            A string containing the report in the requested format.
+
+        Raises:
+            NotImplementedError: If *format* is ``"pdf"``.
+        """
+        if format == "pdf":
+            msg = "PDF report format is not yet supported."
+            raise NotImplementedError(msg)
+        if format == "html":
+            from aetherml.ml.reports.builder import build_html_report
+
+            self._ensure_sync(_REPORT)
+            return build_html_report(self._state)
+        if format == "markdown":
+            return self.report()
+        msg = f"Report format {format!r} is not supported. Supported formats: 'markdown', 'html'."
+        raise NotImplementedError(msg)
 
     def run(self) -> AetherML:
         """Execute the complete ML pipeline end-to-end.
@@ -724,8 +742,4 @@ class AetherML:
     def __repr__(self) -> str:
         stages = len(self._executed_stages)
         elapsed = f"{self.elapsed:.1f}s" if self.elapsed is not None else "N/A"
-        return (
-            f"AetherML(path={self._data_path!r}, "
-            f"stages_completed={stages}, "
-            f"elapsed={elapsed})"
-        )
+        return f"AetherML(path={self._data_path!r}, stages_completed={stages}, elapsed={elapsed})"

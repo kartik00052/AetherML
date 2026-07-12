@@ -253,3 +253,36 @@ def dict_to_candidate(d: dict[str, Any]) -> CandidateModel:
         param_space=d.get("param_space", {}),
         tags=d.get("tags", {}),
     )
+
+
+def estimate_training_cost(
+    n_rows: int,
+    n_features: int,
+    candidates: list[CandidateModel] | None = None,
+) -> str:
+    """Estimate training cost as low / medium / high.
+
+    Heuristic: rows × features × candidate_complexity_score.
+    - Linear models (fast tag): complexity 1
+    - Ensemble models: complexity 3
+    - Sum across all candidates weighted by their param_space size.
+
+    Returns one of ``"low"``, ``"medium"``, or ``"high"``.
+    """
+    if not candidates:
+        return "low"
+
+    complexity = 0.0
+    for c in candidates:
+        base = 1.0 if c.tags.get("fast") else 3.0
+        # Larger param spaces mean more HPO trials → higher cost
+        param_factor = 1.0 + len(c.param_space) * 0.2
+        complexity += base * param_factor
+
+    score = n_rows * n_features * complexity
+
+    if score < 500_000:
+        return "low"
+    if score < 5_000_000:
+        return "medium"
+    return "high"
