@@ -19,7 +19,7 @@ RUN pip install --no-cache-dir --prefix=/install ".[api]"
 FROM python:3.13-slim AS runtime
 
 LABEL maintainer="Kartik Sharma <kartiksharma18852@gmail.com>"
-LABEL org.opencontainers.image.source="https://github.com/kartiksharma/AetherML"
+LABEL org.opencontainers.image.source="https://github.com/Kartik00052/AetherML"
 
 # Minimal runtime deps (libgomp for sklearn, libstdc++ for polars)
 RUN apt-get update && \
