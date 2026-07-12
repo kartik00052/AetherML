@@ -37,7 +37,7 @@
    - [Error Handling](#error-handling)
    - [Advanced Usage (Low-Level API)](#advanced-usage-low-level-api)
 9. [CLI Usage](#cli-usage)
-10. [Future FastAPI Interface](#future-fastapi-interface)
+10. [FastAPI Interface](#fastapi-interface)
 11. [Plugin Architecture](#plugin-architecture)
 12. [Technology Stack](#technology-stack)
 13. [Installation](#installation)
@@ -90,6 +90,7 @@ AetherML is **SDK-first**. The CLI, the (planned) FastAPI service, and any futur
 | **Explainability** | Post-training analysis producing feature importance and model-behavior summaries. | Implemented |
 | **Reporting** | Structured, versionable output artifacts summarizing every stage of the run. | Implemented |
 | **Modular Architecture** | Clear separation between agents, services, engines, and interfaces; no layer reaches across another's boundary. | Implemented |
+| **FastAPI Interface** | REST API with file upload, background jobs, and OpenAPI docs (`pip install aetherml[api]`). | Implemented |
 | **Plugin System** | Extension points for custom agents, models, engines, and storage backends without modifying core code. | Planned |
 | **Offline-First Design** | Core pipeline stages run without requiring network access or hosted services. | Implemented |
 | **SDK-First Philosophy** | Every interface (CLI, API, GUI) is a client of the SDK — never a place where business logic lives. | Implemented |
@@ -719,7 +720,7 @@ The mechanism under consideration is a Python entry-points-based discovery syste
 ![scikit-learn](https://img.shields.io/badge/scikit--learn-F7931E?style=for-the-badge&logo=scikitlearn&logoColor=white)
 ![Pydantic](https://img.shields.io/badge/Pydantic-E92063?style=for-the-badge&logo=pydantic&logoColor=white)
 ![pytest](https://img.shields.io/badge/pytest-0A9EDC?style=for-the-badge&logo=pytest&logoColor=white)
-![FastAPI](https://img.shields.io/badge/FastAPI%20(planned)-009688?style=for-the-badge&logo=fastapi&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)
 
 </div>
 
@@ -733,7 +734,7 @@ The mechanism under consideration is a Python entry-points-based discovery syste
 | ![scikit-learn](https://img.shields.io/badge/-scikit--learn-F7931E?style=flat-square&logo=scikitlearn&logoColor=white) | Underlying model implementations in `ml/` | Battle-tested, consistent API surface for the model families AetherML wraps |
 | ![Pydantic](https://img.shields.io/badge/-Pydantic-E92063?style=flat-square&logo=pydantic&logoColor=white) | Configuration and (planned) API schema validation | Enforces typed, validated configuration objects rather than untyped dicts |
 | ![pytest](https://img.shields.io/badge/-pytest-0A9EDC?style=flat-square&logo=pytest&logoColor=white) | Test runner across all test categories | De facto standard for Python testing; strong fixture and plugin ecosystem |
-| ![FastAPI](https://img.shields.io/badge/-FastAPI%20(planned)-009688?style=flat-square&logo=fastapi&logoColor=white) | HTTP interface layer | Async-first, automatic OpenAPI schema generation, thin enough to stay logic-free |
+| ![FastAPI](https://img.shields.io/badge/-FastAPI-009688?style=flat-square&logo=fastapi&logoColor=white) | HTTP interface layer | Async-first, automatic OpenAPI schema generation, thin enough to stay logic-free |
 
 ---
 
@@ -755,8 +756,8 @@ pip install aetherml
 For contributors who want to modify AetherML itself:
 
 ```bash
-git clone https://github.com/your-org/aetherml.git
-cd aetherml
+git clone https://github.com/kartik00052/AetherML.git
+cd AetherML
 
 python -m venv .venv
 source .venv/bin/activate   # On Windows: .venv\Scripts\activate
@@ -773,8 +774,8 @@ The `[dev]` extra installs testing, linting, and formatting tools in addition to
 ### Repository Setup
 
 ```bash
-git clone https://github.com/your-org/aetherml.git
-cd aetherml
+git clone https://github.com/kartik00052/AetherML.git
+cd AetherML
 python -m venv .venv
 source .venv/bin/activate
 pip install -e ".[dev]"
@@ -855,15 +856,16 @@ AetherML's internal structure is guided by a consistent set of principles:
 - [x] Pandas, Polars, and PySpark data engines with automatic selection
 - [x] Local filesystem storage backend
 - [x] CLI interface
+- [x] FastAPI HTTP interface (`api/`) with background jobs, file uploads, and OpenAPI docs
+- [x] HTML report generation (`generate_report(format="html")`)
 - [x] Unit, integration, regression, and architecture test suites
 
 ### Planned
 
-- [ ] FastAPI HTTP interface (`api/`)
 - [ ] Plugin system with entry-points-based discovery (`plugins/`)
 - [ ] Additional storage backends (S3, GCS, Azure Blob)
 - [ ] Additional data engine support (DuckDB)
-- [ ] HTML/PDF report rendering
+- [ ] PDF report rendering
 - [ ] Parallel/branching agent execution within the workflow graph
 - [ ] Desktop GUI client built on top of the SDK
 - [ ] Human-in-the-loop checkpoints within the workflow graph
@@ -873,7 +875,7 @@ AetherML's internal structure is guided by a consistent set of principles:
 ## Contributing
 
 ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square)
-![Good First Issues](https://img.shields.io/github/issues/your-org/aetherml/good%20first%20issue?style=flat-square&label=good%20first%20issues)
+![Good First Issues](https://img.shields.io/github/issues/kartik00052/AetherML/good%20first%20issue?style=flat-square&label=good%20first%20issues)
 
 Contributions of all kinds are welcome — bug fixes, new agents, documentation improvements, and test coverage.
 
