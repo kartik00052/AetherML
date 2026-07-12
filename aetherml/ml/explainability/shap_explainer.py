@@ -32,7 +32,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-import numpy as np
+import numpy as np  # type: ignore[import]
 
 logger = logging.getLogger(__name__)
 
@@ -197,6 +197,10 @@ def _compute_global_importance(
 
     # Mean across samples
     mean_importance = np.mean(combined, axis=0)
+
+    # If multi-class produced a 2D result (n_features, n_classes), reduce further
+    if mean_importance.ndim > 1:
+        mean_importance = np.mean(mean_importance, axis=tuple(range(1, mean_importance.ndim)))
 
     # Map to feature names
     importance_dict = {}
