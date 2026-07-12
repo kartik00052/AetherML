@@ -9,8 +9,6 @@ from aetherml.configs.settings import (
     AetherMLConfig,
     DataConfig,
     EngineConfig,
-    QdrantConfig,
-    RAGConfig,
 )
 
 
@@ -49,56 +47,16 @@ class TestDataConfigDefaults:
         assert cfg.max_file_size_bytes == 2 * 1024 * 1024 * 1024
 
 
-class TestQdrantConfigDefaults:
-    def test_default_url(self) -> None:
-        cfg = QdrantConfig()
-        assert cfg.url == "http://localhost:6333"
-
-    def test_default_api_key_is_none(self) -> None:
-        cfg = QdrantConfig()
-        assert cfg.api_key is None
-
-    def test_default_collection_name(self) -> None:
-        cfg = QdrantConfig()
-        assert cfg.collection_name == "aetherml_knowledge"
-
-    def test_default_timeout(self) -> None:
-        cfg = QdrantConfig()
-        assert cfg.timeout_seconds == 5.0
-
-
-class TestRAGConfigDefaults:
-    def test_default_enabled(self) -> None:
-        cfg = RAGConfig()
-        assert cfg.enabled is False
-
-    def test_default_max_retrieved_chunks(self) -> None:
-        cfg = RAGConfig()
-        assert cfg.max_retrieved_chunks == 5
-
-    def test_default_embedding_model(self) -> None:
-        cfg = RAGConfig()
-        assert cfg.embedding_model == "all-MiniLM-L6-v2"
-
-    def test_default_similarity_threshold(self) -> None:
-        cfg = RAGConfig()
-        assert cfg.similarity_threshold == 0.3
-
-
 class TestAetherMLConfigComposition:
     def test_default_sub_configs(self) -> None:
         cfg = AetherMLConfig()
         assert isinstance(cfg.engine, EngineConfig)
         assert isinstance(cfg.data, DataConfig)
-        assert isinstance(cfg.qdrant, QdrantConfig)
-        assert isinstance(cfg.rag, RAGConfig)
 
     def test_nested_defaults(self) -> None:
         cfg = AetherMLConfig()
         assert cfg.engine.preferred is None
         assert cfg.data.default_format == "auto"
-        assert cfg.qdrant.url == "http://localhost:6333"
-        assert cfg.rag.enabled is False
 
     def test_custom_sub_config(self) -> None:
         engine = EngineConfig(preferred="polars")

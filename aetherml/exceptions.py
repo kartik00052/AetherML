@@ -16,8 +16,6 @@ __all__ = [
     "DataValidationError",
     "EngineError",
     "EngineSelectionError",
-    "QdrantConnectionError",
-    "RAGError",
     "WorkflowError",
 ]
 
@@ -84,11 +82,3 @@ class AgentError(AetherMLError):
 
 class AgentNotImplementedError(AgentError):
     """Raised by agent stubs that have not been implemented yet."""
-
-
-class RAGError(AetherMLError):
-    """Raised when a RAG operation fails."""
-
-
-class QdrantConnectionError(RAGError):
-    """Raised when the Qdrant vector store is unreachable."""

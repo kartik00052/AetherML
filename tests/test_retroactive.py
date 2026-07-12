@@ -2,10 +2,8 @@
 
 These tests cover specific behavior that was modified without dedicated tests:
 - Upload agent: file-size guard and single getsize() call
-- RAG context: client/embedding caching
 - Engine selector: _DATA_EXTENSIONS filter for directory estimation
 - Target detection: vectorized nunique()
-- Qdrant client: zip(strict=True) upsert
 """
 
 from __future__ import annotations
@@ -13,7 +11,7 @@ from __future__ import annotations
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pandas as pd
 import pytest
@@ -79,80 +77,6 @@ class TestUploadFileSizeGuard:
             await agent.run(state)
             # getsize called once for the size guard check
             assert mock_getsize.call_count == 1
-
-
-# ── RAG context: client caching ──────────────────────────────────────
-
-
-class TestRAGClientCaching:
-    """Test that QdrantClient and EmbeddingWrapper are cached at module level."""
-
-    def setup_method(self) -> None:
-        import aetherml.rag.context as ctx
-
-        ctx._qdrant_client_cache.clear()
-        ctx._embedding_wrapper_cache.clear()
-
-    def teardown_method(self) -> None:
-        import aetherml.rag.context as ctx
-
-        ctx._qdrant_client_cache.clear()
-        ctx._embedding_wrapper_cache.clear()
-
-    def test_qdrant_client_cached(self) -> None:
-        import aetherml.rag.context as ctx
-
-        mock_client = MagicMock()
-
-        with patch(
-            "aetherml.database.qdrant.client.QdrantClient",
-            return_value=mock_client,
-        ):
-            state = SimpleNamespace(
-                target_column="t",
-                task_type="regression",
-                best_pipeline=None,
-                evaluation_report=None,
-            )
-
-            # First call creates client
-            ctx.get_rag_context(state, qdrant_url="http://test:6333")
-            # Client is cached — check the cache directly
-            assert len(ctx._qdrant_client_cache) == 1
-
-            # Second call reuses cached client
-            ctx.get_rag_context(state, qdrant_url="http://test:6333")
-            # Still only one client in cache
-            assert len(ctx._qdrant_client_cache) == 1
-
-    def test_embedding_wrapper_cached(self) -> None:
-        import aetherml.rag.context as ctx
-
-        mock_client = MagicMock()
-        mock_embed = MagicMock()
-
-        with (
-            patch(
-                "aetherml.database.qdrant.client.QdrantClient",
-                return_value=mock_client,
-            ),
-            patch(
-                "aetherml.rag.embeddings.wrapper.EmbeddingWrapper",
-                return_value=mock_embed,
-            ),
-        ):
-            state = SimpleNamespace(
-                target_column="t",
-                task_type="regression",
-                best_pipeline=None,
-                evaluation_report=None,
-            )
-
-            ctx.get_rag_context(state, qdrant_url="http://test2:6333")
-            assert len(ctx._embedding_wrapper_cache) == 1
-
-            ctx.get_rag_context(state, qdrant_url="http://test2:6333")
-            assert len(ctx._embedding_wrapper_cache) == 1
 
 
 # ── Engine selector: _DATA_EXTENSIONS filter ──────────────────────────
@@ -221,79 +145,3 @@ class TestTargetDetectionNunique:
         assert "task_type" in result
         assert "confidence" in result
         assert result["target_column"] == "label"
-
-
-# ── Qdrant client: zip(strict=True) upsert ───────────────────────────
-
-
-class TestQdrantZipStrict:
-    """Test that upsert uses zip(strict=True) to catch length mismatches."""
-
-    def test_upsert_mismatched_lengths_caught_silently(self) -> None:
-        """zip(strict=True) raises TypeError, but upsert's broad except catches it.
-
-        FINDING: The ``except Exception`` handler in ``upsert()`` silently
-        swallows the ``TypeError`` from ``zip(strict=True)`` and returns
-        ``False``.  The strict-zip safety net does not propagate to callers.
-        This should be narrowed to exclude ``TypeError`` so length mismatches
-        surface as real errors.
-        """
-        from aetherml.database.qdrant.client import QdrantClient
-
-        client = QdrantClient()
-
-        mock_qdrant_client = MagicMock()
-        mock_models = MagicMock()
-        mock_point_struct = MagicMock()
-        mock_models.PointStruct = mock_point_struct
-
-        with (
-            patch.object(client, "_get_client") as mock_get,
-            patch.dict(
-                "sys.modules",
-                {
-                    "qdrant_client": mock_qdrant_client,
-                    "qdrant_client.models": mock_models,
-                },
-            ),
-        ):
-            mock_get.return_value = MagicMock()
-            # Mismatched lengths — TypeError is raised by zip(strict=True)
-            # but caught by the broad except Exception, returning False
-            result = client.upsert(
-                ids=["id1", "id2"],
-                vectors=[[0.1, 0.2]],
-                payloads=[{"key": "val"}],
-            )
-            assert result is False  # swallowed by except Exception
-
-    def test_upsert_accepts_matching_lengths(self) -> None:
-        from aetherml.database.qdrant.client import QdrantClient
-
-        client = QdrantClient()
-
-        mock_qdrant_client = MagicMock()
-        mock_models = MagicMock()
-        mock_point_struct = MagicMock()
-        mock_models.PointStruct = mock_point_struct
-
-        with (
-            patch.object(client, "_get_client") as mock_get,
-            patch.dict(
-                "sys.modules",
-                {
-                    "qdrant_client": mock_qdrant_client,
-                    "qdrant_client.models": mock_models,
-                },
-            ),
-        ):
-            mock_qdrant = MagicMock()
-            mock_get.return_value = mock_qdrant
-
-            result = client.upsert(
-                ids=["id1", "id2"],
-                vectors=[[0.1, 0.2], [0.3, 0.4]],
-                payloads=[{"a": 1}, {"b": 2}],
-            )
-            assert result is True
-            mock_qdrant.upsert.assert_called_once()

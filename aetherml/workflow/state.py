@@ -23,7 +23,6 @@ Field ownership map:
     row_count                       → upload agent
     validated_data                  → validation agent
     validation_report               → validation agent
-    active_engine                   → [not wired] engine_selection agent (isolated)
     processed_data                  → etl agent
     transform_log                   → etl agent
     data_profile                    → eda agent (merged profiling)
@@ -33,13 +32,11 @@ Field ownership map:
     target_detection_confidence     → target_detection agent
     ambiguity_reason                → target_detection agent
     features                        → feature_engineering agent
-    feature_names                   → feature_engineering agent
     candidate_models                → model_selection agent (merged automl)
     best_pipeline                   → model_selection agent
     trained_model                   → model_selection agent
     evaluation_report               → evaluation agent
     explanation_report              → explainability agent
-    rag_context                     → [not wired] rag agent (isolated)
     final_report                    → reporting agent
     artifact_uri                    → storage agent
 """
@@ -95,12 +92,6 @@ class WorkflowState(BaseModel):
     validation_report: dict[str, Any] | None = Field(
         default=None,
         description="[validation] Summary of validation checks and results.",
-    )
-
-    # ── Engine selection agent ──────────────────────────────────────
-    active_engine: str | None = Field(
-        default=None,
-        description="[engine_selection] Name of the selected engine (pandas/polars/spark).",
     )
 
     # ── ETL agent ───────────────────────────────────────────────────
@@ -177,12 +168,6 @@ class WorkflowState(BaseModel):
     explanation_report: dict[str, Any] | None = Field(
         default=None,
         description="[explainability] SHAP / LIME / feature-importance report.",
-    )
-
-    # ── RAG agent ───────────────────────────────────────────────────
-    rag_context: dict[str, Any] | None = Field(
-        default=None,
-        description="[rag] Knowledge retrieved for the current pipeline step.",
     )
 
     # ── Reporting agent ─────────────────────────────────────────────

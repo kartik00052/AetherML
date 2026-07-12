@@ -10,6 +10,21 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+# Valid pipeline stage names — mirrors ``PIPELINE_ORDER`` in workflow/graph.py.
+VALID_STAGES = Literal[
+    "upload",
+    "etl",
+    "validation",
+    "eda",
+    "target_detection",
+    "feature_engineering",
+    "model_selection",
+    "evaluation",
+    "explainability",
+    "reporting",
+    "storage",
+]
+
 
 class PipelineRequest(BaseModel):
     """Body for ``POST /pipeline``."""
@@ -25,9 +40,9 @@ class PipelineRequest(BaseModel):
         "drop",
         description="Null handling strategy: drop, fill, flag.",
     )
-    stages: list[str] | None = Field(
+    stages: list[VALID_STAGES] | None = Field(
         None,
-        description="Ordered pipeline stages to execute. None = defaults.",
+        description="Ordered pipeline stages to execute. None = all stages.",
     )
 
 
@@ -37,6 +52,16 @@ class PipelineResponse(BaseModel):
     model_config = ConfigDict(extra="allow")
 
     status: str = "ok"
+    result: dict[str, Any]
+
+
+class UploadPipelineResponse(BaseModel):
+    """Successful pipeline result from file upload."""
+
+    model_config = ConfigDict(extra="allow")
+
+    status: str = "ok"
+    filename: str
     result: dict[str, Any]
 
 
@@ -59,3 +84,5 @@ class HealthResponse(BaseModel):
     status: str = "ok"
     version: str
     python: str
+    platform: str
+    engines: list[str]

@@ -39,7 +39,6 @@ class TestWorkflowState:
         assert state.row_count is None
         assert state.validated_data is None
         assert state.validation_report is None
-        assert state.active_engine is None
         assert state.processed_data is None
         assert state.transform_log is None
         assert state.data_profile is None
@@ -55,7 +54,6 @@ class TestWorkflowState:
         assert state.trained_model is None
         assert state.evaluation_report is None
         assert state.explanation_report is None
-        assert state.rag_context is None
         assert state.final_report is None
         assert state.artifact_uri is None
 

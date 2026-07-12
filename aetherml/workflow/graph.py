@@ -12,8 +12,8 @@ Extended topology (with validation + eda):
     upload → etl → validation → eda → [end]
 
 Full pipeline (future):
-    upload → validation → engine_selection → etl → [profiling ∥ eda]
-    → feature_engineering → target_detection → model_selection
+    upload → etl → validation → eda → target_detection
+    → feature_engineering → model_selection
     → evaluation → explainability → reporting → storage
 
 Design:

@@ -466,32 +466,3 @@ class TestImportChecks:
                 continue
             for kw in ["openai", "langchain", "gemma", "gemini", "aetherml.llm"]:
                 assert kw not in stripped.lower()
-
-
-# ── Build report narrative parameter tests ───────────────────────────
-
-
-class TestBuildReportNarrative:
-    """Test the build_report narrative parameter."""
-
-    def test_narrative_included_in_report(self) -> None:
-        state = _make_state(target_column="y")
-        report = build_report(state, narrative="This is a narrative.")
-        assert "This is a narrative." in report
-        assert "## Narrative Summary" in report
-
-    def test_no_narrative_shows_stub(self) -> None:
-        state = _make_state(target_column="y")
-        report = build_report(state, narrative=None)
-        assert "Narrative summary not generated" in report
-
-    def test_empty_narrative_shows_stub(self) -> None:
-        state = _make_state(target_column="y")
-        report = build_report(state, narrative="  ")
-        assert "Narrative summary was empty" in report
-
-    def test_narrative_none_default_backward_compat(self) -> None:
-        """build_report with no narrative arg should work (backward compat)."""
-        state = _make_state(target_column="y")
-        report = build_report(state)
-        assert "Narrative summary not generated" in report

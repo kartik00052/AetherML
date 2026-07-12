@@ -1,10 +1,7 @@
-"""FastAPI-based REST API for AetherML.
+"""AetherML REST API — thin HTTP layer over ``aetherml.run_pipeline()``.
 
-Thin HTTP layer over ``aetherml.run_pipeline()``.  No business logic
-lives here — request validation, auth, and rate-limiting are delegated
-to FastAPI middleware.
+No business logic lives here — request validation, error mapping, and
+middleware are handled by FastAPI.  Run with::
 
-Usage::
-
-    uvicorn aetherml.interfaces.api.app:app
+    uvicorn aetherml.interfaces.api.app:app --reload
 """

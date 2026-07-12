@@ -15,8 +15,6 @@ __all__ = [
     "DataConfig",
     "EngineConfig",
     "FeatureSelectionConfig",
-    "QdrantConfig",
-    "RAGConfig",
 ]
 
 
@@ -58,55 +56,6 @@ class DataConfig(BaseModel):
     )
 
 
-class QdrantConfig(BaseModel):
-    """Qdrant vector store configuration.
-
-    All fields default to local-mode settings.  Credentials are read
-    from environment variables when not explicitly set.
-    """
-
-    url: str = Field(
-        default="http://localhost:6333",
-        description=("Qdrant server URL. Read from AETHERML_QDRANT_URL env var if not set."),
-    )
-    api_key: str | None = Field(
-        default=None,
-        description=("API key for Qdrant Cloud. Read from AETHERML_QDRANT_API_KEY env var."),
-    )
-    collection_name: str = Field(
-        default="aetherml_knowledge",
-        description="Name of the Qdrant collection to use.",
-    )
-    timeout_seconds: float = Field(
-        default=5.0,
-        description="Maximum seconds to wait for a Qdrant operation.",
-    )
-
-
-class RAGConfig(BaseModel):
-    """RAG (Retrieval-Augmented Generation) configuration."""
-
-    enabled: bool = Field(
-        default=False,
-        description=(
-            "Enable RAG context retrieval for enhanced reporting. "
-            "When False (default), no retrieval is performed."
-        ),
-    )
-    max_retrieved_chunks: int = Field(
-        default=5,
-        description="Maximum number of knowledge chunks to retrieve per query.",
-    )
-    embedding_model: str = Field(
-        default="all-MiniLM-L6-v2",
-        description="Sentence-transformers model for embedding generation.",
-    )
-    similarity_threshold: float = Field(
-        default=0.3,
-        description="Minimum cosine similarity to include a retrieved chunk.",
-    )
-
-
 class FeatureSelectionConfig(BaseModel):
     """Feature selection thresholds for Feature Engineering.
 
@@ -144,7 +93,5 @@ class AetherMLConfig(BaseModel):
     engine: EngineConfig = Field(default_factory=EngineConfig)
     data: DataConfig = Field(default_factory=DataConfig)
     feature_selection: FeatureSelectionConfig = Field(default_factory=FeatureSelectionConfig)
-    qdrant: QdrantConfig = Field(default_factory=QdrantConfig)
-    rag: RAGConfig = Field(default_factory=RAGConfig)
 
     model_config = {"extra": "ignore"}
