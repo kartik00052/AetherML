@@ -2,10 +2,18 @@
 
 from __future__ import annotations
 
+import importlib
+
 import pandas as pd
 import pytest
 
 from aetherml.engines.pandas_engine import PandasEngine
+
+collect_ignore: list[str] = []
+if not importlib.util.find_spec("fastapi"):
+    collect_ignore.append("test_api.py")
+if not importlib.util.find_spec("typer"):
+    collect_ignore.append("test_cli_app.py")
 
 
 @pytest.fixture

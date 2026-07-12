@@ -327,6 +327,10 @@ class TestTrain:
         result = train(csv_path)
         assert len(result.report) > 0
 
+    @pytest.mark.skipif(
+        __import__("importlib").util.find_spec("shap") is None,
+        reason="shap not installed",
+    )
     def test_feature_importance_populated(self, csv_path: str) -> None:
         result = train(csv_path)
         assert len(result.feature_importance) > 0

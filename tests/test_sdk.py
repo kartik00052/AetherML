@@ -357,6 +357,10 @@ class TestEvaluate:
 
 
 class TestExplain:
+    @pytest.mark.skipif(
+        __import__("importlib").util.find_spec("shap") is None,
+        reason="shap not installed",
+    )
     def test_returns_explanation_report(self, csv_path: str) -> None:
         ml = AetherML(csv_path)
         ex = ml.explain()

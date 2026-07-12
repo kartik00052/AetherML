@@ -71,10 +71,17 @@ select = ["E", "F", "I", "N", "UP", "B", "SIM", "ANN"]
 ignore = ["ANN401", "N812", "N803", "N806"]
 
 [tool.mypy]
-python_version = "3.11"
+python_version = "3.13"
 strict = true
 warn_return_any = true
 warn_unused_configs = true
+
+[[tool.mypy.overrides]]
+module = [
+    "aetherml.interfaces.api.*",
+    "aetherml.interfaces.cli.*",
+]
+disable_error_code = ["untyped-decorator"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
