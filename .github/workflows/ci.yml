@@ -63,7 +63,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: docker build -t aetherml:test .
-      - run: docker run --rm aetherml:test curl -f http://localhost:8000/health
+      - run: docker run -d --name aetherml-test -p 8000:8000 aetherml:test
+      - run: sleep 10 && curl -f http://localhost:8000/health
+      - run: docker stop aetherml-test
 
   docker-publish:
     runs-on: ubuntu-latest
