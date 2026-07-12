@@ -73,11 +73,13 @@ class ModelSelectionAgent:
         max_trials: int = DEFAULT_MAX_TRIALS,
         max_time_seconds: int = DEFAULT_MAX_TIME_SECONDS,
         cv: int | None = None,
+        model_type: str | None = None,
     ) -> None:
         self._engine = engine
         self._max_trials = max_trials
         self._max_time_seconds = max_time_seconds
         self._cv = cv
+        self._model_type = model_type
 
     async def run(self, state: Any) -> AgentResult:
         """Recommend models and train the best one.
@@ -149,6 +151,21 @@ class ModelSelectionAgent:
             n_numeric_features=n_numeric,
             n_categorical_features=n_categorical,
         )
+
+        # Filter to a specific model type if requested
+        if self._model_type is not None:
+            candidates = [c for c in candidates if c.name == self._model_type]
+            if not candidates:
+                avail = recommend_models(
+                    task_type, n_rows, n_features, n_numeric, n_categorical
+                )
+                return AgentResult(
+                    success=False,
+                    error=(
+                        f"Model type '{self._model_type}' not found. "
+                        f"Available: {[c.name for c in avail]}"
+                    ),
+                )
 
         if not candidates:
             return AgentResult(

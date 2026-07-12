@@ -335,6 +335,16 @@ class AetherML:
         """Run stages synchronously via asyncio.run()."""
         import asyncio
 
+        try:
+            asyncio.get_running_loop()
+        except RuntimeError:
+            pass
+        else:
+            raise RuntimeError(
+                "Cannot call synchronous AetherML methods from inside a running "
+                "event loop (e.g. inside FastAPI or Jupyter async mode). "
+                "Use the _async variants or await _run_stages() directly."
+            )
         asyncio.run(self._run_stages(stages))
 
     # ── Public properties ──────────────────────────────────────────
@@ -538,7 +548,7 @@ class AetherML:
             features=df,
         )
 
-    def recommend_model(self, cv: int | None = None) -> ModelInfo:
+    def recommend_model(self, cv: int | None = None, model_type: str | None = None) -> ModelInfo:
         """Recommend and train the best model for the dataset.
 
         Evaluates multiple candidate models and selects the best one
@@ -548,18 +558,23 @@ class AetherML:
             cv: Number of cross-validation folds.  If ``None``
                 (default), uses a single train/test split.  Pass an
                 integer ≥ 2 to enable k-fold cross-validation.
+            model_type: Optional name of a specific model to train
+                (e.g. ``"random_forest"``).  If provided, trains only
+                that model instead of selecting the best from all
+                candidates.
 
         Returns:
             A ``ModelInfo`` with the selected model, score, candidates,
             training details, and estimated cost.
         """
-        if cv is not None:
+        if cv is not None or model_type is not None:
             from aetherml.agents.model_selection.agent import ModelSelectionAgent
 
             agents = self._get_agents()
             agents["model_selection"] = ModelSelectionAgent(
                 engine=self._eng,
                 cv=cv,
+                model_type=model_type,
             )
         self._ensure_sync(_MODEL)
 
@@ -575,7 +590,7 @@ class AetherML:
             estimated_training_cost=bp.get("estimated_training_cost", "unknown"),
         )
 
-    def train(self, cv: int | None = None) -> ModelInfo:
+    def train(self, cv: int | None = None, model_type: str | None = None) -> ModelInfo:
         """Alias for ``recommend_model()``.
 
         Trains the recommended model on the engineered features.
@@ -583,11 +598,12 @@ class AetherML:
         Args:
             cv: Number of cross-validation folds.  If ``None``
                 (default), uses a single train/test split.
+            model_type: Optional name of a specific model to train.
 
         Returns:
             A ``ModelInfo``.
         """
-        return self.recommend_model(cv=cv)
+        return self.recommend_model(cv=cv, model_type=model_type)
 
     def evaluate(self) -> EvaluationMetrics:
         """Evaluate the trained model.
@@ -743,3 +759,20 @@ class AetherML:
         stages = len(self._executed_stages)
         elapsed = f"{self.elapsed:.1f}s" if self.elapsed is not None else "N/A"
         return f"AetherML(path={self._data_path!r}, stages_completed={stages}, elapsed={elapsed})"
+
+    def _repr_html_(self) -> str:
+        stages = len(self._executed_stages)
+        elapsed = f"{self.elapsed:.1f}s" if self.elapsed is not None else "N/A"
+        target = self._state.target_column or "N/A"
+        model = (self._state.best_pipeline or {}).get("model_type", "N/A")
+        return (
+            "<div style='font-family:monospace;padding:8px;"
+            "border:1px solid #ccc;border-radius:4px'>"
+            f"<b>AetherML</b><br>"
+            f"Path: <code>{self._data_path}</code><br>"
+            f"Stages completed: {stages}/11<br>"
+            f"Elapsed: {elapsed}<br>"
+            f"Target: <code>{target}</code><br>"
+            f"Model: <code>{model}</code>"
+            "</div>"
+        )

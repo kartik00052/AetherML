@@ -970,6 +970,7 @@ def train(
     correlation_threshold: float = 0.05,
     min_features: int = 1,
     cv: int | None = None,
+    model_type: str | None = None,
 ) -> TrainResult:
     """Run the full ML pipeline and return trained model details.
 
@@ -987,6 +988,8 @@ def train(
         cv: Number of cross-validation folds.  If ``None`` (default),
             uses a single train/test split.  Pass an integer ≥ 2 to
             enable k-fold cross-validation.
+        model_type: Optional name of a specific model to train
+            (e.g. ``"random_forest"``).
 
     Returns:
         A ``TrainResult`` with model, explanation, report, and
@@ -1009,6 +1012,7 @@ def train(
             correlation_threshold=correlation_threshold,
             min_features=min_features,
             cv=cv,
+            model_type=model_type,
         )
     )
 
@@ -1022,6 +1026,7 @@ async def train_async(
     correlation_threshold: float = 0.05,
     min_features: int = 1,
     cv: int | None = None,
+    model_type: str | None = None,
 ) -> TrainResult:
     """Async variant of :func:`train`."""
     from aetherml.sdk import AetherML
@@ -1034,13 +1039,14 @@ async def train_async(
         min_features=min_features,
     )
     ml = AetherML(path, config=config)
-    if cv is not None:
+    if cv is not None or model_type is not None:
         from aetherml.agents.model_selection.agent import ModelSelectionAgent
 
         ml._get_agents()
         ml._agents["model_selection"] = ModelSelectionAgent(
             engine=ml._eng,
             cv=cv,
+            model_type=model_type,
         )
     await _run_stages_async(ml, _STAGES_TRAIN)
     return _build_train_result(ml)
