@@ -41,3 +41,13 @@ Thumbs.db
 # Distribution
 *.tar.gz
 *.whl
+
+# MLflow
+mlruns/
+mlflow.db
+mlartifacts/
+aetherml_artifacts/
+
+# Database files
+*.db
+*.sqlite3

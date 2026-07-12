@@ -226,12 +226,12 @@ def _log_to_mlflow(
 
             # Log metrics (only numeric values)
             for key, value in metrics.items():
-                if isinstance(value, (int, float)):
+                if isinstance(value, int | float):
                     mlflow.log_metric(key, value)
 
             # Log model info as params
             for key, value in model_info.items():
-                if isinstance(value, (str, int, float, bool)):
+                if isinstance(value, str | int | float | bool):
                     mlflow.log_param(f"info_{key}", value)
 
             # Log model artifact

@@ -1,4 +1,5 @@
 """Demo 1 — Simple API: one-liner functions for quick ML."""
+
 from aetherml import analyze, train
 
 print("=" * 60)

@@ -30,6 +30,8 @@ def handle_nulls(
     strategy: str = "drop",
     fill_value: Any = None,
     columns: list[str] | None = None,
+    *,
+    copy: bool = True,
 ) -> tuple[pd.DataFrame, dict[str, Any]]:
     """Handle missing values in the DataFrame.
 
@@ -41,6 +43,8 @@ def handle_nulls(
         fill_value: Value to use when ``strategy="fill"``.
         columns: Specific columns to operate on.  If ``None``, all
             columns with nulls are processed.
+        copy: If ``True`` (default), copy the DataFrame before mutating.
+            Pass ``False`` when the caller already owns a copy.
 
     Returns:
         A tuple of (transformed DataFrame, log entry dict).
@@ -63,10 +67,10 @@ def handle_nulls(
     if strategy == "drop":
         result = df.dropna(subset=target_cols)
     elif strategy == "fill":
-        result = df.copy()
+        result = df.copy() if copy else df
         result[target_cols] = result[target_cols].fillna(fill_value)
     elif strategy == "flag":
-        result = df.copy()
+        result = df.copy() if copy else df
         for col in target_cols:
             result[f"{col}_is_null"] = result[col].isnull().astype(int)
 

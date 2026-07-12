@@ -17,12 +17,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from aetherml import __version__
-from aetherml.interfaces.api.models import APIResponse, ErrorDetail
+from aetherml.interfaces.api.models import DOCUMENTATION_BASE_URL, APIResponse, ErrorDetail
 from aetherml.interfaces.api.routes import router
 
 logger = logging.getLogger(__name__)
-
-DOCUMENTATION_BASE_URL = "https://docs.aetherml.ai/errors"
 
 _OPENAPI_TAGS = [
     {"name": "system", "description": "Health, version, and capabilities."},

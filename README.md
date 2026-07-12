@@ -9,10 +9,10 @@
 [![Build](https://img.shields.io/badge/build-passing-brightgreen.svg)](#)
 [![Docs](https://img.shields.io/badge/docs-latest-blue.svg)](#)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](#contributing)
-![GitHub stars](https://img.shields.io/github/stars/Kartik00052/AetherML?style=flat-square)
-![GitHub forks](https://img.shields.io/github/forks/Kartik00052/AetherML?style=flat-square)
-![GitHub issues](https://img.shields.io/github/issues/Kartik00052/AetherML?style=flat-square)
-![GitHub last commit](https://img.shields.io/github/last-commit/Kartik00052/AetherML?style=flat-square)
+![GitHub stars](https://img.shields.io/github/stars/kartik00052/AetherML?style=flat-square)
+![GitHub forks](https://img.shields.io/github/forks/kartik00052/AetherML?style=flat-square)
+![GitHub issues](https://img.shields.io/github/issues/kartik00052/AetherML?style=flat-square)
+![GitHub last commit](https://img.shields.io/github/last-commit/kartik00052/AetherML?style=flat-square)
 
 **Quick Links:** [Why AetherML](#why-aetherml) · [Installation](#installation) · [Quick Start](#quick-start) · [Architecture](#architecture-overview) · [Contributing](#contributing) · [FAQ](#faq)
 
@@ -271,7 +271,7 @@ pip install aetherml
 ### Development (editable install)
 
 ```bash
-git clone https://github.com/Kartik00052/AetherML.git
+git clone https://github.com/kartik00052/AetherML.git
 cd AetherML
 
 python -m venv .venv
@@ -732,7 +732,7 @@ This README covers concepts and day-to-day usage. Deeper, agent-by-agent referen
 Contributions of all kinds are welcome — bug fixes, new agents, documentation, and test coverage.
 
 ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square)
-![Good First Issues](https://img.shields.io/github/issues/Kartik00052/AetherML/good%20first%20issue?style=flat-square&label=good%20first%20issues)
+![Good First Issues](https://img.shields.io/github/issues/kartik00052/AetherML/good%20first%20issue?style=flat-square&label=good%20first%20issues)
 
 Start from the **development install** in [Installation](#installation) to get a local editable copy set up.
 
@@ -773,7 +773,7 @@ ruff format .
 
 New public functions and classes should include type hints and docstrings, and pass `ruff check .` / `ruff format .` before review.
 
-Have an idea before writing code? Open a GitHub [Issue](https://github.com/Kartik00052/AetherML/issues) for bugs or feature requests, or start a [Discussion](https://github.com/Kartik00052/AetherML/discussions) for open-ended design questions — e.g. "how should the plugin discovery mechanism work?"
+Have an idea before writing code? Open a GitHub [Issue](https://github.com/kartik00052/AetherML/issues) for bugs or feature requests, or start a [Discussion](https://github.com/kartik00052/AetherML/discussions) for open-ended design questions — e.g. "how should the plugin discovery mechanism work?"
 
 [↑ Back to top](#table-of-contents)
 
@@ -873,7 +873,7 @@ SOFTWARE.
 
 ## Community
 
-AetherML is maintained in the open. If something's broken, open an [Issue](https://github.com/Kartik00052/AetherML/issues); if you have a design question or an idea you want to think through before writing code, start a [Discussion](https://github.com/Kartik00052/AetherML/discussions). Pull requests are reviewed against the guidelines in [Contributing](#contributing).
+AetherML is maintained in the open. If something's broken, open an [Issue](https://github.com/kartik00052/AetherML/issues); if you have a design question or an idea you want to think through before writing code, start a [Discussion](https://github.com/kartik00052/AetherML/discussions). Pull requests are reviewed against the guidelines in [Contributing](#contributing).
 
 [↑ Back to top](#table-of-contents)
 

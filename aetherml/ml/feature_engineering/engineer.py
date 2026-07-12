@@ -31,33 +31,10 @@ import logging
 import warnings
 from typing import Any
 
-from aetherml.engines.base_engine import BaseEngine
+from aetherml.engines.base_engine import NUMERIC_DTYPES, BaseEngine
 from aetherml.exceptions import DataTransformError
 
 logger = logging.getLogger(__name__)
-
-# Dtypes that the engine reports as numeric
-_NUMERIC_DTYPES = frozenset(
-    {
-        "int8",
-        "int16",
-        "int32",
-        "int64",
-        "uint8",
-        "uint16",
-        "uint32",
-        "uint64",
-        "float16",
-        "float32",
-        "float64",
-        "Int8",
-        "Int16",
-        "Int32",
-        "Int64",
-        "Float32",
-        "Float64",
-    }
-)
 
 # Variance threshold: features with variance below this are dropped.
 _VARIANCE_THRESHOLD = 0.01
@@ -118,11 +95,11 @@ def engineer_features(
     columns = engine.columns(df)
 
     transform_log: list[dict[str, Any]] = []
-    result = collected.copy()
+    result = collected  # work in-place — collected is already a fresh DataFrame from engine
 
     # Determine feature columns (exclude target)
     feature_cols = [c for c in columns if c != target_column]
-    numeric_cols = [c for c in feature_cols if dtypes.get(c, "") in _NUMERIC_DTYPES]
+    numeric_cols = [c for c in feature_cols if dtypes.get(c, "") in NUMERIC_DTYPES]
     categorical_cols = [c for c in feature_cols if c not in numeric_cols]
 
     # ── Step 1: Handle remaining nulls ───────────────────────────────

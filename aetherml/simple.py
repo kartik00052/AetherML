@@ -294,19 +294,6 @@ def _build_config(
     )
 
 
-def _make_ml(path: str, config: Any) -> Any:
-    """Create an AetherML instance and run stages synchronously."""
-    from aetherml.sdk import AetherML
-
-    ml = AetherML(path, config=config)
-    return ml
-
-
-def _run_stages_sync(ml: Any, stages: list[str]) -> None:
-    """Run pipeline stages synchronously on an AetherML instance."""
-    ml._ensure_sync(stages)
-
-
 async def _run_stages_async(ml: Any, stages: list[str]) -> None:
     """Run pipeline stages asynchronously on an AetherML instance."""
     await ml._run_stages(stages)
@@ -326,7 +313,7 @@ def _build_dataset_profile(ml: Any) -> DatasetProfile:
         shape = (len(df), len(df.columns))
         dtypes = {c: str(d) for c, d in df.dtypes.items()}
         column_names = list(df.columns)
-        missing = {k: int(v) for k, v in df.isnull().sum().to_dict().items() if v > 0}
+        missing = {k: int(v) for k, v in df.isnull().sum().items() if v > 0}
         memory = int(df.memory_usage(deep=True).sum())
     else:
         shape = (0, 0)

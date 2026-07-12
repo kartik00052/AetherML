@@ -37,7 +37,7 @@ import logging
 from typing import Any
 
 from aetherml.agents.base import AgentResult, Tool
-from aetherml.engines.base_engine import BaseEngine
+from aetherml.engines.base_engine import NUMERIC_DTYPES, BaseEngine
 from aetherml.ml.automl.auto_selector import (
     candidate_to_dict,
     estimate_training_cost,
@@ -141,7 +141,7 @@ class ModelSelectionAgent:
         n_rows = len(collected)
         n_features = len(feature_names)
         dtypes = self._engine.dtypes(state.features if state.features is not None else upstream)
-        n_numeric = sum(1 for f in feature_names if dtypes.get(f, "") in _NUMERIC_DTYPES)
+        n_numeric = sum(1 for f in feature_names if dtypes.get(f, "") in NUMERIC_DTYPES)
         n_categorical = n_features - n_numeric
 
         candidates = recommend_models(
@@ -250,27 +250,3 @@ class ModelSelectionAgent:
                 },
             ),
         ]
-
-
-_NUMERIC_DTYPES = frozenset(
-    {
-        "int8",
-        "int16",
-        "int32",
-        "int64",
-        "uint8",
-        "uint16",
-        "uint24",
-        "uint32",
-        "uint64",
-        "float16",
-        "float32",
-        "float64",
-        "Int8",
-        "Int16",
-        "Int32",
-        "Int64",
-        "Float32",
-        "Float64",
-    }
-)

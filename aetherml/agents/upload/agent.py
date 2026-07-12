@@ -32,6 +32,9 @@ logger = logging.getLogger(__name__)
 
 _EXCEL_EXTENSIONS = {".xlsx", ".xls"}
 
+# Default max file size: 2 GB — avoids constructing AetherMLConfig just to read this.
+_DEFAULT_MAX_FILE_SIZE_BYTES = 2 * 1024 * 1024 * 1024
+
 
 class UploadAgent:
     """Agent responsible for loading raw data into the workflow.
@@ -60,9 +63,7 @@ class UploadAgent:
             # Size guard: reject files exceeding the configured limit.
             max_bytes = getattr(state, "max_file_size_bytes", None)
             if max_bytes is None:
-                from aetherml.configs.settings import AetherMLConfig
-
-                max_bytes = AetherMLConfig().data.max_file_size_bytes
+                max_bytes = _DEFAULT_MAX_FILE_SIZE_BYTES
             if os.path.exists(data_path):
                 file_size = os.path.getsize(data_path)
                 if file_size > max_bytes:

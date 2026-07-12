@@ -25,9 +25,9 @@ async def main() -> None:
     assert result["categorical_columns"] is not None, "categorical_columns should be set"
 
     # After ETL encoding, all columns are numeric (categoricals label-encoded)
-    assert len(result["numeric_columns"]) == 4, (
-        f"Expected 4 numeric columns, got {result['numeric_columns']}"
-    )
+    assert (
+        len(result["numeric_columns"]) == 4
+    ), f"Expected 4 numeric columns, got {result['numeric_columns']}"
 
     print("\nAll assertions passed!")
 

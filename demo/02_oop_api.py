@@ -1,4 +1,5 @@
 """Demo 2 — OOP API: incremental pipeline with the AetherML class."""
+
 from aetherml import AetherML
 
 print("=" * 60)

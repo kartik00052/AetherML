@@ -331,6 +331,7 @@ class TestTrain:
         # artifact_uri is None when MLflow is not installed
         try:
             import mlflow  # noqa: F401
+
             assert result.artifact_uri is not None
         except ImportError:
             assert result.artifact_uri is None

@@ -94,14 +94,15 @@ class ETLAgent:
 
         config = self._config
         transform_log: list[dict[str, Any]] = []
-        df = raw_data.copy()
+        df = raw_data.copy()  # protect state.raw_data from mutation
 
         try:
-            # Step 1: Handle nulls
+            # Step 1: Handle nulls (df is already a copy, skip internal copy)
             df, null_log = handle_nulls(
                 df,
                 strategy=config.null_strategy,
                 fill_value=config.fill_value,
+                copy=False,
             )
             transform_log.append(null_log)
 

@@ -36,6 +36,31 @@ class EngineType(StrEnum):
     SPARK = "spark"
 
 
+# Shared constant: dtype strings that engines report as numeric.
+NUMERIC_DTYPES = frozenset(
+    {
+        "int8",
+        "int16",
+        "int32",
+        "int64",
+        "uint8",
+        "uint16",
+        "uint24",
+        "uint32",
+        "uint64",
+        "float16",
+        "float32",
+        "float64",
+        "Int8",
+        "Int16",
+        "Int32",
+        "Int64",
+        "Float32",
+        "Float64",
+    }
+)
+
+
 class BaseEngine(ABC):
     """Abstract interface that every data engine must implement.
 

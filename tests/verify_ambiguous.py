@@ -32,9 +32,9 @@ async def main() -> None:
     # With 2 unique numeric values, confidence should be below threshold
     # (ambiguous case)
     if result["task_type"] == "ambiguous":
-        assert result["target_detection_confidence"] < 0.6, (
-            f"Ambiguous target should have low confidence: {result['target_detection_confidence']}"
-        )
+        assert (
+            result["target_detection_confidence"] < 0.6
+        ), f"Ambiguous target should have low confidence: {result['target_detection_confidence']}"
         print("\nAmbiguous target correctly surfaced with low confidence!")
     else:
         print(f"\nTarget detected as {result['task_type']} (not ambiguous)")

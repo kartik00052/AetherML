@@ -23,11 +23,21 @@ from __future__ import annotations
 import logging
 import time
 from dataclasses import dataclass, field
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-import pandas as pd
+if TYPE_CHECKING:
+    import pandas as pd  # noqa: F401 — used only in type annotations
 
 logger = logging.getLogger(__name__)
+
+
+def _to_df(data: Any) -> Any:
+    """Ensure data is a pandas DataFrame (lazy import)."""
+    import pandas as pd
+
+    if isinstance(data, pd.DataFrame):
+        return data
+    return pd.DataFrame(data)
 
 
 # ── Typed result objects ─────────────────────────────────────────
@@ -46,7 +56,7 @@ class DatasetSummary:
     duplicate_rows: int
     numeric_columns: list[str]
     categorical_columns: list[str]
-    preview: pd.DataFrame
+    preview: Any  # pd.DataFrame — deferred to avoid eager pandas import
 
     @property
     def memory_mb(self) -> float:
@@ -99,7 +109,7 @@ class FeatureReport:
     feature_names: list[str]
     n_features: int
     n_rows: int
-    features: pd.DataFrame
+    features: Any  # pd.DataFrame — deferred to avoid eager pandas import
 
 
 @dataclass(frozen=True)
@@ -317,17 +327,15 @@ class AetherML:
 
             raise WorkflowError(f"Pipeline execution failed: {exc}") from exc
 
-        # Merge returned state into our accumulated state
-        if hasattr(final_state, "model_dump"):
-            state_dict = final_state.model_dump()
+        # Merge returned state into our accumulated state — avoid
+        # model_dump() which serialises DataFrames and models to dicts.
+        if hasattr(final_state, "model_fields_set"):
+            for key in final_state.model_fields_set:
+                setattr(self._state, key, getattr(final_state, key))
         elif isinstance(final_state, dict):
-            state_dict = final_state
-        else:
-            state_dict = {}
-
-        for key, value in state_dict.items():
-            if value is not None:
-                setattr(self._state, key, value)
+            for key, value in final_state.items():
+                if value is not None:
+                    setattr(self._state, key, value)
 
         self._executed_stages.update(stages)
 
@@ -400,7 +408,7 @@ class AetherML:
         if df is None:
             raise ValueError("No data loaded.")
 
-        collected = df if isinstance(df, pd.DataFrame) else pd.DataFrame(df)
+        collected = _to_df(df)
         missing = collected.isnull().sum().to_dict()
         numeric_cols = collected.select_dtypes(include="number").columns.tolist()
         cat_cols = collected.select_dtypes(exclude="number").columns.tolist()
@@ -462,7 +470,7 @@ class AetherML:
         validated = self._state.validated_data
         n_rows, n_cols = (0, 0)
         if validated is not None:
-            df = validated if isinstance(validated, pd.DataFrame) else pd.DataFrame(validated)
+            df = _to_df(validated)
             n_rows, n_cols = df.shape
 
         return ValidationReport(
@@ -534,11 +542,11 @@ class AetherML:
         self._ensure_sync(_FEATURES)
 
         features = self._state.features
-        if isinstance(features, pd.DataFrame):
-            df = features
-        elif features is not None:
-            df = pd.DataFrame(features)
+        if features is not None:
+            df = _to_df(features)
         else:
+            import pandas as pd
+
             df = pd.DataFrame()
 
         return FeatureReport(
@@ -716,7 +724,7 @@ class AetherML:
 
     # ── Convenience accessors ──────────────────────────────────────
 
-    def get_data(self) -> pd.DataFrame:
+    def get_data(self) -> Any:
         """Return the raw loaded DataFrame.
 
         Runs ``load()`` automatically if not yet done.
@@ -725,9 +733,9 @@ class AetherML:
         df = self._state.raw_data
         if df is None:
             raise ValueError("No data loaded.")
-        return df if isinstance(df, pd.DataFrame) else pd.DataFrame(df)
+        return _to_df(df)
 
-    def get_cleaned_data(self) -> pd.DataFrame:
+    def get_cleaned_data(self) -> Any:
         """Return the cleaned (post-ETL) DataFrame.
 
         Runs ``clean()`` automatically if not yet done.
@@ -736,9 +744,9 @@ class AetherML:
         df = self._state.processed_data
         if df is None:
             raise ValueError("No cleaned data available.")
-        return df if isinstance(df, pd.DataFrame) else pd.DataFrame(df)
+        return _to_df(df)
 
-    def get_features(self) -> pd.DataFrame:
+    def get_features(self) -> Any:
         """Return the engineered feature DataFrame.
 
         Runs ``engineer_features()`` automatically if not yet done.

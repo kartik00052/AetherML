@@ -19,32 +19,9 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from aetherml.engines.base_engine import BaseEngine
+from aetherml.engines.base_engine import NUMERIC_DTYPES, BaseEngine
 
 logger = logging.getLogger(__name__)
-
-# Dtypes that the engine reports as numeric
-_NUMERIC_DTYPES = frozenset(
-    {
-        "int8",
-        "int16",
-        "int32",
-        "int64",
-        "uint8",
-        "uint16",
-        "uint32",
-        "uint64",
-        "float16",
-        "float32",
-        "float64",
-        "Int8",
-        "Int16",
-        "Int32",
-        "Int64",
-        "Float32",
-        "Float64",
-    }
-)
 
 
 def profile_dataset(
@@ -70,7 +47,7 @@ def profile_dataset(
     categorical_cols: list[str] = []
 
     for col, dtype_str in dtypes.items():
-        if dtype_str in _NUMERIC_DTYPES:
+        if dtype_str in NUMERIC_DTYPES:
             numeric_cols.append(col)
         else:
             categorical_cols.append(col)

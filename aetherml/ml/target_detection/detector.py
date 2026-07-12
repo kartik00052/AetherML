@@ -35,7 +35,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from aetherml.engines.base_engine import BaseEngine
+from aetherml.engines.base_engine import NUMERIC_DTYPES, BaseEngine
 
 logger = logging.getLogger(__name__)
 
@@ -100,7 +100,7 @@ def detect_target(
             continue
         dtype_str = dtypes.get(col, "")
         n_unique = int(nunique_series.get(col, 0))
-        is_numeric = dtype_str in _NUMERIC_DTYPES
+        is_numeric = dtype_str in NUMERIC_DTYPES
         col_summary = all_summaries.get(col, {})
 
         candidate = _score_column(col, is_numeric, n_unique, col_summary)
@@ -250,27 +250,3 @@ def _no_target_found() -> dict[str, Any]:
         "ambiguity_reason": "No viable target column detected.",
         "candidates": [],
     }
-
-
-# Re-export the numeric dtype set fromprofilers for consistency
-_NUMERIC_DTYPES = frozenset(
-    {
-        "int8",
-        "int16",
-        "int32",
-        "int64",
-        "uint8",
-        "uint16",
-        "uint32",
-        "uint64",
-        "float16",
-        "float32",
-        "float64",
-        "Int8",
-        "Int16",
-        "Int32",
-        "Int64",
-        "Float32",
-        "Float64",
-    }
-)

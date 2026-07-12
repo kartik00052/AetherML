@@ -1,4 +1,5 @@
 """Generate sample customer dataset for demos."""
+
 import numpy as np
 import pandas as pd
 

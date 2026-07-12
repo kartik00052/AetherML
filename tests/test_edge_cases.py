@@ -62,6 +62,7 @@ class TestUnsupportedExtension:
         ml = AetherML(str(p))
         # parquet bytes may or may not parse; just confirm no crash on non-parquet
         import contextlib
+
         with contextlib.suppress(Exception):
             ml.load()
 
@@ -140,9 +141,7 @@ class TestMultiSheetExcel:
             pd.DataFrame({"x": range(50), "y": range(50)}).to_excel(
                 writer, sheet_name="big", index=False
             )
-            pd.DataFrame({"z": range(20)}).to_excel(
-                writer, sheet_name="medium", index=False
-            )
+            pd.DataFrame({"z": range(20)}).to_excel(writer, sheet_name="medium", index=False)
         ml = AetherML(str(p))
         s = ml.summary()
         # Should load the "big" sheet (50 rows)
