@@ -1,21 +1,19 @@
 <p align="center">
-
-<img src="https://capsule-render.vercel.app/api?type=waving&height=250&color=0:0F2027,50:203A43,100:2C5364&text=AetherML&fontSize=70&fontColor=ffffff&animation=fadeIn&fontAlignY=40&desc=Open-Source%20Agentic%20Machine%20Learning%20Framework&descAlignY=60"/>
-
+  <img src="https://capsule-render.vercel.app/api?type=waving&height=200&color=0:0F2027,50:203A43,100:2C5364&text=AetherML&fontSize=60&fontColor=ffffff&animation=fadeIn&fontAlignY=40&desc=Open-Source%20Agentic%20Machine%20Learning%20Framework&descAlignY=60"/>
 </p>
 
-<div align="center">
-
-<h3>🚀 Build Production-Ready Machine Learning Pipelines with Intelligent Multi-Agent Orchestration</h3>
-
-<br>
+**🚀 Build production-ready machine learning pipelines with intelligent multi-agent orchestration**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/)
 [![Build](https://img.shields.io/badge/build-passing-brightgreen.svg)](#)
 [![Docs](https://img.shields.io/badge/docs-latest-blue.svg)](#)
+![GitHub stars](https://img.shields.io/github/stars/kartik00052/AetherML?style=flat-square)
+![GitHub forks](https://img.shields.io/github/forks/kartik00052/AetherML?style=flat-square)
+![GitHub last commit](https://img.shields.io/github/last-commit/kartik00052/AetherML?style=flat-square)
+![GitHub issues](https://img.shields.io/github/issues/kartik00052/AetherML?style=flat-square)
 
-</div>
+**Quick links:** [Why AetherML](#why-aetherml) · [Installation](#installation) · [SDK Usage](#sdk-usage) · [Architecture](#architecture-overview) · [Contributing](#contributing) · [FAQ](#faq)
 
 ---
 
@@ -64,13 +62,53 @@ AetherML exists to occupy the space between these two extremes.
 
 **AetherML is a Python SDK** that formalizes the machine learning lifecycle — validation, profiling, ETL, exploratory data analysis, feature engineering, target detection, model recommendation, training, evaluation, explainability, and reporting — as a graph of cooperating agents, each with a well-defined responsibility and a well-defined contract with the rest of the system.
 
+### AetherML vs. the alternatives
+
+| | Notebooks | AutoML tools | AetherML |
+|---|---|---|---|
+| Structure | Ad hoc, cell-by-cell | Fixed, opaque | Modular agents on a typed `WorkflowState` |
+| Transparency | High, but unorganized | Low — a black box | High — every decision is inspectable |
+| Overridable decisions | N/A (you wrote it) | Rarely | Yes — imputation, encoding, model family |
+| Reusability across datasets | Low | Low | High — same pipeline, swap the data |
+| Production-ready | No | Partially | Yes — versioned artifacts, architecture tests |
+
 **How it differs from notebooks:** every stage of the pipeline is a discrete, testable, reusable unit of code operating on a shared, typed `WorkflowState`, rather than an untracked sequence of cells.
 
 **How it differs from AutoML tools:** every decision an agent makes — which imputation strategy, which encoding, which model family — is inspectable, overridable, and explainable. AetherML recommends; it does not obscure.
 
 **How it differs from traditional hand-rolled pipelines:** the orchestration layer (built on LangGraph) manages state transitions, retries, and conditional branching between agents, so pipeline authors do not need to hand-write glue code for every new dataset or use case.
 
-AetherML is **SDK-first**. The CLI, the (planned) FastAPI service, and any future desktop or web interface are thin clients built on top of the same SDK that a data scientist would `import` directly into their own scripts. There is exactly one source of truth for ML logic, and it is the SDK.
+AetherML is **SDK-first**. The CLI, the FastAPI service, and any future desktop or web interface are thin clients built on top of the same SDK that a data scientist would `import` directly into their own scripts. There is exactly one source of truth for ML logic, and it is the SDK.
+
+### See it in action
+
+```python
+from aetherml import AetherML
+
+ml = AetherML("data/customers.csv")
+ml.run()             # upload → ETL → validation → EDA → … → storage
+print(ml.report())
+```
+
+```text
+$ python quickstart.py
+[UploadAgent]        Loaded data/customers.csv — 10,000 rows, 14 columns
+[ValidationAgent]    Schema OK · 0 critical issues
+[ProfilingAgent]     Selected engine: pandas (dataset fits in memory)
+[ETLAgent]           Cleaned & normalized — 3 duplicate rows removed
+[EDAAgent]           Profiled 14 columns — 2 strong correlations found
+[FeatureEngAgent]    Engineered 21 features from 14 raw columns
+[TargetDetectAgent]  Detected target: "churned" (binary classification)
+[ModelRecAgent]      Recommended: GradientBoostingClassifier
+[TrainingAgent]      Trained in 4.2s — AUC 0.891
+[EvaluationAgent]    Precision 0.84 · Recall 0.79 · F1 0.81
+[ExplainAgent]       Top feature: "days_since_last_login" (0.31 importance)
+[ReportingAgent]     Report written to reports/run_2026-07-13.md
+```
+
+*(Sample output — actual metrics will vary by dataset.)*
+
+[↑ Back to top](#table-of-contents)
 
 ---
 
@@ -94,6 +132,8 @@ AetherML is **SDK-first**. The CLI, the (planned) FastAPI service, and any futur
 | **Plugin System** | Extension points for custom agents, models, engines, and storage backends without modifying core code. | Planned |
 | **Offline-First Design** | Core pipeline stages run without requiring network access or hosted services. | Implemented |
 | **SDK-First Philosophy** | Every interface (CLI, API, GUI) is a client of the SDK — never a place where business logic lives. | Implemented |
+
+[↑ Back to top](#table-of-contents)
 
 ---
 
@@ -135,6 +175,8 @@ AetherML is organized into distinct layers. Each layer only depends on the layer
 - **Services** — Stateless, reusable domain logic invoked by agents (e.g., statistical computations, encoding strategies, model scoring utilities). Services are engine-agnostic — they operate through the Data Engine abstraction rather than importing Pandas/Polars/PySpark directly.
 - **Data Engines** — Concrete implementations of a common `DataEngine` interface for Pandas, Polars, and PySpark. Selected automatically or explicitly configured.
 - **Reports / Storage** — Where run artifacts (validation reports, EDA summaries, trained model metadata, explainability output) are persisted, either to local disk (offline-first default) or to a configured backend.
+
+[↑ Back to top](#table-of-contents)
 
 ---
 
@@ -194,46 +236,49 @@ Explainability          → Feature importance, model behavior summary
 - **Explainability** — Generates feature importance and model-behavior summaries to support interpretation of results.
 - **Reporting** — Serializes every stage's output into a structured, versioned artifact for later inspection or auditing.
 
+[↑ Back to top](#table-of-contents)
+
 ---
 
 ## Folder Structure
 
-The folder structure is the clearest expression of AetherML's architecture. Every directory below has a single, well-defined purpose. New contributors should be able to navigate this section instead of reading the entire source tree to understand where a given piece of logic belongs.
+The folder structure is the clearest expression of AetherML's architecture. Every directory below has a single, well-defined purpose. Click any directory to expand its full description — new contributors should be able to navigate this section instead of reading the entire source tree to understand where a given piece of logic belongs.
 
 ```
 aetherml/
 ├── __init__.py          # Public SDK surface
 ├── exceptions.py        # Exception hierarchy
-├── agents/              # Pipeline agents
-│   ├── base.py          # BaseAgent, AgentResult, Tool
-│   ├── upload/          # Data loading agent
-│   ├── etl/             # ETL cleaning agent
-│   ├── validation/      # Data validation agent
-│   ├── eda/             # Exploratory data analysis
-│   ├── target_detection/# Target column detection
+├── agents/               # Pipeline agents
+│   ├── base.py           # BaseAgent, AgentResult, Tool
+│   ├── upload/            # Data loading agent
+│   ├── etl/               # ETL cleaning agent
+│   ├── validation/        # Data validation agent
+│   ├── eda/               # Exploratory data analysis
+│   ├── target_detection/  # Target column detection
 │   ├── feature_engineering/ # Feature engineering
-│   ├── model_selection/ # Model recommendation & training
-│   ├── evaluation/      # Model evaluation
-│   ├── explainability/  # SHAP-based explainability
-│   ├── reporting/       # Report assembly
-│   └── ...              # Additional agents
-├── configs/             # Pydantic configuration
-├── data/                # Data loading, validation, profiling
-├── database/            # Qdrant vector store client
-├── engines/             # Pandas/Polars/Spark engine abstraction
-├── interfaces/          # CLI and future API
-├── ml/                  # ML pipeline components
-│   ├── automl/          # AutoML model selection
-│   ├── evaluation/      # Metrics and evaluation
-│   ├── explainability/  # SHAP explanations
+│   ├── model_selection/   # Model recommendation & training
+│   ├── evaluation/        # Model evaluation
+│   ├── explainability/    # SHAP-based explainability
+│   ├── reporting/         # Report assembly
+│   └── ...                # Additional agents
+├── configs/              # Pydantic configuration
+├── data/                 # Data loading, validation, profiling
+├── database/             # Qdrant vector store client
+├── engines/              # Pandas/Polars/Spark engine abstraction
+├── interfaces/           # CLI and future API
+├── ml/                   # ML pipeline components
+│   ├── automl/            # AutoML model selection
+│   ├── evaluation/        # Metrics and evaluation
+│   ├── explainability/    # SHAP explanations
 │   ├── feature_engineering/ # Feature engineering
-│   ├── reports/         # Report builder and templates
-│   └── target_detection/ # Target detection heuristics
-├── rag/                 # RAG infrastructure
-└── workflow/            # LangGraph workflow orchestration
+│   ├── reports/           # Report builder and templates
+│   └── target_detection/  # Target detection heuristics
+├── rag/                  # RAG infrastructure
+└── workflow/             # LangGraph workflow orchestration
 ```
 
-### `agents/`
+<details>
+<summary><code>agents/</code> — every pipeline agent</summary>
 
 **Purpose:** Houses every pipeline agent — the units of work that perform one pipeline responsibility each (validation, EDA, feature engineering, target detection, model recommendation, explainability, reporting, and so on).
 
@@ -247,7 +292,10 @@ aetherml/
 
 **Future extensions:** New agents (e.g., a `DriftDetectionAgent` or `FairnessAuditAgent`) can be added here and registered as new graph nodes without modifying existing agents.
 
-### `workflow/`
+</details>
+
+<details>
+<summary><code>workflow/</code> — the LangGraph orchestration graph</summary>
 
 **Purpose:** Defines the LangGraph graph itself — the nodes (agents), edges (transitions), conditional branching logic, and the shared `WorkflowState` schema.
 
@@ -261,7 +309,10 @@ aetherml/
 
 **Future extensions:** Support for parallel branches (e.g., training multiple candidate models concurrently), human-in-the-loop checkpoints, and resumable/interruptible runs.
 
-### `engines/`
+</details>
+
+<details>
+<summary><code>engines/</code> — Pandas / Polars / PySpark abstraction</summary>
 
 **Purpose:** Contains the `DataEngine` abstraction and its concrete implementations for Pandas, Polars, and PySpark.
 
@@ -275,7 +326,10 @@ aetherml/
 
 **Future extensions:** Additional engines (e.g., Dask, DuckDB) can be added by implementing `DataEngine` and registering with the factory.
 
-### `services/`
+</details>
+
+<details>
+<summary><code>services/</code> — stateless domain logic shared across agents</summary>
 
 **Purpose:** Stateless domain logic shared across agents — statistical computations, encoding strategies, scoring utilities, imputation logic, and similar reusable functions.
 
@@ -289,7 +343,10 @@ aetherml/
 
 **Future extensions:** New statistical methods, encoding strategies, or scoring functions can be added here without touching agent code.
 
-### `ml/`
+</details>
+
+<details>
+<summary><code>ml/</code> — model definitions, training, and metrics</summary>
 
 **Purpose:** Houses model definitions, training routines, and evaluation metric implementations.
 
@@ -303,7 +360,10 @@ aetherml/
 
 **Future extensions:** Support for additional model families, hyperparameter search strategies, and custom model registration via the plugin system.
 
-### `configs/`
+</details>
+
+<details>
+<summary><code>configs/</code> — configuration schemas and defaults</summary>
 
 **Purpose:** Centralizes configuration schemas and default values for the entire pipeline (engine selection thresholds, validation rules, feature engineering defaults, model recommendation weights, etc.).
 
@@ -317,7 +377,10 @@ aetherml/
 
 **Future extensions:** Per-environment config profiles (dev/staging/prod), YAML/JSON config file loading.
 
-### `exceptions/`
+</details>
+
+<details>
+<summary><code>exceptions/</code> — the exception hierarchy</summary>
 
 **Purpose:** Defines AetherML's exception hierarchy.
 
@@ -329,9 +392,12 @@ aetherml/
 
 **Interaction with other modules:** Raised throughout `agents/`, `services/`, and `engines/`; caught and handled at the SDK boundary and by `cli/`.
 
-**Future extensions:** Structured error codes for programmatic handling by the future FastAPI interface.
+**Future extensions:** Structured error codes for programmatic handling by the FastAPI interface.
 
-### `interfaces/`
+</details>
+
+<details>
+<summary><code>interfaces/</code> — abstract contracts (BaseAgent, DataEngine, StorageBackend)</summary>
 
 **Purpose:** Defines the abstract base classes and protocols that concrete implementations (agents, engines, storage backends) must satisfy.
 
@@ -345,7 +411,10 @@ aetherml/
 
 **Future extensions:** Additional interfaces as new extension points (custom report formats, custom storage backends) are introduced.
 
-### `cli/`
+</details>
+
+<details>
+<summary><code>cli/</code> — the command-line interface</summary>
 
 **Purpose:** The command-line interface built on top of the SDK.
 
@@ -359,19 +428,27 @@ aetherml/
 
 **Future extensions:** Interactive mode, shell completion, richer terminal output.
 
-### `api/`
+</details>
 
-**Purpose:** Reserved for the **planned** FastAPI interface that will expose the SDK over HTTP.
+<details>
+<summary><code>api/</code> — the FastAPI HTTP interface</summary>
 
-**Responsibilities (planned):** Translate HTTP requests into SDK calls and SDK results into HTTP responses. Like the CLI, it is intended to contain no business logic.
+**Purpose:** Exposes the SDK over HTTP.
 
-**Key classes/modules (planned):** `main.py`, `routers/`, `schemas/` (Pydantic request/response models).
+**Responsibilities:** Translate HTTP requests into SDK calls and SDK results into HTTP responses. Like the CLI, it contains no business logic of its own.
+
+**Key classes/modules:** `app.py`, `routes.py`, `jobs.py` (background job execution), `models.py` (Pydantic request/response schemas).
 
 **Why it exists:** To provide programmatic, network-accessible access to the SDK for teams building services or UIs on top of AetherML.
 
-**Status:** **Planned** — not yet implemented. See [Future FastAPI Interface](#future-fastapi-interface).
+**Interaction with other modules:** Imports only from the top-level SDK, mirroring the CLI's boundary discipline.
 
-### `reports/`
+**Future extensions:** Authentication/authorization middleware, webhook-based job completion callbacks.
+
+</details>
+
+<details>
+<summary><code>reports/</code> — report generation logic</summary>
 
 **Purpose:** Defines the structure and generation logic for AetherML's output reports (validation reports, EDA summaries, model evaluation reports, explainability reports).
 
@@ -383,9 +460,12 @@ aetherml/
 
 **Interaction with other modules:** Invoked by `ReportingAgent`; writes through `storage/`.
 
-**Future extensions:** HTML/PDF report rendering, report diffing between runs.
+**Future extensions:** PDF report rendering, report diffing between runs.
 
-### `storage/`
+</details>
+
+<details>
+<summary><code>storage/</code> — where artifacts are persisted</summary>
 
 **Purpose:** Abstracts *where* artifacts (reports, trained model metadata, intermediate datasets) are persisted.
 
@@ -399,15 +479,21 @@ aetherml/
 
 **Future extensions:** S3/GCS/Azure Blob backends, database-backed run history.
 
-### `plugins/`
+</details>
 
-**Purpose:** Reserved for the **planned** plugin system that will let third parties extend agents, models, data engines, reports, and storage backends without modifying core framework code.
-
-**Responsibilities (planned):** Discover, load, and validate externally registered plugins against the `interfaces/` contracts.
+<details>
+<summary><code>plugins/</code> — extension system (planned)</summary>
 
 **Status:** **Planned** — not yet implemented. See [Plugin Architecture](#plugin-architecture).
 
-### `tests/`
+**Purpose:** Reserved for the planned plugin system that will let third parties extend agents, models, data engines, reports, and storage backends without modifying core framework code.
+
+**Responsibilities (planned):** Discover, load, and validate externally registered plugins against the `interfaces/` contracts.
+
+</details>
+
+<details>
+<summary><code>tests/</code> — the full test suite</summary>
 
 **Purpose:** Houses the full test suite.
 
@@ -419,7 +505,10 @@ aetherml/
 
 **Interaction with other modules:** Imports from every other package as needed; is never imported by production code.
 
-### `docs/`
+</details>
+
+<details>
+<summary><code>docs/</code> — long-form documentation source</summary>
 
 **Purpose:** Source for the project's documentation site (architecture guides, API reference, tutorials).
 
@@ -429,7 +518,10 @@ aetherml/
 
 **Why it exists:** Keeps the README focused on onboarding and overview while deeper reference material lives in a dedicated, searchable location.
 
-### `examples/`
+</details>
+
+<details>
+<summary><code>examples/</code> — runnable example scripts</summary>
 
 **Purpose:** Runnable, minimal example scripts demonstrating SDK usage.
 
@@ -438,6 +530,10 @@ aetherml/
 **Key classes/modules:** `basic_analysis.py`, `custom_config.py`, `selected_stages.py`.
 
 **Why it exists:** Examples are often the first code a new user reads; keeping them runnable and current is treated as a first-class documentation responsibility.
+
+</details>
+
+[↑ Back to top](#table-of-contents)
 
 ---
 
@@ -461,6 +557,8 @@ Every agent implements the same `BaseAgent` interface and interacts with the pip
 
 This table is intentionally architecture-focused: it describes *contracts*, not implementation details. Full implementation-level documentation for each agent lives in `docs/architecture/agents/`.
 
+[↑ Back to top](#table-of-contents)
+
 ---
 
 ## Data Engine Abstraction
@@ -474,6 +572,8 @@ AetherML supports three dataframe backends — **Pandas**, **Polars**, and **PyS
 **Factory pattern:** `engines/factory.py` is the single place in the codebase responsible for instantiating a concrete `DataEngine`. This is a textbook Factory pattern: callers ask for "a data engine appropriate for this dataset" and receive a concrete implementation without needing to know which one they got.
 
 **Why other modules never import engine-specific libraries directly:** This boundary is what allows AetherML to add a new engine (say, DuckDB) in the future by implementing one new class, with zero changes required to `agents/`, `services/`, `ml/`, `cli/`, or the SDK's public API. It also makes it possible to unit test agent and service logic against a lightweight in-memory fake `DataEngine`, without requiring Polars or PySpark to be installed for most of the test suite.
+
+[↑ Back to top](#table-of-contents)
 
 ---
 
@@ -603,13 +703,12 @@ except WorkflowError as e:
     print(f"Pipeline failed: {e}")
 ```
 
----
-
 ### Advanced Usage (Low-Level API)
 
-For power users who need fine-grained control over the pipeline, the advanced API provides direct access to the workflow graph:
+For power users who need fine-grained control over the pipeline, the advanced API provides direct access to the workflow graph.
 
-#### Full Pipeline (Async)
+<details>
+<summary>Full pipeline (async)</summary>
 
 ```python
 import asyncio
@@ -622,7 +721,10 @@ async def main():
 asyncio.run(main())
 ```
 
-#### Running Selected Stages
+</details>
+
+<details>
+<summary>Running selected stages only</summary>
 
 ```python
 import asyncio
@@ -638,7 +740,10 @@ async def main():
 asyncio.run(main())
 ```
 
-#### Custom Configuration
+</details>
+
+<details>
+<summary>Custom configuration (e.g. forcing the Polars engine)</summary>
 
 ```python
 import asyncio
@@ -656,6 +761,10 @@ async def main():
 
 asyncio.run(main())
 ```
+
+</details>
+
+[↑ Back to top](#table-of-contents)
 
 ---
 
@@ -676,6 +785,8 @@ aetherml info
 
 Each command maps directly onto an SDK call — `aetherml run` calls `AetherML.run(...)`, `aetherml validate` calls the validation stage in isolation. No command contains logic that isn't already present in the SDK.
 
+[↑ Back to top](#table-of-contents)
+
 ---
 
 ## FastAPI Interface
@@ -689,6 +800,8 @@ uvicorn aetherml.interfaces.api.app:app --reload
 # Or install with API extras
 pip install aetherml[api]
 ```
+
+[↑ Back to top](#table-of-contents)
 
 ---
 
@@ -706,11 +819,11 @@ AetherML's `interfaces/` module already defines the contracts (`BaseAgent`, `Dat
 
 The mechanism under consideration is a Python entry-points-based discovery system, similar in spirit to how pytest and Flake8 discover plugins — packages installed alongside AetherML that declare an `aetherml.plugins` entry point will be automatically discovered and validated against the relevant `interfaces/` contract at startup.
 
+[↑ Back to top](#table-of-contents)
+
 ---
 
 ## Technology Stack
-
-<div align="center">
 
 ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![LangGraph](https://img.shields.io/badge/LangGraph-1C3C3C?style=for-the-badge&logo=langchain&logoColor=white)
@@ -722,19 +835,19 @@ The mechanism under consideration is a Python entry-points-based discovery syste
 ![pytest](https://img.shields.io/badge/pytest-0A9EDC?style=for-the-badge&logo=pytest&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)
 
-</div>
-
 | Technology | Role in AetherML | Why It Was Chosen |
 |---|---|---|
-| ![Python](https://img.shields.io/badge/-Python-3776AB?style=flat-square&logo=python&logoColor=white) | Core implementation language | Mature ML/data ecosystem; type hints support the interface-driven design |
-| ![LangGraph](https://img.shields.io/badge/-LangGraph-1C3C3C?style=flat-square&logo=langchain&logoColor=white) | Workflow orchestration engine | Purpose-built for modeling stateful, graph-shaped agent workflows with conditional branching |
-| ![Pandas](https://img.shields.io/badge/-Pandas-150458?style=flat-square&logo=pandas&logoColor=white) | Default data engine for small-to-medium datasets | Ubiquitous, well-understood, ideal for datasets that fit comfortably in memory |
-| ![Polars](https://img.shields.io/badge/-Polars-CD792C?style=flat-square&logo=polars&logoColor=white) | Data engine for larger single-machine workloads | Significantly faster than Pandas on larger datasets due to its Rust-based, multi-threaded query engine |
-| ![PySpark](https://img.shields.io/badge/-PySpark-E25A1C?style=flat-square&logo=apachespark&logoColor=white) | Data engine for distributed/large-scale datasets | Industry-standard for data that exceeds single-machine memory |
-| ![scikit-learn](https://img.shields.io/badge/-scikit--learn-F7931E?style=flat-square&logo=scikitlearn&logoColor=white) | Underlying model implementations in `ml/` | Battle-tested, consistent API surface for the model families AetherML wraps |
-| ![Pydantic](https://img.shields.io/badge/-Pydantic-E92063?style=flat-square&logo=pydantic&logoColor=white) | Configuration and (planned) API schema validation | Enforces typed, validated configuration objects rather than untyped dicts |
-| ![pytest](https://img.shields.io/badge/-pytest-0A9EDC?style=flat-square&logo=pytest&logoColor=white) | Test runner across all test categories | De facto standard for Python testing; strong fixture and plugin ecosystem |
-| ![FastAPI](https://img.shields.io/badge/-FastAPI-009688?style=flat-square&logo=fastapi&logoColor=white) | HTTP interface layer | Async-first, automatic OpenAPI schema generation, thin enough to stay logic-free |
+| Python | Core implementation language | Mature ML/data ecosystem; type hints support the interface-driven design |
+| LangGraph | Workflow orchestration engine | Purpose-built for modeling stateful, graph-shaped agent workflows with conditional branching |
+| Pandas | Default data engine for small-to-medium datasets | Ubiquitous, well-understood, ideal for datasets that fit comfortably in memory |
+| Polars | Data engine for larger single-machine workloads | Significantly faster than Pandas on larger datasets due to its Rust-based, multi-threaded query engine |
+| PySpark | Data engine for distributed/large-scale datasets | Industry-standard for data that exceeds single-machine memory |
+| scikit-learn | Underlying model implementations in `ml/` | Battle-tested, consistent API surface for the model families AetherML wraps |
+| Pydantic | Configuration and API schema validation | Enforces typed, validated configuration objects rather than untyped dicts |
+| pytest | Test runner across all test categories | De facto standard for Python testing; strong fixture and plugin ecosystem |
+| FastAPI | HTTP interface layer | Async-first, automatic OpenAPI schema generation, thin enough to stay logic-free |
+
+[↑ Back to top](#table-of-contents)
 
 ---
 
@@ -766,6 +879,8 @@ pip install -e ".[dev]"
 ```
 
 The `[dev]` extra installs testing, linting, and formatting tools in addition to AetherML's runtime dependencies. The editable (`-e`) install links the installed package directly to your working copy of the source, so changes take effect immediately without reinstalling.
+
+[↑ Back to top](#table-of-contents)
 
 ---
 
@@ -810,6 +925,8 @@ ruff format .
 4. Open a pull request describing the change, referencing any related issue.
 5. Address review feedback; a maintainer will merge once approved.
 
+[↑ Back to top](#table-of-contents)
+
 ---
 
 ## Testing Philosophy
@@ -824,6 +941,8 @@ AetherML's test suite is organized into four categories, each answering a differ
 | **Architecture Tests** | Are the module boundaries described in this README actually enforced? | Does static analysis confirm that `agents/` never imports from `engines/` directly? |
 
 Architecture tests are a deliberate choice: they encode the layering rules described in [Architecture Overview](#architecture-overview) and [Data Engine Abstraction](#data-engine-abstraction) as executable checks, so that boundary violations are caught in CI rather than discovered later during a refactor.
+
+[↑ Back to top](#table-of-contents)
 
 ---
 
@@ -841,6 +960,8 @@ AetherML's internal structure is guided by a consistent set of principles:
 - **Factory Pattern** — Used for engine instantiation (`engines/factory.py`) and, in the future, plugin instantiation.
 - **Composition over Inheritance** — Agents compose services rather than inheriting shared behavior through deep class hierarchies.
 - **Plugin-friendly design** — Even before the plugin system itself is implemented, every extension point is designed against an interface in `interfaces/`, so plugins can be added later without retrofitting the core.
+
+[↑ Back to top](#table-of-contents)
 
 ---
 
@@ -870,6 +991,8 @@ AetherML's internal structure is guided by a consistent set of principles:
 - [ ] Desktop GUI client built on top of the SDK
 - [ ] Human-in-the-loop checkpoints within the workflow graph
 
+[↑ Back to top](#table-of-contents)
+
 ---
 
 ## Contributing
@@ -889,36 +1012,71 @@ Contributions of all kinds are welcome — bug fixes, new agents, documentation 
 
 **Discussions:** For open-ended design questions (e.g., "how should the plugin system's discovery mechanism work?"), use GitHub Discussions rather than an issue, to keep design conversations separate from actionable bug/feature tracking.
 
+[↑ Back to top](#table-of-contents)
+
 ---
 
 ## FAQ
 
-**Why not just use AutoML?**
+<details>
+<summary>Why not just use AutoML?</summary>
+
 AutoML tools optimize for a leaderboard metric and often hide the reasoning behind their choices. AetherML is designed so every decision — imputation strategy, encoding, model family — is inspectable and overridable, at the cost of being less "hands-off" than a pure AutoML tool.
 
-**Why LangGraph specifically?**
+</details>
+
+<details>
+<summary>Why LangGraph specifically?</summary>
+
 LangGraph models workflows as a graph of stateful nodes with conditional edges, which maps directly onto AetherML's pipeline shape (sequential stages with occasional conditional skips), without requiring hand-written orchestration and retry logic.
 
-**Why Polars in addition to Pandas?**
+</details>
+
+<details>
+<summary>Why Polars in addition to Pandas?</summary>
+
 Pandas is the default for small-to-medium datasets, but its single-threaded execution model becomes a bottleneck on larger data. Polars' multi-threaded, Rust-based engine handles larger single-machine workloads significantly faster, so AetherML automatically upgrades to Polars when dataset size warrants it.
 
-**Why SDK-first instead of API-first or app-first?**
-Building the SDK first ensures there is exactly one place where ML logic lives. Every interface built afterward (CLI, and the planned FastAPI service and GUI) is a client of that logic rather than a second implementation of it, which avoids behavioral drift between interfaces.
+</details>
 
-**Can I use only the ETL stage without running the full pipeline?**
+<details>
+<summary>Why SDK-first instead of API-first or app-first?</summary>
+
+Building the SDK first ensures there is exactly one place where ML logic lives. Every interface built afterward (CLI, the FastAPI service, and any future GUI) is a client of that logic rather than a second implementation of it, which avoids behavioral drift between interfaces.
+
+</details>
+
+<details>
+<summary>Can I use only the ETL stage without running the full pipeline?</summary>
+
 Yes. The SDK's `run()` method accepts a `stages` parameter that lets you run any subset of the pipeline — see [SDK Usage](#sdk-usage).
 
-**Can I integrate AetherML with FastAPI myself, today?**
-Yes, informally — since the SDK is a plain Python package, you can already wrap `AetherML.run()` in your own FastAPI routes. The `api/` module described in this README is AetherML's own **planned**, first-party FastAPI interface, not a prerequisite for using AetherML from a FastAPI app you build yourself.
+</details>
 
-**Can I build my own agents?**
+<details>
+<summary>Can I integrate AetherML with FastAPI myself, today?</summary>
+
+Yes, informally — since the SDK is a plain Python package, you can already wrap `AetherML.run()` in your own FastAPI routes. The `api/` module described in this README is AetherML's own first-party FastAPI interface, not a prerequisite for using AetherML from a FastAPI app you build yourself.
+
+</details>
+
+<details>
+<summary>Can I build my own agents?</summary>
+
 Not yet through a formal plugin mechanism — that is **planned** (see [Plugin Architecture](#plugin-architecture)). Today, extending the pipeline with a custom agent requires modifying `workflow/graph.py` directly in a fork or contribution.
+
+</details>
+
+[↑ Back to top](#table-of-contents)
 
 ---
 
 ## License
 
-This project is licensed under the MIT License.
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for the full text.
+
+<details>
+<summary>View full MIT License text</summary>
 
 ```
 MIT License
@@ -944,21 +1102,19 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-See the [LICENSE](LICENSE) file for the full text.
+</details>
+
+[↑ Back to top](#table-of-contents)
 
 ---
 
 ## Acknowledgements
-
-<div align="center">
 
 ![scikit-learn](https://img.shields.io/badge/scikit--learn-F7931E?style=flat-square&logo=scikitlearn&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=flat-square&logo=fastapi&logoColor=white)
 ![LangGraph](https://img.shields.io/badge/LangGraph-1C3C3C?style=flat-square&logo=langchain&logoColor=white)
 ![MLflow](https://img.shields.io/badge/MLflow-0194E2?style=flat-square&logo=mlflow&logoColor=white)
 ![Polars](https://img.shields.io/badge/Polars-CD792C?style=flat-square&logo=polars&logoColor=white)
-
-</div>
 
 AetherML's design draws inspiration from the architectural patterns and developer experience established by several mature open-source projects, without any affiliation with or endorsement from them:
 
@@ -970,8 +1126,4 @@ AetherML's design draws inspiration from the architectural patterns and develope
 
 ---
 
-<div align="center">
-
-Built with a commitment to transparent, inspectable machine learning pipelines.
-
-</div>
+<p align="center"><sub>Built with a commitment to transparent, inspectable machine learning pipelines.</sub></p>
