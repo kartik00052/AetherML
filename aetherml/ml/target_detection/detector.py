@@ -82,7 +82,7 @@ def detect_target(
         ``candidates`` (list of scored candidates for transparency).
 
     """
-    collected = engine.collect(df)
+    collected = engine.cached_collect(df)
     dtypes = engine.dtypes(df)
     profile_numeric = data_profile.get("numeric_summary", {})
     profile_categorical = data_profile.get("categorical_summary", {})

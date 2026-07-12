@@ -70,6 +70,7 @@ class BaseEngine(ABC):
     """
 
     engine_type: EngineType
+    _collect_cache: dict[int, pd.DataFrame] = {}
 
     @abstractmethod
     def read(self, path: str | Path, **kwargs: Any) -> Any:
@@ -148,6 +149,24 @@ class BaseEngine(ABC):
         all downstream code receives Pandas DataFrames.
         """
         ...
+
+    def cached_collect(self, df: Any) -> pd.DataFrame:
+        """Cache-aware version of ``collect()``.
+
+        Uses the object id of *df* as cache key.  If the same DataFrame
+        has been collected before, returns the cached result directly.
+        """
+        key = id(df)
+        cached = self._collect_cache.get(key)
+        if cached is not None:
+            return cached
+        result = self.collect(df)
+        self._collect_cache[key] = result
+        return result
+
+    def clear_collect_cache(self) -> None:
+        """Clear the collect cache to free memory."""
+        self._collect_cache.clear()
 
     @abstractmethod
     def lazy(self, df: Any) -> Any:

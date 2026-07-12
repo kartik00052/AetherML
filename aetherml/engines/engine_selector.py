@@ -6,8 +6,8 @@ Selection criteria (in order):
 2. Estimate the dataset's memory footprint (file size as a proxy when
    the DataFrame is not yet loaded; ``memory_usage()`` when it is).
 3. Route based on the estimate:
-   - ``< 100 MB``  → Pandas  (fastest startup, simplest API)
-   - ``100 MB – max_memory_bytes``  → Polars  (default, best single-machine perf)
+   - ``< 2 MB``   → Pandas  (fastest startup, simplest API)
+   - ``2 MB – max_memory_bytes``  → Polars  (default, best single-machine perf)
    - ``> max_memory_bytes``  → Spark  (distributed processing)
 
 The thresholds are configurable via ``DataConfig.max_memory_bytes``.
@@ -28,7 +28,7 @@ from aetherml.exceptions import EngineSelectionError
 logger = logging.getLogger(__name__)
 
 # Thresholds in bytes
-_PANDAS_MAX = 100 * 1024 * 1024  # 100 MB
+_PANDAS_MAX = 2 * 1024 * 1024  # 2 MB
 
 
 _DATA_EXTENSIONS = frozenset(

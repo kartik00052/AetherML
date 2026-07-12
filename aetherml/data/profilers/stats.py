@@ -39,7 +39,7 @@ def profile_dataset(
         ``categorical_summary``, ``shape``, and ``memory_bytes``.
 
     """
-    collected = engine.collect(df)
+    collected = engine.cached_collect(df)
     dtypes = engine.dtypes(df)
     n_rows, n_cols = engine.shape(df)
 

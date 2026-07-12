@@ -101,7 +101,7 @@ class ExplainabilityAgent:
         feature_names = getattr(state, "feature_names", None)
 
         # ── Collect data to pandas ───────────────────────────────────
-        collected = self._engine.collect(data)
+        collected = self._engine.cached_collect(data)
 
         # ── Resolve feature names ────────────────────────────────────
         if feature_names is None:

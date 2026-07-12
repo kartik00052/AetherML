@@ -90,7 +90,7 @@ def engineer_features(
         A tuple of ``(transformed_df, log_entry_dict)``.
 
     """
-    collected = engine.collect(df)
+    collected = engine.cached_collect(df)
     dtypes = engine.dtypes(df)
     columns = engine.columns(df)
 

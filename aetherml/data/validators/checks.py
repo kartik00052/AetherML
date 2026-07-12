@@ -63,7 +63,7 @@ def validate_dataframe(
     report["column_names"] = engine.columns(df)
 
     # ── Null analysis ────────────────────────────────────────────────
-    collected = engine.collect(df)
+    collected = engine.cached_collect(df)
     report["null_counts"] = _count_nulls(collected)
     report["null_columns"] = [col for col, count in report["null_counts"].items() if count > 0]
 

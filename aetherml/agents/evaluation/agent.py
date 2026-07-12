@@ -93,15 +93,15 @@ class EvaluationAgent:
             )
 
         if state.features is not None:
-            features_df = self._engine.collect(state.features)
-            upstream_df = self._engine.collect(upstream)
+            features_df = self._engine.cached_collect(state.features)
+            upstream_df = self._engine.cached_collect(upstream)
             if target_column in upstream_df.columns:
                 collected = features_df.copy()
                 collected[target_column] = upstream_df[target_column].values
             else:
                 collected = features_df
         else:
-            collected = self._engine.collect(upstream)
+            collected = self._engine.cached_collect(upstream)
 
         if feature_names is None:
             feature_names = [c for c in collected.columns if c != target_column]
