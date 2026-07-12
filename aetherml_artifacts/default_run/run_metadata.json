@@ -1,7 +1,22 @@
 {
   "run_id": "default_run",
-  "target_column": null,
-  "task_type": null,
-  "best_pipeline": null,
-  "saved_files": []
+  "target_column": "target",
+  "task_type": "ambiguous",
+  "best_pipeline": {
+    "model_type": "GradientBoostingClassifier",
+    "params": {
+      "n_estimators": 50,
+      "max_depth": 3,
+      "learning_rate": 0.1
+    },
+    "score": 0.55,
+    "trials_used": 45,
+    "time_elapsed": 4.021877899998799,
+    "truncated": false,
+    "estimated_training_cost": "low"
+  },
+  "saved_files": [
+    "aetherml_artifacts\\default_run\\evaluation_report.json",
+    "aetherml_artifacts\\default_run\\final_report.md"
+  ]
 }
