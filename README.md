@@ -259,20 +259,50 @@ This table describes contracts, not implementation — full agent-by-agent docum
 
 **Requirements:** Python 3.11+
 
-### Standard
+### Standard (recommended)
 
 ```bash
 pip install aetherml
 ```
 
+This installs everything you need for CSV, Excel (.xlsx), Parquet, JSON, and Feather files out of the box.
+
+### What's included in the base install
+
+| Format | Supported | Dependency |
+|---|---|---|
+| CSV / TSV | Yes | `pandas` (core) |
+| Excel (.xlsx) | Yes | `openpyxl` (core) |
+| Parquet | Yes | `pyarrow` (core) |
+| JSON / JSONL | Yes | `pandas` (core) |
+| Feather / Arrow | Yes | `pyarrow` (core) |
+| Legacy Excel (.xls) | Needs extra | `pip install xlrd` |
+
 ### With optional extras
 
 ```bash
-pip install aetherml[all]       # everything
-pip install aetherml[api]       # FastAPI endpoints
-pip install aetherml[cli]       # CLI commands
-pip install aetherml[explain]   # SHAP explanations
+pip install aetherml[all]       # everything below
+pip install aetherml[api]       # FastAPI REST endpoints
+pip install aetherml[cli]       # CLI commands (aetherml run, aetherml info)
+pip install aetherml[explain]   # SHAP model explanations
+pip install aetherml[boost]     # XGBoost models
+pip install aetherml[mlflow]    # MLflow experiment tracking
+pip install aetherml[spark]     # PySpark engine for large datasets
 ```
+
+### Installation matrix
+
+| Extra | What it adds | Core install needed? |
+|---|---|---|
+| *(none)* | CSV, Excel, Parquet, JSON, Feather, training, evaluation, reporting | No — included |
+| `cli` | `aetherml run`, `aetherml info` commands | No — just the extra |
+| `api` | REST endpoints, file upload, background jobs, Swagger docs | No — just the extra |
+| `explain` | SHAP-based feature importance | No — just the extra |
+| `boost` | XGBoost in model candidates | No — just the extra |
+| `mlflow` | MLflow experiment tracking | No — just the extra |
+| `spark` | PySpark engine for distributed data | No — just the extra |
+| `all` | All of the above | No — installs everything |
+| `dev` | pytest, ruff, mypy, pre-commit | For contributors only |
 
 ### From source (for contributors)
 
@@ -285,19 +315,6 @@ source .venv/bin/activate
 
 pip install -e ".[dev]"
 ```
-
-### Available extras
-
-| Extra | What it adds | Install |
-|---|---|---|
-| `cli` | Typer CLI commands | `pip install aetherml[cli]` |
-| `api` | FastAPI REST endpoints | `pip install aetherml[api]` |
-| `explain` | SHAP model explanations | `pip install aetherml[explain]` |
-| `boost` | XGBoost models | `pip install aetherml[boost]` |
-| `mlflow` | MLflow experiment tracking | `pip install aetherml[mlflow]` |
-| `spark` | PySpark engine for large datasets | `pip install aetherml[spark]` |
-| `all` | Everything above | `pip install aetherml[all]` |
-| `dev` | Testing, linting, formatting | `pip install aetherml[dev]` |
 
 [↑ Back to top](#table-of-contents)
 

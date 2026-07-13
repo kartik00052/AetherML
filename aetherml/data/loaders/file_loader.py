@@ -47,6 +47,10 @@ def _check_xls_deps(path: Path) -> None:
         raise DataLoadError(msg) from exc
 
 
+# Legacy alias kept for backward compatibility
+_check_excel_deps = _check_xls_deps
+
+
 def list_excel_sheets(path: str | Path) -> list[dict[str, Any]]:
     """List all sheets in an Excel file with their row counts.
 

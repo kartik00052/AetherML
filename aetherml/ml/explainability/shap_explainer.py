@@ -91,7 +91,10 @@ def compute_shap_explanations(
     try:
         import shap
     except ImportError as exc:
-        msg = "SHAP library is required for explainability. Install it with: pip install shap"
+        msg = (
+            "SHAP library is required for explainability. "
+            "Install it with: pip install aetherml[explain]"
+        )
         raise ImportError(msg) from exc
 
     # ── Enforce resource bound ───────────────────────────────────────

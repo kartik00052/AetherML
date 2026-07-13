@@ -54,10 +54,14 @@ class PandasEngine(BaseEngine):
         try:
             return reader(path, **kwargs)
         except ImportError as exc:
-            msg = (
-                f"Missing dependency for {suffix} files: {exc}. "
-                f"Install the required package (e.g. pip install openpyxl)."
-            )
+            extra_map = {
+                ".xlsx": "openpyxl (included in aetherml core)",
+                ".xls": "xlrd — install with: pip install xlrd",
+                ".parquet": "pyarrow (included in aetherml core)",
+                ".feather": "pyarrow (included in aetherml core)",
+            }
+            hint = extra_map.get(suffix, str(exc))
+            msg = f"Missing dependency for {suffix} files: {exc}. {hint}"
             raise EngineError(msg) from exc
 
     def write(self, df: pd.DataFrame, path: str | Path, **kwargs: Any) -> None:
