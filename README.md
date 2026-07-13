@@ -1,51 +1,37 @@
-﻿<div align="center">
+<div align="center">
 
-<!-- Animated Hero Banner -->
-<img src="assets/banner.png" alt="PhronesisML" width="100%" />
+<img src="assets/banner.svg" alt="PhronesisML — Practical Wisdom for Machine Learning" width="100%" />
 
-<!-- Tagline with animated typing SVG -->
-<h1>
-  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=28&duration=3000&pause=1000&color=6366F1&center=true&vCenter=true&multiline=true&repeat=true&width=700&height=100&lines=A+transparent+inspectable+alternative+to+AutoML;The+ML+lifecycle+modeled+as+a+graph+of+cooperating+agents" alt="PhronesisML Tagline" />
-</h1>
+<h3>
+  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=24&duration=3000&pause=1200&color=A855F7&center=true&vCenter=true&multiline=true&repeat=true&width=760&height=70&lines=A+transparent%2C+inspectable+alternative+to+AutoML;The+ML+lifecycle%2C+modeled+as+a+graph+of+cooperating+agents" alt="PhronesisML Tagline" />
+</h3>
 
-<!-- Badges Row 1: Status -->
 <a href="https://pypi.org/project/phronesisml">
-  <img src="https://img.shields.io/pypi/v/phronesisml?color=6366F1&label=PyPI&logo=pypi&logoColor=white&style=for-the-badge" alt="PyPI" />
+  <img src="https://img.shields.io/pypi/v/phronesisml?color=6366F1&label=PyPI&logo=pypi&logoColor=white&style=flat-square" alt="PyPI" />
 </a>
 <a href="https://github.com/kartik00052/PhronesisML/actions/workflows/ci.yml">
-  <img src="https://img.shields.io/github/actions/workflow/status/kartik00052/PhronesisML/ci.yml?branch=main&color=22C55E&label=CI&logo=githubactions&logoColor=white&style=for-the-badge" alt="CI" />
+  <img src="https://img.shields.io/github/actions/workflow/status/kartik00052/PhronesisML/ci.yml?branch=main&color=22C55E&label=CI&logo=githubactions&logoColor=white&style=flat-square" alt="CI" />
 </a>
 <a href="https://github.com/kartik00052/PhronesisML/blob/main/LICENSE">
-  <img src="https://img.shields.io/badge/License-MIT-6366F1?style=for-the-badge&logo=openai&logoColor=white" alt="License" />
+  <img src="https://img.shields.io/badge/license-MIT-6366F1?style=flat-square" alt="License" />
 </a>
 <a href="https://www.python.org/downloads/">
-  <img src="https://img.shields.io/badge/python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python" />
+  <img src="https://img.shields.io/badge/python-3.11+-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python" />
 </a>
-
-<!-- Badges Row 2: Community -->
 <a href="https://github.com/kartik00052/PhronesisML/stargazers">
-  <img src="https://img.shields.io/github/stars/kartik00052/PhronesisML?color=FFD60A&label=Stars&style=for-the-badge&logo=github" alt="Stars" />
-</a>
-<a href="https://github.com/kartik00052/PhronesisML/network/members">
-  <img src="https://img.shields.io/github/forks/kartik00052/PhronesisML?color=22C55E&label=Forks&style=for-the-badge&logo=github" alt="Forks" />
-</a>
-<a href="https://github.com/kartik00052/PhronesisML/issues">
-  <img src="https://img.shields.io/github/issues/kartik00052/PhronesisML?color=EF4444&label=Issues&style=for-the-badge&logo=github" alt="Issues" />
+  <img src="https://img.shields.io/github/stars/kartik00052/PhronesisML?color=FFD60A&label=stars&style=flat-square&logo=github" alt="Stars" />
 </a>
 <a href="https://github.com/kartik00052/PhronesisML/pulls">
-  <img src="https://img.shields.io/github/issues-pr/kartik00052/PhronesisML?color=F97316&label=PRs&style=for-the-badge&logo=github" alt="PRs" />
+  <img src="https://img.shields.io/github/issues-pr/kartik00052/PhronesisML?color=F97316&label=PRs&style=flat-square&logo=github" alt="PRs" />
 </a>
 
-<br/>
-
-<!-- Quick Links as Pill Buttons -->
 <p>
-  <a href="#-why-phronesisml"><img src="https://img.shields.io/badge/Why_PhronesisML-6366F1?style=for-the-badge&logo=lightbulb&logoColor=white" alt="Why" /></a>
-  <a href="#-installation"><img src="https://img.shields.io/badge/Install-22C55E?style=for-the-badge&logo=terminal&logoColor=white" alt="Install" /></a>
-  <a href="#-quick-start"><img src="https://img.shields.io/badge/Quick_Start-F97316?style=for-the-badge&logo=rocket&logoColor=white" alt="Quick Start" /></a>
-  <a href="#-architecture-overview"><img src="https://img.shields.io/badge/Architecture-A855F7?style=for-the-badge&logo=diagramdotcom&logoColor=white" alt="Architecture" /></a>
-  <a href="#-sdk-interfaces"><img src="https://img.shields.io/badge/SDK-Interfaces-0EA5E9?style=for-the-badge&logo=codeium&logoColor=white" alt="SDK" /></a>
-  <a href="#-contributing"><img src="https://img.shields.io/badge/Contribute-FFD60A?style=for-the-badge&logo=git&logoColor=black" alt="Contribute" /></a>
+  <a href="#why-phronesisml">Why</a> ·
+  <a href="#installation">Install</a> ·
+  <a href="#quick-start">Quick Start</a> ·
+  <a href="#architecture-overview">Architecture</a> ·
+  <a href="#sdk-interfaces">SDK</a> ·
+  <a href="#contributing">Contributing</a>
 </p>
 
 </div>
@@ -57,20 +43,27 @@
 <details open>
 <summary><strong>Navigation</strong></summary>
 
-1. [Why PhronesisML](#-why-phronesisml)
-2. [Key Features](#-key-features)
-3. [Architecture Overview](#-architecture-overview)
-4. [How It Works](#-how-it-works)
-5. [Technology Stack](#-technology-stack)
-6. [Installation](#-installation)
-7. [Quick Start](#-quick-start)
-8. [Examples](#-examples)
-9. [SDK Interfaces](#-sdk-interfaces)
-10. [Project Structure](#-project-structure)
-11. [Roadmap](#-roadmap)
-12. [Contributing](#-contributing)
-13. [FAQ](#-faq)
-14. [License](#-license)
+1. [Why PhronesisML](#why-phronesisml)
+2. [Core Principles](#core-principles)
+3. [Key Features](#key-features)
+4. [Architecture Overview](#architecture-overview)
+5. [How It Works](#how-it-works)
+6. [Engine Selection Logic](#engine-selection-logic)
+7. [Technology Stack](#technology-stack)
+8. [Performance](#performance)
+9. [Installation](#installation)
+10. [Quick Start](#quick-start)
+11. [Examples](#examples)
+12. [SDK Interfaces](#sdk-interfaces)
+13. [Project Structure](#project-structure)
+14. [Offline-First Philosophy](#offline-first-philosophy)
+15. [Security](#security)
+16. [Roadmap](#roadmap)
+17. [Contributing](#contributing)
+18. [Community](#community)
+19. [FAQ](#faq)
+20. [License](#license)
+21. [Acknowledgements](#acknowledgements)
 
 </details>
 
@@ -81,18 +74,33 @@
 <div align="center">
 
 | | Notebooks | AutoML Tools | **PhronesisML** |
-|:---:|:---:|:---:|:---:|
+|:---|:---:|:---:|:---:|
 | Structure | Ad hoc, cell-by-cell | Fixed, opaque | **Modular agents on typed `WorkflowState`** |
-| Transparency | High, unorganized | Low -- black box | **High -- every decision is inspectable** |
-| Overridable | N/A | Rarely | **Yes -- imputation, encoding, model** |
-| Reusable | Low | Low | **High -- same pipeline, swap the data** |
-| Production | No | Partially | **Yes -- versioned artifacts** |
+| Transparency | High, but unorganized | Low — black box | **High — every decision is inspectable** |
+| Overridable | N/A | Rarely | **Yes — imputation, encoding, model choice** |
+| Reusable | Low | Low | **High — same pipeline, swap the data** |
+| Production-ready | No | Partially | **Yes — versioned, reportable artifacts** |
+| Works offline | Yes | Rarely | **Yes — by design** |
 
 </div>
 
 > **In short:** PhronesisML recommends; it does not obscure. Every stage of the pipeline is a discrete, testable, reusable unit of code operating on a shared, typed `WorkflowState`.
 
-PhronesisML is **SDK-first** -- the CLI, the FastAPI service, and any future GUI are thin clients built on the same SDK a data scientist would `import` directly. There is exactly **one source of truth** for ML logic.
+PhronesisML is **SDK-first** — the CLI, the FastAPI service, and any future GUI are thin clients built on the same SDK a data scientist would `import` directly. There is exactly **one source of truth** for ML logic.
+
+---
+
+## Core Principles
+
+PhronesisML is built around five commitments that shape every design decision in the codebase:
+
+| Principle | What It Means in Practice |
+|---|---|
+| **Simple API** | `Phronesis("data.csv").run()` is a complete, working pipeline. Complexity is opt-in, not mandatory. |
+| **Advanced Power** | The same SDK exposes stage-by-stage control, custom configuration, and low-level workflow access when you need it. |
+| **Offline-First** | The core pipeline runs with no network dependency — your data never has to leave your machine to be analyzed. |
+| **Production-Ready** | Every run produces versioned, structured artifacts, not a throwaway notebook cell. |
+| **Intelligent Automation** | Engine selection, target detection, and model recommendation are automated but always inspectable and overridable. |
 
 ---
 
@@ -102,20 +110,20 @@ PhronesisML is **SDK-first** -- the CLI, the FastAPI service, and any future GUI
 
 <table>
 <tr>
-<td align="center" width="96"><img src="https://img.shields.io/badge/Agents-6366F1?style=for-the-badge&logo=robotframework&logoColor=white" alt="Agents" /><br/><small>Multi-Agent</small></td>
-<td align="center" width="96"><img src="https://img.shields.io/badge/LangGraph-A855F7?style=for-the-badge&logo=langchain&logoColor=white" alt="LangGraph" /><br/><small>Orchestration</small></td>
-<td align="center" width="96"><img src="https://img.shields.io/badge/Engines-22C55E?style=for-the-badge&logo=database&logoColor=white" alt="Engines" /><br/><small>Auto Engine</small></td>
-<td align="center" width="96"><img src="https://img.shields.io/badge/ETL-0EA5E9?style=for-the-badge&logo=folders&logoColor=white" alt="ETL" /><br/><small>Cleaning</small></td>
-<td align="center" width="96"><img src="https://img.shields.io/badge/EDA-F97316?style=for-the-badge&logo=chartline&logoColor=white" alt="EDA" /><br/><small>Analysis</small></td>
-<td align="center" width="96"><img src="https://img.shields.io/badge/Features-FFD60A?style=for-the-badge&logo=filter&logoColor=black" alt="Features" /><br/><small>Engineering</small></td>
+<td align="center" width="110"><img src="https://img.shields.io/badge/Agents-6366F1?style=flat-square&logo=robotframework&logoColor=white" alt="Agents" /><br/><sub>Multi-Agent</sub></td>
+<td align="center" width="110"><img src="https://img.shields.io/badge/LangGraph-A855F7?style=flat-square&logo=langchain&logoColor=white" alt="LangGraph" /><br/><sub>Orchestration</sub></td>
+<td align="center" width="110"><img src="https://img.shields.io/badge/Engines-22C55E?style=flat-square&logo=database&logoColor=white" alt="Engines" /><br/><sub>Auto Engine</sub></td>
+<td align="center" width="110"><img src="https://img.shields.io/badge/ETL-0EA5E9?style=flat-square&logo=databricks&logoColor=white" alt="ETL" /><br/><sub>Cleaning</sub></td>
+<td align="center" width="110"><img src="https://img.shields.io/badge/EDA-F97316?style=flat-square&logo=googleanalytics&logoColor=white" alt="EDA" /><br/><sub>Analysis</sub></td>
+<td align="center" width="110"><img src="https://img.shields.io/badge/Features-EAB308?style=flat-square&logo=filter&logoColor=black" alt="Features" /><br/><sub>Engineering</sub></td>
 </tr>
 <tr>
-<td align="center" width="96"><img src="https://img.shields.io/badge/Target-EF4444?style=for-the-badge&logo=crosshairs&logoColor=white" alt="Target" /><br/><small>Detection</small></td>
-<td align="center" width="96"><img src="https://img.shields.io/badge/Models-8B5CF6?style=for-the-badge&logo=tensorflow&logoColor=white" alt="Models" /><br/><small>Selection</small></td>
-<td align="center" width="96"><img src="https://img.shields.io/badge/Evaluation-14B8A6?style=for-the-badge&logo=checkdouble&logoColor=white" alt="Evaluation" /><br/><small>Metrics</small></td>
-<td align="center" width="96"><img src="https://img.shields.io/badge/Explain-EC4899?style=for-the-badge&logo=magnifyingglasschart&logoColor=white" alt="Explain" /><br/><small>Explainability</small></td>
-<td align="center" width="96"><img src="https://img.shields.io/badge/Reports-06B6D4?style=for-the-badge&logo=filelines&logoColor=white" alt="Reports" /><br/><small>Reporting</small></td>
-<td align="center" width="96"><img src="https://img.shields.io/badge/Plugins-F59E0B?style=for-the-badge&logo=puzzlepiece&logoColor=white" alt="Plugins" /><br/><small>Extensible</small></td>
+<td align="center" width="110"><img src="https://img.shields.io/badge/Target-EF4444?style=flat-square&logo=target&logoColor=white" alt="Target" /><br/><sub>Detection</sub></td>
+<td align="center" width="110"><img src="https://img.shields.io/badge/Models-8B5CF6?style=flat-square&logo=scikitlearn&logoColor=white" alt="Models" /><br/><sub>Selection</sub></td>
+<td align="center" width="110"><img src="https://img.shields.io/badge/Evaluation-14B8A6?style=flat-square&logo=checkmarx&logoColor=white" alt="Evaluation" /><br/><sub>Metrics</sub></td>
+<td align="center" width="110"><img src="https://img.shields.io/badge/Explain-EC4899?style=flat-square&logo=googlesearchconsole&logoColor=white" alt="Explain" /><br/><sub>Explainability</sub></td>
+<td align="center" width="110"><img src="https://img.shields.io/badge/Reports-06B6D4?style=flat-square&logo=readdotcv&logoColor=white" alt="Reports" /><br/><sub>Reporting</sub></td>
+<td align="center" width="110"><img src="https://img.shields.io/badge/Plugins-F59E0B?style=flat-square&logo=plug&logoColor=white" alt="Plugins" /><br/><sub>Extensible</sub></td>
 </tr>
 </table>
 
@@ -123,27 +131,25 @@ PhronesisML is **SDK-first** -- the CLI, the FastAPI service, and any future GUI
 
 | Feature | Description | Status |
 |---|---|:---:|
-| **Multi-Agent Workflow** | Each pipeline stage is an independent agent with a single responsibility | &#9989; |
-| **LangGraph Orchestration** | Agents are nodes in a directed graph; state passing, retries | &#9989; |
-| **Automatic Engine Selection** | Dataset size determines Pandas, Polars, or PySpark | &#9989; |
-| **ETL** | Declarative extraction, cleaning, and transformation | &#9989; |
-| **Validation** | Schema, type, and quality validation before downstream processing | &#9989; |
-| **EDA** | Automated statistical profiling and structured dataset summaries | &#9989; |
-| **Feature Engineering** | Automated and configurable transformation, encoding, derivation | &#9989; |
-| **Target Detection** | Heuristic, overridable identification of prediction target | &#9989; |
-| **Model Recommendation** | Rule- and metric-driven suggestion of candidate model families | &#9989; |
-| **Explainability** | Post-training feature importance and model-behavior summaries | &#9989; |
-| **Reporting** | Structured, versionable output artifacts for every stage | &#9989; |
-| **FastAPI Interface** | REST API with file upload, background jobs, OpenAPI docs | &#9989; |
-| **Offline-First** | Core pipeline stages run without network access | &#9989; |
-| **SDK-First** | Every interface is a client of the SDK | &#9989; |
-| **Plugin System** | Extension points for custom agents, models, engines, storage | &#128312; |
+| **Multi-Agent Workflow** | Each pipeline stage is an independent agent with a single responsibility | ✅ |
+| **LangGraph Orchestration** | Agents are nodes in a directed graph; state passing, retries | ✅ |
+| **Automatic Engine Selection** | Dataset size determines Pandas, Polars, or PySpark | ✅ |
+| **ETL** | Declarative extraction, cleaning, and transformation | ✅ |
+| **Validation** | Schema, type, and quality validation before downstream processing | ✅ |
+| **EDA** | Automated statistical profiling and structured dataset summaries | ✅ |
+| **Feature Engineering** | Automated and configurable transformation, encoding, derivation | ✅ |
+| **Target Detection** | Heuristic, overridable identification of prediction target | ✅ |
+| **Model Recommendation** | Rule- and metric-driven suggestion of candidate model families | ✅ |
+| **Explainability** | Post-training feature importance and model-behavior summaries | ✅ |
+| **Reporting** | Structured, versionable output artifacts for every stage | ✅ |
+| **FastAPI Interface** | REST API with file upload, background jobs, OpenAPI docs | ✅ |
+| **Offline-First** | Core pipeline stages run without network access | ✅ |
+| **SDK-First** | Every interface is a client of the SDK | ✅ |
+| **Plugin System** | Extension points for custom agents, models, engines, storage | 🔜 Planned |
 
 ---
 
 ## Architecture Overview
-
-<div align="center">
 
 ```mermaid
 graph TD
@@ -162,11 +168,9 @@ graph TD
     style F fill:#06B6D4,stroke:#0891B2,color:#fff,stroke-width:2px
 ```
 
-</div>
-
 | Layer | Responsibility | Depends On |
 |---|---|---|
-| **Python SDK** | Single public entry point (`Phronesis` class) | -- |
+| **Python SDK** | Single public entry point (`Phronesis` class) | — |
 | **LangGraph Workflow** | Pipeline as graph; owns `WorkflowState` | Called by SDK |
 | **Agents** | One pipeline responsibility each; read/write state | Graph nodes |
 | **Services** | Stateless, reusable domain logic | Called by agents |
@@ -180,24 +184,14 @@ graph TD
 | **SDK-first** | One source of truth for ML logic |
 | **Offline-first** | Core pipeline runs without network |
 | **Deterministic ML** | Same input + config = same output |
-| **DI** | Agents receive dependencies |
-| **Clean Architecture** | Layers depend inward |
-| **SRP** | One agent, one job |
+| **Dependency Injection** | Agents receive dependencies rather than construct them |
+| **Clean Architecture** | Layers depend inward, never outward |
+| **Single Responsibility** | One agent, one job |
 | **Strategy Pattern** | Interchangeable engine selection |
-
-### Data Engine Abstraction
-
-| Engine | Best For | Why |
-|---|---|---|
-| **Pandas** | Small-to-medium, in-memory | Ubiquitous, well understood |
-| **Polars** | Larger single-machine | Rust-based, multi-threaded |
-| **PySpark** | Distributed / larger-than-memory | Industry standard at scale |
 
 ---
 
 ## How It Works
-
-<div align="center">
 
 ```mermaid
 graph TD
@@ -227,7 +221,39 @@ graph TD
     style L fill:#06B6D4,color:#fff
 ```
 
-</div>
+Each numbered stage is implemented as its own agent — see [Project Structure](#project-structure) for where each one lives in the codebase.
+
+---
+
+## Engine Selection Logic
+
+PhronesisML supports three interchangeable dataframe backends behind a single `DataEngine` interface, so pipeline code never imports Pandas, Polars, or PySpark directly.
+
+```mermaid
+graph LR
+    A["Dataset"] --> B{"Profile size<br/>& shape"}
+    B -->|"Small–medium,<br/>fits in memory"| C["Pandas"]
+    B -->|"Larger,<br/>single machine"| D["Polars"]
+    B -->|"Larger than<br/>memory / distributed"| E["PySpark"]
+    C --> F["Same DataEngine<br/>interface downstream"]
+    D --> F
+    E --> F
+
+    style A fill:#6366F1,color:#fff
+    style B fill:#A855F7,color:#fff
+    style C fill:#150458,color:#fff
+    style D fill:#CD792C,color:#fff
+    style E fill:#E25A1C,color:#fff
+    style F fill:#06B6D4,color:#fff
+```
+
+| Engine | Best For | Why |
+|---|---|---|
+| **Pandas** | Small-to-medium, in-memory | Ubiquitous, well understood |
+| **Polars** | Larger single-machine workloads | Rust-based, multi-threaded query engine |
+| **PySpark** | Distributed / larger-than-memory data | Industry standard at scale |
+
+Selection is automatic by default but can always be forced explicitly — see [Quick Start](#quick-start).
 
 ---
 
@@ -235,17 +261,23 @@ graph TD
 
 <div align="center">
 
-![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
-![LangGraph](https://img.shields.io/badge/LangGraph-1C3C3C?style=for-the-badge&logo=langchain&logoColor=white)
-![Pandas](https://img.shields.io/badge/Pandas-150458?style=for-the-badge&logo=pandas&logoColor=white)
-![Polars](https://img.shields.io/badge/Polars-CD792C?style=for-the-badge&logo=polars&logoColor=white)
-![PySpark](https://img.shields.io/badge/PySpark-E25A1C?style=for-the-badge&logo=apachespark&logoColor=white)
-![scikit-learn](https://img.shields.io/badge/scikit--learn-F7931E?style=for-the-badge&logo=scikitlearn&logoColor=white)
-![Pydantic](https://img.shields.io/badge/Pydantic-E92063?style=for-the-badge&logo=pydantic&logoColor=white)
-![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)
-![pytest](https://img.shields.io/badge/pytest-0A9EDC?style=for-the-badge&logo=pytest&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white)
+![LangGraph](https://img.shields.io/badge/LangGraph-1C3C3C?style=flat-square&logo=langchain&logoColor=white)
+![Pandas](https://img.shields.io/badge/Pandas-150458?style=flat-square&logo=pandas&logoColor=white)
+![Polars](https://img.shields.io/badge/Polars-CD792C?style=flat-square&logo=polars&logoColor=white)
+![PySpark](https://img.shields.io/badge/PySpark-E25A1C?style=flat-square&logo=apachespark&logoColor=white)
+![scikit-learn](https://img.shields.io/badge/scikit--learn-F7931E?style=flat-square&logo=scikitlearn&logoColor=white)
+![Pydantic](https://img.shields.io/badge/Pydantic-E92063?style=flat-square&logo=pydantic&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=flat-square&logo=fastapi&logoColor=white)
+![pytest](https://img.shields.io/badge/pytest-0A9EDC?style=flat-square&logo=pytest&logoColor=white)
 
 </div>
+
+---
+
+## Performance
+
+PhronesisML's engine abstraction exists specifically so the pipeline can move from Pandas to Polars to PySpark as data size grows, without changing pipeline code. Formal, reproducible benchmarks across dataset sizes and engines are not yet published — this section will be filled in with measured numbers (not estimates) once a benchmark suite lands. Track progress in [Roadmap](#roadmap).
 
 ---
 
@@ -257,17 +289,17 @@ graph TD
 pip install phronesisml
 ```
 
-### What's included
+### Supported file formats
 
 | Format | Supported | Dependency |
 |---|:---:|---|
-| CSV / TSV | &#9989; | `pandas` (core) |
-| Excel (.xlsx) | &#9989; | `openpyxl` (core) |
-| Parquet | &#9989; | `pyarrow` (core) |
-| JSON / JSONL | &#9989; | `pandas` (core) |
-| Feather / Arrow | &#9989; | `pyarrow` (core) |
+| CSV / TSV | ✅ | `pandas` (core) |
+| Excel (.xlsx) | ✅ | `openpyxl` (core) |
+| Parquet | ✅ | `pyarrow` (core) |
+| JSON / JSONL | ✅ | `pandas` (core) |
+| Feather / Arrow | ✅ | `pyarrow` (core) |
 
-### With optional extras
+### Optional extras
 
 | Extra | Install | What it adds |
 |---|---|---|
@@ -349,7 +381,7 @@ print(ml.explain())
 </details>
 
 <details>
-<summary><strong>Simple API (One-Liner Functions)</strong></summary>
+<summary><strong>Simple API (one-liner functions)</strong></summary>
 
 ```python
 from phronesisml import analyze, train
@@ -364,7 +396,7 @@ print(f"Best model: {result.best_model_type} ({result.best_score:.4f})")
 </details>
 
 <details>
-<summary><strong>Async Variants</strong></summary>
+<summary><strong>Async variants</strong></summary>
 
 ```python
 from phronesisml import analyze_async, train_async
@@ -380,7 +412,7 @@ asyncio.run(main())
 </details>
 
 <details>
-<summary><strong>Error Handling</strong></summary>
+<summary><strong>Error handling</strong></summary>
 
 ```python
 from phronesisml import train
@@ -399,7 +431,7 @@ except WorkflowError as e:
 </details>
 
 <details>
-<summary><strong>Advanced -- Low-Level Workflow API</strong></summary>
+<summary><strong>Advanced — low-level workflow API</strong></summary>
 
 ```python
 import asyncio
@@ -438,11 +470,26 @@ phronesisml/
   configs/             # Pydantic configuration
   data/                # Data loading, validation, profiling
   engines/             # Pandas/Polars/Spark abstraction
-  interfaces/          # CLI (Typer) + FastAPI
-  ml/                  # Model definitions, training, metrics
-  rag/                 # RAG infrastructure
-  workflow/            # LangGraph workflow orchestration
+  interfaces/           # CLI (Typer) + FastAPI
+  ml/                   # Model definitions, training, metrics
+  rag/                   # RAG infrastructure
+  workflow/             # LangGraph workflow orchestration
 ```
+
+---
+
+## Offline-First Philosophy
+
+PhronesisML's core pipeline — validation, profiling, ETL, EDA, feature engineering, target detection, model recommendation, training, evaluation, explainability, and reporting — runs entirely on your machine, with no network dependency and no requirement to send data to a hosted service. Optional extras (`mlflow` for remote experiment tracking, future cloud storage backends) are opt-in additions on top of an offline-capable core, not a requirement for it.
+
+---
+
+## Security
+
+- **No data leaves your machine** unless you explicitly configure a remote storage or tracking backend.
+- **No hidden network calls** in the core pipeline — installation extras that do require network access (e.g. `mlflow`) are opt-in.
+- **Dependency-pinned releases** to reduce supply-chain surface area.
+- Found a security issue? Please open a private security advisory on GitHub rather than a public issue.
 
 ---
 
@@ -450,8 +497,8 @@ phronesisml/
 
 <div align="center">
 
-![Status](https://img.shields.io/badge/status-active%20development-brightgreen?style=for-the-badge)
-![Version](https://img.shields.io/badge/version-0.2.0-6366F1?style=for-the-badge)
+![Status](https://img.shields.io/badge/status-active%20development-brightgreen?style=flat-square)
+![Version](https://img.shields.io/badge/version-0.2.0-6366F1?style=flat-square)
 
 </div>
 
@@ -470,6 +517,7 @@ phronesisml/
 - [ ] DuckDB engine
 - [ ] PDF report rendering
 - [ ] Parallel/branching agent execution
+- [ ] Reproducible benchmark suite (see [Performance](#performance))
 - [ ] Desktop GUI client
 - [ ] Human-in-the-loop checkpoints
 
@@ -479,16 +527,26 @@ phronesisml/
 
 <div align="center">
 
-![PRs Welcome](https://img.shields.io/badge/PRs-welcome-22C55E?style=for-the-badge&logo=git&logoColor=white)
+![PRs Welcome](https://img.shields.io/badge/PRs-welcome-22C55E?style=flat-square&logo=git&logoColor=white)
 
 </div>
 
 ```bash
 make check       # lint + typecheck + test
 make format      # auto-fix formatting
-make build       # build wheel + sdist
+make build        # build wheel + sdist
 make docker      # build and run Docker image
 ```
+
+New to the project? Look for issues labeled `good first issue`. Please open an issue before starting on a large change, so the design can be discussed first.
+
+---
+
+## Community
+
+- **[GitHub Discussions](https://github.com/kartik00052/PhronesisML/discussions)** — design questions, ideas, and general Q&A
+- **[Issues](https://github.com/kartik00052/PhronesisML/issues)** — bug reports and feature requests
+- **[Pull Requests](https://github.com/kartik00052/PhronesisML/pulls)** — see what's currently in progress
 
 ---
 
@@ -504,21 +562,28 @@ AutoML tools optimize for a leaderboard metric and hide their reasoning. Phrones
 <details>
 <summary>Why LangGraph?</summary>
 
-LangGraph models workflows as a graph of stateful nodes with conditional edges -- a direct map onto PhronesisML's pipeline shape.
+LangGraph models workflows as a graph of stateful nodes with conditional edges — a direct map onto PhronesisML's pipeline shape.
 
 </details>
 
 <details>
 <summary>Why Polars in addition to Pandas?</summary>
 
-Polars' Rust-based, multi-threaded engine handles larger workloads significantly faster. PhronesisML upgrades automatically when warranted.
+Polars' Rust-based, multi-threaded engine handles larger workloads significantly faster. PhronesisML upgrades automatically when warranted — see [Engine Selection Logic](#engine-selection-logic).
 
 </details>
 
 <details>
 <summary>Can I run only part of the pipeline?</summary>
 
-Yes -- `run()` and `run_pipeline()` accept a `stages` parameter.
+Yes — `run()` and `run_pipeline()` accept a `stages` parameter so you can run, for example, only validation and EDA.
+
+</details>
+
+<details>
+<summary>Does PhronesisML require an internet connection?</summary>
+
+No. The core pipeline is offline-first — see [Offline-First Philosophy](#offline-first-philosophy). Only optional extras like remote MLflow tracking require network access.
 
 </details>
 
@@ -526,7 +591,7 @@ Yes -- `run()` and `run_pipeline()` accept a `stages` parameter.
 
 ## License
 
-Licensed under the MIT License -- see [LICENSE](LICENSE) for the full text.
+Licensed under the MIT License — see [LICENSE](LICENSE) for the full text.
 
 ---
 
@@ -542,13 +607,15 @@ Licensed under the MIT License -- see [LICENSE](LICENSE) for the full text.
 
 </div>
 
+PhronesisML's design draws inspiration from the architectural patterns and developer experience established by these projects, without any affiliation with or endorsement from them.
+
 ---
 
 <div align="center">
 
 **Built with a commitment to transparent, inspectable machine learning pipelines.**
 
-[![GitHub](https://img.shields.io/badge/GitHub-kartik00052-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/kartik00052/PhronesisML)
-[![PyPI](https://img.shields.io/badge/PyPI-phronesisml-6366F1?style=for-the-badge&logo=pypi&logoColor=white)](https://pypi.org/project/phronesisml/)
+[![GitHub](https://img.shields.io/badge/GitHub-kartik00052-181717?style=flat-square&logo=github&logoColor=white)](https://github.com/kartik00052/PhronesisML)
+[![PyPI](https://img.shields.io/badge/PyPI-phronesisml-6366F1?style=flat-square&logo=pypi&logoColor=white)](https://pypi.org/project/phronesisml/)
 
 </div>
