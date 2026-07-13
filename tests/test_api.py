@@ -89,7 +89,7 @@ class TestVersionEndpoint:
 
     def test_sdk_field(self, client: Any) -> None:
         data = client.get("/version").json()["data"]
-        assert data["sdk"] == "Phronesis"
+        assert data["sdk"] == "phronesisml"
 
 
 class TestCapabilitiesEndpoint:
@@ -366,7 +366,7 @@ class TestModels:
         data = VersionData(version="0.1.0", python="3.11.0")
         d = data.model_dump()
         assert d["version"] == "0.1.0"
-        assert d["sdk"] == "Phronesis"
+        assert d["sdk"] == "phronesisml"
 
     def test_capabilities_data_fields(self) -> None:
         data = CapabilitiesData(

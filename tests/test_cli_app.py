@@ -37,7 +37,7 @@ class TestInfoCommand:
 
     def test_info_prints_version(self, runner: CliRunner) -> None:
         result = runner.invoke(app, ["info"])
-        assert "0.1.0" in result.output
+        assert "0.2.0" in result.output
 
     def test_info_prints_Phronesis(self, runner: CliRunner) -> None:
         result = runner.invoke(app, ["info"])
