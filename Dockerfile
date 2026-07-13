@@ -9,9 +9,8 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 COPY pyproject.toml README.md ./
-COPY aetherml/__init__.py aetherml/__init__.py
-
 # Install package with API extras only (no dev/test deps in image)
+COPY aetherml/ aetherml/
 RUN pip install --no-cache-dir --prefix=/install ".[api]"
 
 

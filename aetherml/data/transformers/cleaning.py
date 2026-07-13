@@ -82,7 +82,7 @@ def handle_nulls(
         "rows_before": before_rows,
         "rows_after": after_rows,
     }
-    logger.info("Null handling (%s): %d rows → %d rows", strategy, before_rows, after_rows)
+    logger.info("Null handling (%s): %d rows -> %d rows", strategy, before_rows, after_rows)
     return result, log_entry
 
 

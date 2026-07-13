@@ -106,9 +106,9 @@ class TestDegenerateFeatureSelection:
         )
         ml = AetherML(degenerate_csv, config=config)
         report = ml.engineer_features()
-        assert (
-            report.n_features >= 2
-        ), f"Expected >= 2 features with min_features=2, got {report.n_features}"
+        assert report.n_features >= 2, (
+            f"Expected >= 2 features with min_features=2, got {report.n_features}"
+        )
 
     def test_near_constant_col_retained(self, degenerate_csv: str) -> None:
         """The near-constant column should be retained when min_features > 1."""
@@ -126,9 +126,9 @@ class TestDegenerateFeatureSelection:
         )
         ml = AetherML(degenerate_csv, config=config)
         report = ml.engineer_features()
-        assert (
-            "constant_col" in report.feature_names
-        ), f"constant_col should be retained, got: {report.feature_names}"
+        assert "constant_col" in report.feature_names, (
+            f"constant_col should be retained, got: {report.feature_names}"
+        )
 
 
 # ── Item 4: Sync method inside running event loop ───────────────
@@ -181,9 +181,9 @@ class TestModelTypeSelection:
         candidates = first_run.candidates
         assert len(candidates) >= 2, "Need at least 2 candidates for this test"
         alt_name = candidates[1]["name"]
-        assert (
-            alt_name != first_run.model_type
-        ), f"Alternative should differ from top: {alt_name} vs {first_run.model_type}"
+        assert alt_name != first_run.model_type, (
+            f"Alternative should differ from top: {alt_name} vs {first_run.model_type}"
+        )
 
         # Now train the alternative
         ml2 = AetherML(csv_path)
@@ -296,5 +296,5 @@ class TestSparkEngineError:
                 break
             current = current.__cause__
         assert found_install_msg, (
-            f"Expected 'pip install aetherml[spark]' in error chain, " f"got: {exc}"
+            f"Expected 'pip install aetherml[spark]' in error chain, got: {exc}"
         )

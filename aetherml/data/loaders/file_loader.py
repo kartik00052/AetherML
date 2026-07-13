@@ -33,6 +33,19 @@ _FORMAT_EXTENSIONS: dict[str, list[str]] = {
 }
 
 _EXCEL_EXTENSIONS = {".xlsx", ".xls"}
+_PARQUET_EXTENSIONS = {".parquet", ".pq"}
+
+
+def _check_parquet_deps(path: Path) -> None:
+    """Raise a clear error if pyarrow is missing for Parquet files."""
+    try:
+        import pyarrow  # noqa: F401
+    except ImportError as exc:
+        msg = (
+            "Parquet files require the 'pyarrow' package. "
+            "Install it with: pip install aetherml[parquet]  or  pip install pyarrow"
+        )
+        raise DataLoadError(msg) from exc
 
 
 def _check_excel_deps(path: Path) -> None:
@@ -209,6 +222,10 @@ def load_file(
         _check_excel_deps(path)
         if "sheet_name" not in kwargs:
             kwargs["sheet_name"] = select_best_sheet(path)
+
+    # ── Parquet: dependency check ─────────────────────────────────────
+    if path.suffix.lower() in _PARQUET_EXTENSIONS:
+        _check_parquet_deps(path)
 
     try:
         df = engine.read(path, **kwargs)

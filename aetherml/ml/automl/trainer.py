@@ -206,7 +206,7 @@ def train_models(
                     best_params = params
 
                 logger.debug(
-                    "Trial %d: %s %s → %.4f",
+                    "Trial %d: %s %s -> %.4f",
                     trials_used,
                     candidate.name,
                     params,

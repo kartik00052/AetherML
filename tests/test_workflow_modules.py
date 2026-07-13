@@ -151,9 +151,9 @@ class TestRouter:
         state = SimpleNamespace(explanation_report=None)
         assert route_after_explainability(state) == "__end__"
 
-    def test_route_after_reporting_always_end(self) -> None:
+    def test_route_after_reporting_proceed_with_report(self) -> None:
         state = SimpleNamespace(final_report="report")
-        assert route_after_reporting(state) == "__end__"
+        assert route_after_reporting(state) == "proceed"
 
     def test_route_after_reporting_end_even_without_report(self) -> None:
         state = SimpleNamespace(final_report=None)

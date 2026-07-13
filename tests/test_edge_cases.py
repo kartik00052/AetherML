@@ -210,6 +210,5 @@ class TestLargeDatasetPerformance:
 
         # summary() should be at least 2x faster than run()
         assert summary_time < run_time / 2, (
-            f"summary() ({summary_time:.2f}s) should be much faster than "
-            f"run() ({run_time:.2f}s)"
+            f"summary() ({summary_time:.2f}s) should be much faster than run() ({run_time:.2f}s)"
         )

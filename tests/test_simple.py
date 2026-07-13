@@ -328,13 +328,7 @@ class TestTrain:
 
     def test_artifact_uri_set(self, csv_path: str) -> None:
         result = train(csv_path)
-        # artifact_uri is None when MLflow is not installed
-        try:
-            import mlflow  # noqa: F401
-
-            assert result.artifact_uri is not None
-        except ImportError:
-            assert result.artifact_uri is None
+        assert result.artifact_uri is not None
 
     def test_langgraph_full_pipeline_ran(self, csv_path: str) -> None:
         """Verify all 11 stages ran by checking report is populated."""

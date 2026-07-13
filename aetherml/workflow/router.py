@@ -147,10 +147,11 @@ def route_after_explainability(state: Any) -> Literal["proceed", "__end__"]:
 def route_after_reporting(state: Any) -> Literal["proceed", "__end__"]:
     """Route after the Reporting node.
 
-    Reporting is the last stage. Always end.
+    If the report was assembled, proceed (to storage or end, depending
+    on the pipeline stages).  Otherwise, end the workflow.
     """
     if getattr(state, "final_report", None) is not None:
-        logger.info("Report assembled — workflow complete.")
-    else:
-        logger.warning("Report assembly produced no output — ending.")
+        logger.info("Report assembled — proceeding.")
+        return "proceed"
+    logger.warning("Report assembly produced no output — ending.")
     return "__end__"

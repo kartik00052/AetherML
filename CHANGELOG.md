@@ -25,7 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **HTML report generation** — `AetherML.generate_report(format="html")` produces a self-contained HTML report.
 - **CI/CD pipeline** — GitHub Actions workflow with lint (ruff), typecheck (mypy), tests (pytest across Python 3.11/3.12/3.13), API tests, CLI tests, explainability tests, Docker build, and GHCR image publishing on tagged releases.
 - **Docker image** — Multi-stage Dockerfile producing a minimal production image, published to `ghcr.io/kartik00052/aetherml`.
-- **Core dependencies required by default** — pandas, polars, numpy, scikit-learn, pyarrow, openpyxl, and joblib are always installed (no `[all]` extra needed for basic usage).
+- **Core dependencies required by default** — pandas, polars, numpy, scikit-learn, pydantic, langgraph, and joblib are always installed. Optional extras: `[parquet]` (pyarrow), `[excel]` (openpyxl), `[api]`, `[cli]`, `[spark]`, `[explain]`, `[boost]`, `[mlflow]`.
 - **`python-multipart` in API extras** — Required by FastAPI for file upload parsing; added to the `[api]` extra.
 
 ### Changed
