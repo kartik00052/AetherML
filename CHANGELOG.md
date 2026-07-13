@@ -5,6 +5,36 @@ All notable changes to AetherML will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.3] - 2026-07-13
+
+### Added
+
+- **`py.typed` marker** (PEP 561) — Downstream users get proper type-checking support from mypy/pyright.
+- **Dependabot config** — Automated weekly dependency-update PRs for pip and GitHub Actions.
+- **Real CI/PyPI badges** in README — Dynamic shields linked to PyPI, GitHub Actions, and license.
+- **Installation matrix** in README — Shows which extras enable which features.
+
+### Changed
+
+- **Version bump to 0.1.3** — Fresh publish to validate Trusted Publisher pipeline end-to-end.
+
+## [0.1.2] - 2026-07-13
+
+### Added
+
+- **PyPI Trusted Publishing** — CI now publishes to PyPI automatically on `v*` tags via GitHub OIDC (no API tokens stored in secrets).
+- **PyPI CI publish job** — `pypi-publish` in `ci.yml` builds the wheel and pushes to PyPI using `pypa/gh-action-pypi-publish`.
+
+### Changed
+
+- **`openpyxl` and `pyarrow` are now core dependencies** — Excel (.xlsx), Parquet, and Feather files work out of the box with `pip install aetherml`. No manual extra installs needed.
+- **README installation section** rewritten with format support table, extras matrix, and clearer quick-start guidance.
+- **Import error messages** in `pandas_engine.py`, `shap_explainer.py`, and `file_loader.py` updated to reference `pip install aetherml[explain]` instead of raw pip package names.
+
+### Removed
+
+- **Stale manual extras** — Removed separate `[excel]` and `[parquet]` extras (now core). Cleaned up any leftover `[excel]`/`[parquet]` references from v0.1.0.
+
 ## [0.1.0] - 2026-07-12
 
 ### Added
@@ -25,7 +55,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **HTML report generation** — `AetherML.generate_report(format="html")` produces a self-contained HTML report.
 - **CI/CD pipeline** — GitHub Actions workflow with lint (ruff), typecheck (mypy), tests (pytest across Python 3.11/3.12/3.13), API tests, CLI tests, explainability tests, Docker build, and GHCR image publishing on tagged releases.
 - **Docker image** — Multi-stage Dockerfile producing a minimal production image, published to `ghcr.io/kartik00052/aetherml`.
-- **Core dependencies required by default** — pandas, polars, numpy, scikit-learn, pydantic, langgraph, and joblib are always installed. Optional extras: `[parquet]` (pyarrow), `[excel]` (openpyxl), `[api]`, `[cli]`, `[spark]`, `[explain]`, `[boost]`, `[mlflow]`.
+- **Core dependencies required by default** — pandas, polars, numpy, scikit-learn, pydantic, langgraph, and joblib are always installed. Optional extras: `[api]`, `[cli]`, `[spark]`, `[explain]`, `[boost]`, `[mlflow]`.
 - **`python-multipart` in API extras** — Required by FastAPI for file upload parsing; added to the `[api]` extra.
 
 ### Changed

@@ -4,10 +4,10 @@
 
 **A transparent, inspectable alternative to AutoML — the ML lifecycle modeled as a graph of cooperating agents.**
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![PyPI version](https://img.shields.io/pypi/v/aetherml.svg)](https://pypi.org/project/aetherml/)
+[![CI](https://github.com/kartik00052/AetherML/actions/workflows/ci.yml/badge.svg)](https://github.com/kartik00052/AetherML/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/)
-[![Build](https://img.shields.io/badge/build-passing-brightgreen.svg)](#)
-[![Docs](https://img.shields.io/badge/docs-latest-blue.svg)](#)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](#contributing)
 ![GitHub stars](https://img.shields.io/github/stars/kartik00052/AetherML?style=flat-square)
 ![GitHub forks](https://img.shields.io/github/forks/kartik00052/AetherML?style=flat-square)
