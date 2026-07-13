@@ -271,7 +271,6 @@ pip install aetherml
 pip install aetherml[all]       # everything
 pip install aetherml[api]       # FastAPI endpoints
 pip install aetherml[cli]       # CLI commands
-pip install aetherml[parquet]   # .parquet support
 pip install aetherml[explain]   # SHAP explanations
 ```
 
@@ -293,8 +292,6 @@ pip install -e ".[dev]"
 |---|---|---|
 | `cli` | Typer CLI commands | `pip install aetherml[cli]` |
 | `api` | FastAPI REST endpoints | `pip install aetherml[api]` |
-| `parquet` | .parquet/.pq file support | `pip install aetherml[parquet]` |
-| `excel` | .xlsx/.xls file support | `pip install aetherml[excel]` |
 | `explain` | SHAP model explanations | `pip install aetherml[explain]` |
 | `boost` | XGBoost models | `pip install aetherml[boost]` |
 | `mlflow` | MLflow experiment tracking | `pip install aetherml[mlflow]` |

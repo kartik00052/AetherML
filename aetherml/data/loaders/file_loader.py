@@ -33,42 +33,18 @@ _FORMAT_EXTENSIONS: dict[str, list[str]] = {
 }
 
 _EXCEL_EXTENSIONS = {".xlsx", ".xls"}
-_PARQUET_EXTENSIONS = {".parquet", ".pq"}
 
 
-def _check_parquet_deps(path: Path) -> None:
-    """Raise a clear error if pyarrow is missing for Parquet files."""
+def _check_xls_deps(path: Path) -> None:
+    """Raise a clear error if xlrd is missing for legacy .xls files."""
     try:
-        import pyarrow  # noqa: F401
+        import xlrd  # noqa: F401
     except ImportError as exc:
         msg = (
-            "Parquet files require the 'pyarrow' package. "
-            "Install it with: pip install aetherml[parquet]  or  pip install pyarrow"
+            "Legacy Excel (.xls) files require the 'xlrd' package. "
+            "Install it with: pip install xlrd"
         )
         raise DataLoadError(msg) from exc
-
-
-def _check_excel_deps(path: Path) -> None:
-    """Raise a clear error if the required Excel library is missing."""
-    suffix = path.suffix.lower()
-    if suffix == ".xlsx":
-        try:
-            import openpyxl  # noqa: F401
-        except ImportError as exc:
-            msg = (
-                "Excel (.xlsx) files require the 'openpyxl' package. "
-                "Install it with: pip install openpyxl"
-            )
-            raise DataLoadError(msg) from exc
-    elif suffix == ".xls":
-        try:
-            import xlrd  # noqa: F401
-        except ImportError as exc:
-            msg = (
-                "Legacy Excel (.xls) files require the 'xlrd' package. "
-                "Install it with: pip install xlrd"
-            )
-            raise DataLoadError(msg) from exc
 
 
 def list_excel_sheets(path: str | Path) -> list[dict[str, Any]]:
@@ -84,7 +60,8 @@ def list_excel_sheets(path: str | Path) -> list[dict[str, Any]]:
         DataLoadError: If the file cannot be read.
     """
     path = Path(path)
-    _check_excel_deps(path)
+    if path.suffix.lower() == ".xls":
+        _check_xls_deps(path)
     try:
         xls = pd.ExcelFile(path)
     except Exception as exc:
@@ -219,13 +196,10 @@ def load_file(
 
     # ── Excel: smart sheet selection ──────────────────────────────────
     if path.suffix.lower() in _EXCEL_EXTENSIONS:
-        _check_excel_deps(path)
+        if path.suffix.lower() == ".xls":
+            _check_xls_deps(path)
         if "sheet_name" not in kwargs:
             kwargs["sheet_name"] = select_best_sheet(path)
-
-    # ── Parquet: dependency check ─────────────────────────────────────
-    if path.suffix.lower() in _PARQUET_EXTENSIONS:
-        _check_parquet_deps(path)
 
     try:
         df = engine.read(path, **kwargs)
