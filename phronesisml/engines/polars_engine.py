@@ -115,7 +115,9 @@ class PolarsEngine(BaseEngine):
             return df.collect().to_pandas()
         if isinstance(df, pl.DataFrame):
             return df.to_pandas()
-        msg = f"Expected Polars DataFrame or LazyFrame, got {type(df).__name__}"
+        if isinstance(df, pd.DataFrame):
+            return df
+        msg = f"Expected Polars DataFrame, LazyFrame, or Pandas DataFrame, got {type(df).__name__}"
         raise EngineError(msg)
 
     def lazy(self, df: pl.DataFrame) -> pl.LazyFrame:
@@ -126,14 +128,26 @@ class PolarsEngine(BaseEngine):
     def shape(self, df: pl.DataFrame) -> tuple[int, int]:
         return df.shape
 
-    def columns(self, df: pl.DataFrame) -> list[str]:
-        return df.columns
+    def columns(self, df: Any) -> list[str]:
+        if isinstance(df, pd.DataFrame):
+            return list(df.columns)
+        result: list[str] = df.columns
+        return result
 
     def dtypes(self, df: pl.DataFrame) -> dict[str, str]:
         return {col: str(dtype) for col, dtype in zip(df.columns, df.dtypes, strict=True)}
 
-    def head(self, df: pl.DataFrame, n: int = 5) -> pd.DataFrame:
+    def head(self, df: Any, n: int = 5) -> pd.DataFrame:
+        if isinstance(df, pd.DataFrame):
+            return df.head(n)
         return df.head(n).to_pandas()
 
-    def memory_usage(self, df: pl.DataFrame) -> int:
-        return int(df.estimated_size("bytes"))
+    def memory_usage(self, df: Any) -> int:
+        if isinstance(df, pd.DataFrame):
+            return int(df.memory_usage(deep=True).sum())
+        if isinstance(df, pl.LazyFrame):
+            return int(df.collect().estimated_size("bytes"))
+        if isinstance(df, pl.DataFrame):
+            return int(df.estimated_size("bytes"))
+        msg = f"Expected DataFrame or LazyFrame, got {type(df).__name__}"
+        raise EngineError(msg)

@@ -29,7 +29,6 @@ Scalability:
 
 from __future__ import annotations
 
-import contextlib
 import importlib
 import logging
 import time
@@ -235,8 +234,10 @@ def train_models(
 
     # Refit best model on all data when using CV (cross_val_score doesn't refit)
     if use_cv:
-        with contextlib.suppress(Exception):
+        try:
             best_model.fit(features, target)
+        except Exception as exc:
+            logger.warning("CV refit on full data failed: %s", exc)
 
     logger.info(
         "Training complete: best=%s, score=%.4f, trials=%d, time=%.1fs, truncated=%s",

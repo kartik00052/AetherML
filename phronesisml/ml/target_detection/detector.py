@@ -185,7 +185,7 @@ def _score_column(
         # Constant column — not a useful target
         confidence = 0.0
         signals.append("constant_column")
-    elif is_numeric and n_unique in _AMBIGUOUS_CARDINALITY_RANGE:
+    elif is_numeric and n_unique in range(3, 6):
         # Numeric with 2–5 unique values: ambiguous
         confidence += 0.3
         task_type = "ambiguous"

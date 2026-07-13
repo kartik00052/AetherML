@@ -60,7 +60,7 @@ def ml(csv_path: str) -> Phronesis:
 
 
 class TestImports:
-    def test_import_Phronesis_class(self) -> None:
+    def test_import_phronesis_class(self) -> None:
         from phronesisml import Phronesis
 
         assert Phronesis is not None
