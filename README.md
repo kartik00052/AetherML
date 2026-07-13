@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&height=200&color=0:0F2027,50:203A43,100:2C5364&text=AetherML&fontSize=60&fontColor=ffffff&animation=fadeIn&fontAlignY=40&desc=Open-Source%20Agentic%20Machine%20Learning%20Framework&descAlignY=60" alt="AetherML — Open-Source Agentic Machine Learning Framework"/>
+  <img src="assets/banner.png" alt="AetherML — Open-Source Agentic Machine Learning Framework" width="100%"/>
 </p>
 
 **A transparent, inspectable alternative to AutoML — the ML lifecycle modeled as a graph of cooperating agents.**
