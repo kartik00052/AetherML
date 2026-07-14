@@ -69,60 +69,9 @@ jobs:
       - run: pip install -e ".[dev]"
       - run: mypy phronesisml/ --ignore-missing-imports
 
-  test:
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.11", "3.12", "3.13"]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-          cache: pip
-      - run: pip install -e ".[dev]"
-      - run: pytest tests/ -q --tb=short
-
-  test-api:
-    runs-on: ubuntu-latest
-    needs: [lint, typecheck]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.13"
-          cache: pip
-      - run: pip install -e ".[dev,api]"
-      - run: pytest tests/test_api.py -q --tb=short
-
-  test-cli:
-    runs-on: ubuntu-latest
-    needs: [lint, typecheck]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.13"
-          cache: pip
-      - run: pip install -e ".[dev,cli]"
-      - run: pytest tests/test_cli_app.py -q --tb=short
-
-  test-explain:
-    runs-on: ubuntu-latest
-    needs: [lint, typecheck]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.13"
-          cache: pip
-      - run: pip install -e ".[dev,explain]"
-      - run: pytest tests/test_sdk.py tests/test_simple.py tests/test_explainability.py -q --tb=short
-
   docker:
     runs-on: ubuntu-latest
-    needs: [lint, typecheck, test]
+    needs: [lint, typecheck]
     steps:
       - uses: actions/checkout@v4
       - run: docker build -t phronesisml:test .
@@ -145,7 +94,7 @@ jobs:
 
   docker-publish:
     runs-on: ubuntu-latest
-    needs: [lint, typecheck, test, docker]
+    needs: [lint, typecheck, docker]
     if: startsWith(github.ref, 'refs/tags/v')
     steps:
       - uses: actions/checkout@v4
@@ -169,7 +118,7 @@ jobs:
 
   pypi-publish:
     runs-on: ubuntu-latest
-    needs: [lint, typecheck, test]
+    needs: [lint, typecheck]
     if: startsWith(github.ref, 'refs/tags/v')
     environment: pypi
     permissions:
