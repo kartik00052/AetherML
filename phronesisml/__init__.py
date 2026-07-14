@@ -32,6 +32,19 @@ from typing import Any
 
 from phronesisml.configs.settings import PhronesisConfig
 from phronesisml.exceptions import ConfigurationError, PhronesisError, WorkflowError
+from phronesisml.results import (
+    AnomalyResult,
+    CleanResult,
+    ClusteringResult,
+    DatasetProfile,
+    ExplainResult,
+    FeatureResult,
+    ModelResult,
+    TargetResult,
+    TaskDetectionResult,
+    TrainResult,
+    ValidationResult,
+)
 from phronesisml.sdk import (
     AnomalyReport,
     ClusteringReport,
@@ -47,17 +60,6 @@ from phronesisml.sdk import (
     ValidationReport,
 )
 from phronesisml.simple import (
-    AnomalyResult,
-    CleanResult,
-    ClusteringResult,
-    DatasetProfile,
-    ExplainResult,
-    FeatureResult,
-    ModelResult,
-    TargetResult,
-    TaskDetectionResult,
-    TrainResult,
-    ValidationResult,
     analyze,
     analyze_async,
     clean,
