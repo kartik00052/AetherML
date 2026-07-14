@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "phronesisml"
-version = "0.2.0"
+version = "0.2.1"
 description = "Open-source Python SDK that automates the complete ML lifecycle using a modular multi-agent architecture orchestrated by LangGraph."
 readme = "README.md"
 license = "MIT"
@@ -58,6 +58,18 @@ dev = [
 ]
 all = [
     "phronesisml[cli,spark,api,boost,mlflow,parquet]",
+]
+
+[tool.hatch.build.targets.sdist]
+exclude = [
+    "*.csv",
+    "tests/",
+    "test.py",
+    "AUDIT_REPORT.md",
+    "ARCHITECTURE_AUDIT.md",
+    ".github/",
+    "docs/",
+    "mkdocs.yml",
 ]
 
 [tool.hatch.build.targets.wheel]
