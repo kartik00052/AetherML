@@ -91,7 +91,14 @@ def train_models(
     """
     # ── Prepare data ─────────────────────────────────────────────────
     feature_cols = [c for c in df.columns if c != target_column]
-    features = df[feature_cols].values
+    features_df = df[feature_cols].copy()
+
+    # Encode any remaining categorical (object) columns as integers
+    for col in features_df.columns:
+        if features_df[col].dtype == "object":
+            features_df[col] = pd.factorize(features_df[col])[0]
+
+    features = features_df.values
     target = df[target_column].values
 
     use_cv = cv is not None and cv >= 2

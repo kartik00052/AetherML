@@ -84,7 +84,11 @@ def select_engine(
     # 1. User-forced engine
     preferred = config.engine.preferred
     if preferred is not None:
-        return _build_engine(EngineType(preferred), config)
+        try:
+            return _build_engine(EngineType(preferred), config)
+        except (ValueError, KeyError) as exc:
+            msg = f"Unknown engine type: {preferred!r}. Use 'pandas', 'polars', or 'spark'."
+            raise EngineSelectionError(msg) from exc
 
     # 2. Estimate memory footprint
     if df is not None:

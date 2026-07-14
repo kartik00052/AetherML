@@ -153,6 +153,44 @@ class ExplanationReport:
     n_samples_used: int
 
 
+@dataclass(frozen=True)
+class ClusteringReport:
+    """Clustering analysis results."""
+
+    algorithm: str
+    n_clusters: int
+    silhouette_score: float | None
+    davies_bouldin_score: float | None
+    calinski_harabasz_score: float | None
+    cluster_labels: list[int]
+    params: dict[str, Any]
+    raw: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass(frozen=True)
+class AnomalyReport:
+    """Anomaly detection results."""
+
+    algorithm: str
+    n_anomalies: int
+    contamination: float
+    anomaly_labels: list[int]
+    anomaly_scores: list[float]
+    params: dict[str, Any]
+    raw: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass(frozen=True)
+class TaskInfo:
+    """Result of unified task detection."""
+
+    task_type: str
+    target_column: str | None
+    confidence: float
+    ambiguity_reason: str | None
+    candidates: list[dict[str, Any]]
+
+
 # ── Internal engine bootstrap (lazy, lightweight) ────────────────
 
 
@@ -222,6 +260,15 @@ _EVALUATION = _MODEL + ["evaluation"]
 _EXPLAIN = _EVALUATION + ["explainability"]
 _REPORT = _EXPLAIN + ["reporting"]
 _FULL = _REPORT + ["storage"]
+_UNSUPERVISED_STAGES = [
+    "target_detection",
+    "feature_engineering",
+    "model_selection",
+    "evaluation",
+    "reporting",
+]
+_CLUSTERING = _EDA + _UNSUPERVISED_STAGES
+_ANOMALY = _EDA + _UNSUPERVISED_STAGES
 
 _STAGE_MAP: dict[str, list[str]] = {
     "load": _UPLOAD,
@@ -658,6 +705,102 @@ class Phronesis:
             explainer_type=report.get("explainer_type", "none"),
             sampled=report.get("sampled", False),
             n_samples_used=report.get("n_samples_used", 0),
+        )
+
+    def detect_task(
+        self,
+        force_task: str | None = None,
+    ) -> TaskInfo:
+        """Detect the ML task type (supervised or unsupervised).
+
+        Runs upload through target detection. Returns the detected
+        task type which may be classification, regression, clustering,
+        anomaly_detection, or analytics.
+
+        Args:
+            force_task: Optional override to force a specific task type.
+
+        Returns:
+            A ``TaskInfo`` with task_type, target_column, confidence,
+            and ambiguity reasoning.
+        """
+        self._ensure_sync(_TARGET)
+
+        return TaskInfo(
+            task_type=self._state.task_type or "unknown",
+            target_column=self._state.target_column,
+            confidence=self._state.target_detection_confidence or 0.0,
+            ambiguity_reason=self._state.ambiguity_reason,
+            candidates=[],
+        )
+
+    def cluster(
+        self,
+        n_clusters: int | None = None,
+        algorithms: list[str] | None = None,
+    ) -> ClusteringReport:
+        """Run clustering analysis on the dataset.
+
+        Executes upload through clustering evaluation. Automatically
+        selects the best clustering algorithm (KMeans, DBSCAN,
+        Agglomerative) based on silhouette score.
+
+        Args:
+            n_clusters: Optional hint for number of clusters.
+            algorithms: Optional list of algorithms to try.
+
+        Returns:
+            A ``ClusteringReport`` with algorithm, scores, labels.
+        """
+        self._ensure_sync(_CLUSTERING)
+        state = self._state
+
+        labels = state.cluster_labels or []
+        metrics = state.cluster_metrics or {}
+
+        return ClusteringReport(
+            algorithm=metrics.get("algorithm", "unknown"),
+            n_clusters=metrics.get("n_clusters", 0),
+            silhouette_score=metrics.get("silhouette_score"),
+            davies_bouldin_score=metrics.get("davies_bouldin_score"),
+            calinski_harabasz_score=metrics.get("calinski_harabasz_score"),
+            cluster_labels=labels,
+            params=metrics.get("params", {}),
+            raw=metrics,
+        )
+
+    def detect_anomalies(
+        self,
+        contamination: float = 0.1,
+        algorithms: list[str] | None = None,
+    ) -> AnomalyReport:
+        """Run anomaly detection on the dataset.
+
+        Executes upload through anomaly evaluation. Automatically
+        selects the best algorithm (Isolation Forest, LOF).
+
+        Args:
+            contamination: Expected fraction of anomalies.
+            algorithms: Optional list of algorithms to try.
+
+        Returns:
+            An ``AnomalyReport`` with algorithm, labels, scores.
+        """
+        self._ensure_sync(_ANOMALY)
+        state = self._state
+
+        labels = state.anomaly_labels or []
+        scores = state.anomaly_scores or []
+        metrics = state.anomaly_metrics or {}
+
+        return AnomalyReport(
+            algorithm=metrics.get("algorithm", "unknown"),
+            n_anomalies=metrics.get("n_anomalies", 0),
+            contamination=contamination,
+            anomaly_labels=labels,
+            anomaly_scores=scores,
+            params=metrics.get("params", {}),
+            raw=metrics,
         )
 
     def report(self, narrative: str | None = None) -> str:

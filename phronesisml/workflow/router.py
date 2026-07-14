@@ -79,16 +79,22 @@ def route_after_eda(state: Any) -> Literal["proceed", "__end__"]:
 
 
 def route_after_target_detection(state: Any) -> Literal["proceed", "__end__"]:
-    """Route after the Target Detection node.
+    """Route after the Target Detection / Task Detection node.
 
     If target detection found a target column, proceed to feature
-    engineering.  Even ambiguous detections proceed — the ambiguity
-    is surfaced to the user but does not block the pipeline.
+    engineering.  For unsupervised tasks (clustering, anomaly), proceed
+    without a target column.  Analytics-only mode ends here.
     """
-    if getattr(state, "target_column", None) is not None:
-        logger.info("Target detection succeeded — proceeding.")
+    task_type = getattr(state, "task_type", None)
+    target_column = getattr(state, "target_column", None)
+
+    if target_column is not None:
+        logger.info("Target detection succeeded — proceeding (supervised).")
         return "proceed"
-    logger.warning("No target column detected — ending workflow.")
+    if task_type in ("clustering", "anomaly_detection"):
+        logger.info("Unsupervised task detected (%s) — proceeding.", task_type)
+        return "proceed"
+    logger.warning("No target column or unsupervised task detected — ending workflow.")
     return "__end__"
 
 
@@ -108,11 +114,15 @@ def route_after_feature_engineering(state: Any) -> Literal["proceed", "__end__"]
 def route_after_model_selection(state: Any) -> Literal["proceed", "__end__"]:
     """Route after the Model Selection node.
 
-    If a trained model was produced, proceed to evaluation.
-    Otherwise, end the workflow.
+    If a trained model or cluster/anomaly results were produced,
+    proceed to evaluation.  Otherwise, end the workflow.
     """
     if getattr(state, "trained_model", None) is not None:
         logger.info("Model selection succeeded — proceeding to evaluation.")
+        return "proceed"
+    task_type = getattr(state, "task_type", None)
+    if task_type in ("clustering", "anomaly_detection"):
+        logger.info("Unsupervised task (%s) — proceeding to evaluation.", task_type)
         return "proceed"
     logger.warning("No trained model produced — ending workflow.")
     return "__end__"

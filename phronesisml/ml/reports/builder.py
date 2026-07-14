@@ -426,6 +426,74 @@ def _build_explainability_section(state: Any) -> str:
     return "\n".join(lines) if lines else "_Explainability data not available._"
 
 
+def _build_clustering_section(state: Any) -> str:
+    """Build the clustering results section."""
+    labels = getattr(state, "cluster_labels", None)
+    metrics = getattr(state, "cluster_metrics", None)
+
+    if labels is None and metrics is None:
+        return "_Clustering data not available._"
+
+    lines = []
+    if metrics and isinstance(metrics, dict):
+        lines.append("**Clustering Metrics:**\n")
+        for name, value in metrics.items():
+            if isinstance(value, float):
+                lines.append(f"- {name}: {value:.4f}")
+            elif isinstance(value, list):
+                lines.append(f"- {name}: {len(value)} values")
+            else:
+                lines.append(f"- {name}: {value}")
+    elif labels is not None:
+        import collections
+
+        counts = collections.Counter(labels)
+        n_clusters = len(counts)
+        lines.append(f"- **Clusters found:** {n_clusters}")
+        for cluster_id in sorted(counts.keys()):
+            lines.append(f"  - Cluster {cluster_id}: {counts[cluster_id]} samples")
+
+    return "\n".join(lines) if lines else "_Clustering data not available._"
+
+
+def _build_anomaly_section(state: Any) -> str:
+    """Build the anomaly detection results section."""
+    labels = getattr(state, "anomaly_labels", None)
+    metrics = getattr(state, "anomaly_metrics", None)
+    scores = getattr(state, "anomaly_scores", None)
+
+    if labels is None and metrics is None:
+        return "_Anomaly detection data not available._"
+
+    lines = []
+    if labels is not None:
+        n_anomalies = sum(labels)
+        n_total = len(labels)
+        lines.append(f"- **Total samples:** {n_total}")
+        lines.append(
+            f"- **Anomalies detected:** {n_anomalies} ({n_anomalies / n_total * 100:.1f}%)"
+        )
+        lines.append(f"- **Normal samples:** {n_total - n_anomalies}")
+
+    if metrics and isinstance(metrics, dict):
+        lines.append("\n**Anomaly Metrics:**\n")
+        for name, value in metrics.items():
+            if isinstance(value, float):
+                lines.append(f"- {name}: {value:.4f}")
+            else:
+                lines.append(f"- {name}: {value}")
+
+    if scores is not None and isinstance(scores, list) and scores:
+        import statistics
+
+        lines.append("\n**Score Statistics:**")
+        lines.append(f"- Mean: {statistics.mean(scores):.4f}")
+        lines.append(f"- Std: {statistics.stdev(scores):.4f}" if len(scores) > 1 else "")
+        lines.append(f"- Max: {max(scores):.4f}")
+
+    return "\n".join(lines) if lines else "_Anomaly detection data not available._"
+
+
 def _build_notes_section(state: Any) -> str:
     """Build the notes/cross-cutting concerns section."""
     notes = []
@@ -438,6 +506,9 @@ def _build_notes_section(state: Any) -> str:
             "- The task type could not be definitively determined. "
             "Results should be interpreted with caution.",
         )
+
+    if task_type in ("clustering", "anomaly_detection", "analytics"):
+        notes.append(f"- **Unsupervised task:** {task_type}. No target variable was used.")
 
     eval_report = getattr(state, "evaluation_report", None)
     if isinstance(eval_report, dict):

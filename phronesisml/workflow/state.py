@@ -158,6 +158,28 @@ class WorkflowState(BaseModel):
         description="[model_selection] Trained model object.",
     )
 
+    # ── Unsupervised task fields ────────────────────────────────────
+    cluster_labels: list[int] | None = Field(
+        default=None,
+        description="[clustering] Cluster assignments for each row.",
+    )
+    cluster_metrics: dict[str, Any] | None = Field(
+        default=None,
+        description="[clustering] Clustering evaluation metrics.",
+    )
+    anomaly_labels: list[int] | None = Field(
+        default=None,
+        description="[anomaly_detection] Anomaly labels (1=anomaly, 0=normal).",
+    )
+    anomaly_scores: list[float] | None = Field(
+        default=None,
+        description="[anomaly_detection] Anomaly scores per row.",
+    )
+    anomaly_metrics: dict[str, Any] | None = Field(
+        default=None,
+        description="[anomaly_detection] Anomaly detection metrics.",
+    )
+
     # ── Evaluation agent ────────────────────────────────────────────
     evaluation_report: dict[str, Any] | None = Field(
         default=None,

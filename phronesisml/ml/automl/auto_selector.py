@@ -110,6 +110,52 @@ _REGRESSION_CANDIDATES: list[CandidateModel] = [
     ),
 ]
 
+# ── Clustering candidates ───────────────────────────────────────
+
+_CLUSTERING_CANDIDATES: list[CandidateModel] = [
+    CandidateModel(
+        name="kmeans",
+        estimator_path="sklearn.cluster.KMeans",
+        param_space={
+            "n_clusters": [2, 3, 4, 5, 6, 8, 10],
+            "n_init": [10],
+        },
+        tags={"clustering": True, "fast": True},
+    ),
+    CandidateModel(
+        name="agglomerative",
+        estimator_path="sklearn.cluster.AgglomerativeClustering",
+        param_space={
+            "n_clusters": [2, 3, 4, 5, 6, 8, 10],
+            "linkage": ["ward", "complete"],
+        },
+        tags={"clustering": True, "fast": True},
+    ),
+]
+
+# ── Anomaly detection candidates ─────────────────────────────────
+
+_ANOMALY_CANDIDATES: list[CandidateModel] = [
+    CandidateModel(
+        name="isolation_forest",
+        estimator_path="sklearn.ensemble.IsolationForest",
+        param_space={
+            "n_estimators": [100, 200],
+            "contamination": [0.05, 0.1, 0.15],
+        },
+        tags={"anomaly": True, "fast": True},
+    ),
+    CandidateModel(
+        name="local_outlier_factor",
+        estimator_path="sklearn.neighbors.LocalOutlierFactor",
+        param_space={
+            "n_neighbors": [10, 20, 30],
+            "contamination": [0.05, 0.1, 0.15],
+        },
+        tags={"anomaly": True, "fast": True},
+    ),
+]
+
 # ── Ambiguous candidates (superset of both) ────────────────────────
 
 _AMBIGUOUS_CANDIDATES: list[CandidateModel] = [
@@ -181,6 +227,10 @@ def recommend_models(
         candidates = list(_CLASSIFICATION_CANDIDATES)
     elif task_type == "regression":
         candidates = list(_REGRESSION_CANDIDATES)
+    elif task_type == "clustering":
+        candidates = list(_CLUSTERING_CANDIDATES)
+    elif task_type == "anomaly_detection":
+        candidates = list(_ANOMALY_CANDIDATES)
     else:
         # Ambiguous or unknown: try classification candidates first,
         # they'll fail gracefully if the target is truly continuous.

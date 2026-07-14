@@ -1,13 +1,15 @@
 """Evaluation metrics — problem-type-appropriate model scoring.
 
-Computes metrics based on the task type recorded by Target Detection
+Computes metrics based on the task type recorded by Task Detection
 — never infers problem type independently.  Surfaces ambiguity
-caveats when Target Detection recorded low confidence.
+caveats when Task Detection recorded low confidence.
 
 Supported metric sets:
 - **Classification**: accuracy, precision (macro), recall (macro),
   F1 (macro), confusion matrix.
 - **Regression**: RMSE, MAE, R².
+- **Clustering**: silhouette, davies-bouldin, calinski-harabasz.
+- **Anomaly Detection**: contamination ratio, anomaly count.
 - **Ambiguous**: computes both classification and regression metrics
   where applicable, and includes the ambiguity caveat in the report.
 
@@ -37,58 +39,95 @@ logger = logging.getLogger(__name__)
 def evaluate_model(
     model: Any,
     df: pd.DataFrame,
-    target_column: str,
-    feature_names: list[str],
-    task_type: str | None,
+    target_column: str | None = None,
+    feature_names: list[str] | None = None,
+    task_type: str | None = None,
     best_params: dict[str, Any] | None = None,
     target_detection_confidence: float | None = None,
     ambiguity_reason: str | None = None,
     mlflow_experiment: str | None = None,
+    cluster_labels: list[int] | None = None,
+    anomaly_labels: list[int] | None = None,
+    anomaly_contamination: float | None = None,
 ) -> dict[str, Any]:
     """Evaluate a trained model and return a metrics report.
 
     Args:
         model: A trained sklearn-compatible estimator.
-        df: The full engineered DataFrame (train + test will be
-            extracted from the trainer's split, or this can be a
-            held-out test set).
-        target_column: Name of the target column.
+        df: The full engineered DataFrame.
+        target_column: Name of the target column (None for unsupervised).
         feature_names: Names of the feature columns.
-        task_type: ``"classification"``, ``"regression"``, or
-            ``"ambiguous"`` — from Target Detection.
+        task_type: ``"classification"``, ``"regression"``,
+            ``"clustering"``, ``"anomaly_detection"``, or
+            ``"ambiguous"`` — from Task Detection.
         best_params: The hyperparameters that produced this model.
-        target_detection_confidence: Confidence from Target Detection.
-        ambiguity_reason: Reason if Target Detection was ambiguous.
+        target_detection_confidence: Confidence from Task Detection.
+        ambiguity_reason: Reason if Task Detection was ambiguous.
         mlflow_experiment: Optional MLflow experiment name.
+        cluster_labels: Pre-computed cluster labels (for clustering).
+        anomaly_labels: Pre-computed anomaly labels (for anomaly).
+        anomaly_contamination: Expected contamination ratio.
 
     Returns:
         A dict with keys: ``task_type``, ``metrics``, ``model_info``,
         ``ambiguity_caveat``, ``mlflow_logged``.
 
     """
-    features = df[feature_names].values
-    target = df[target_column].values
+    if feature_names is None:
+        if target_column:
+            feature_names = [c for c in df.columns if c != target_column]
+        else:
+            feature_names = list(df.columns)
 
-    y_pred = model.predict(features)
+    features_df = df[feature_names].copy()
+
+    # Encode any remaining categorical (object) columns as integers
+    for col in features_df.columns:
+        if features_df[col].dtype == "object":
+            features_df[col] = pd.factorize(features_df[col])[0]
+
+    features = features_df.values
 
     # ── Compute metrics based on task type ──────────────────────────
-    if task_type == "classification":
-        metrics = _classification_metrics(target, y_pred)
-    elif task_type == "regression":
-        metrics = _regression_metrics(target, y_pred)
-    elif task_type == "ambiguous":
-        # Compute both sets where applicable — skip regression if
-        # target is non-numeric (e.g. string labels).
-        metrics = _classification_metrics(target, y_pred)
-        with contextlib.suppress(ValueError, TypeError):
-            metrics.update(_regression_metrics(target, y_pred))
-    else:
-        # Fallback: try classification if values are discrete
-        unique_target = np.unique(target)
-        if len(unique_target) <= 20 and np.all(unique_target == unique_target.astype(int)):
-            metrics = _classification_metrics(target, y_pred)
+    if task_type == "clustering":
+        if cluster_labels is not None:
+            metrics = _clustering_metrics(features, cluster_labels)
+        elif model is not None and hasattr(model, "labels_"):
+            metrics = _clustering_metrics(features, model.labels_.tolist())
         else:
+            metrics = {}
+    elif task_type == "anomaly_detection":
+        if anomaly_labels is not None:
+            metrics = _anomaly_metrics(anomaly_labels, anomaly_contamination or 0.1)
+        elif model is not None and hasattr(model, "predict"):
+            try:
+                pred = model.predict(features)
+                labels = (pred == -1).astype(int).tolist()
+                metrics = _anomaly_metrics(labels, anomaly_contamination or 0.1)
+            except Exception:
+                metrics = {}
+        else:
+            metrics = {}
+    elif target_column is not None and target_column in df.columns:
+        target = df[target_column].values
+        y_pred = model.predict(features)
+
+        if task_type == "classification":
+            metrics = _classification_metrics(target, y_pred)
+        elif task_type == "regression":
             metrics = _regression_metrics(target, y_pred)
+        elif task_type == "ambiguous":
+            metrics = _classification_metrics(target, y_pred)
+            with contextlib.suppress(ValueError, TypeError):
+                metrics.update(_regression_metrics(target, y_pred))
+        else:
+            unique_target = np.unique(target)
+            if len(unique_target) <= 20 and np.all(unique_target == unique_target.astype(int)):
+                metrics = _classification_metrics(target, y_pred)
+            else:
+                metrics = _regression_metrics(target, y_pred)
+    else:
+        metrics = {}
 
     # ── Build ambiguity caveat ───────────────────────────────────────
     ambiguity_caveat: str | None = None
@@ -107,22 +146,26 @@ def evaluate_model(
         )
 
     # ── Model info ───────────────────────────────────────────────────
+    model_name = type(model).__name__ if model is not None else "unsupervised"
+    model_module = type(model).__module__ if model is not None else "unknown"
     model_info: dict[str, Any] = {
-        "model_type": type(model).__name__,
-        "model_module": type(model).__module__,
+        "model_type": model_name,
+        "model_module": model_module,
         "best_params": best_params or {},
         "n_features": len(feature_names),
         "n_samples": len(df),
     }
 
     # ── MLflow logging (graceful degradation) ────────────────────────
-    mlflow_logged = _log_to_mlflow(
-        model=model,
-        metrics=metrics,
-        params=best_params or {},
-        model_info=model_info,
-        experiment_name=mlflow_experiment,
-    )
+    mlflow_logged = False
+    if model is not None:
+        mlflow_logged = _log_to_mlflow(
+            model=model,
+            metrics=metrics,
+            params=best_params or {},
+            model_info=model_info,
+            experiment_name=mlflow_experiment,
+        )
 
     report: dict[str, Any] = {
         "task_type": task_type,
@@ -199,6 +242,78 @@ def _regression_metrics(
         "rmse": rmse,
         "mae": mae,
         "r2": r2,
+    }
+
+
+def _clustering_metrics(
+    X: np.ndarray[Any, Any],
+    labels: list[int],
+) -> dict[str, Any]:
+    """Compute clustering metrics: silhouette, davies-bouldin, calinski-harabasz."""
+    from sklearn.metrics import (
+        calinski_harabasz_score,
+        davies_bouldin_score,
+        silhouette_score,
+    )
+
+    labels_arr = np.array(labels)
+    n_clusters = len(set(labels_arr) - {-1})
+
+    if n_clusters < 2:
+        return {
+            "n_clusters": n_clusters,
+            "silhouette_score": None,
+            "davies_bouldin_score": None,
+            "calinski_harabasz_score": None,
+        }
+
+    # Filter noise points (label == -1 from DBSCAN)
+    mask = labels_arr != -1
+    if mask.sum() < 2:
+        return {
+            "n_clusters": n_clusters,
+            "silhouette_score": None,
+            "davies_bouldin_score": None,
+            "calinski_harabasz_score": None,
+        }
+
+    X_valid = X[mask]
+    labels_valid = labels_arr[mask]
+
+    sil = None
+    db = None
+    ch = None
+
+    with contextlib.suppress(ValueError, TypeError):
+        sil = float(silhouette_score(X_valid, labels_valid))
+    with contextlib.suppress(ValueError, TypeError):
+        db = float(davies_bouldin_score(X_valid, labels_valid))
+    with contextlib.suppress(ValueError, TypeError):
+        ch = float(calinski_harabasz_score(X_valid, labels_valid))
+
+    return {
+        "n_clusters": n_clusters,
+        "silhouette_score": sil,
+        "davies_bouldin_score": db,
+        "calinski_harabasz_score": ch,
+    }
+
+
+def _anomaly_metrics(
+    labels: list[int],
+    contamination: float = 0.1,
+) -> dict[str, Any]:
+    """Compute anomaly detection metrics."""
+    labels_arr = np.array(labels)
+    n_anomalies = int(labels_arr.sum())
+    n_total = len(labels_arr)
+    detected_contamination = n_anomalies / n_total if n_total > 0 else 0.0
+
+    return {
+        "n_anomalies": n_anomalies,
+        "n_total": n_total,
+        "detected_contamination": detected_contamination,
+        "expected_contamination": contamination,
     }
 
 

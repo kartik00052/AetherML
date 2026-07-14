@@ -190,6 +190,62 @@ class TrainResult:
     estimated_training_cost: str = "unknown"
 
 
+@dataclass(frozen=True)
+class ClusteringResult:
+    """Result of clustering analysis.
+
+    Example::
+
+        result = cluster("data.csv")
+        print(f"Algorithm: {result.algorithm}, Clusters: {result.n_clusters}")
+    """
+
+    algorithm: str
+    n_clusters: int
+    silhouette_score: float | None
+    davies_bouldin_score: float | None
+    calinski_harabasz_score: float | None
+    cluster_labels: list[int]
+    params: dict[str, Any]
+    report: str
+
+
+@dataclass(frozen=True)
+class AnomalyResult:
+    """Result of anomaly detection.
+
+    Example::
+
+        result = detect_anomalies("data.csv")
+        print(f"Anomalies: {result.n_anomalies} of {result.n_total}")
+    """
+
+    algorithm: str
+    n_anomalies: int
+    n_total: int
+    contamination: float
+    anomaly_labels: list[int]
+    anomaly_scores: list[float]
+    params: dict[str, Any]
+    report: str
+
+
+@dataclass(frozen=True)
+class TaskDetectionResult:
+    """Result of unified task detection.
+
+    Example::
+
+        result = detect_task("data.csv")
+        print(f"Task: {result.task_type} (confidence: {result.confidence:.2f})")
+    """
+
+    task_type: str
+    target_column: str | None
+    confidence: float
+    ambiguity_reason: str | None
+
+
 # ── Pipeline stage constants ─────────────────────────────────────
 
 _STAGES_ANALYZE = ["upload", "etl", "validation", "eda"]
@@ -249,6 +305,38 @@ _STAGES_TRAIN = [
     "explainability",
     "reporting",
     "storage",
+]
+
+_STAGES_CLUSTER = [
+    "upload",
+    "etl",
+    "validation",
+    "eda",
+    "target_detection",
+    "feature_engineering",
+    "model_selection",
+    "evaluation",
+    "reporting",
+]
+
+_STAGES_ANOMALY = [
+    "upload",
+    "etl",
+    "validation",
+    "eda",
+    "target_detection",
+    "feature_engineering",
+    "model_selection",
+    "evaluation",
+    "reporting",
+]
+
+_STAGES_DETECT_TASK = [
+    "upload",
+    "etl",
+    "validation",
+    "eda",
+    "target_detection",
 ]
 
 
@@ -477,6 +565,53 @@ def _build_train_result(ml: Any) -> TrainResult:
         report=str(state.final_report or ""),
         artifact_uri=state.artifact_uri,
         estimated_training_cost=bp.get("estimated_training_cost", "unknown"),
+    )
+
+
+def _build_clustering_result(ml: Any) -> ClusteringResult:
+    """Build ClusteringResult from phronesisml state after clustering."""
+    state = ml._state
+    metrics = state.cluster_metrics or {}
+    labels = state.cluster_labels or []
+    return ClusteringResult(
+        algorithm=metrics.get("algorithm", "unknown"),
+        n_clusters=metrics.get("n_clusters", 0),
+        silhouette_score=metrics.get("silhouette_score"),
+        davies_bouldin_score=metrics.get("davies_bouldin_score"),
+        calinski_harabasz_score=metrics.get("calinski_harabasz_score"),
+        cluster_labels=labels,
+        params=metrics.get("params", {}),
+        report=str(state.final_report or ""),
+    )
+
+
+def _build_anomaly_result(ml: Any) -> AnomalyResult:
+    """Build AnomalyResult from phronesisml state after anomaly detection."""
+    state = ml._state
+    metrics = state.anomaly_metrics or {}
+    labels = state.anomaly_labels or []
+    scores = state.anomaly_scores or []
+    n_total = len(labels) if labels else 0
+    return AnomalyResult(
+        algorithm=metrics.get("algorithm", "unknown"),
+        n_anomalies=metrics.get("n_anomalies", 0),
+        n_total=n_total,
+        contamination=metrics.get("expected_contamination", 0.1),
+        anomaly_labels=labels,
+        anomaly_scores=scores,
+        params=metrics.get("params", {}),
+        report=str(state.final_report or ""),
+    )
+
+
+def _build_task_detection_result(ml: Any) -> TaskDetectionResult:
+    """Build TaskDetectionResult from phronesisml state."""
+    state = ml._state
+    return TaskDetectionResult(
+        task_type=state.task_type or "unknown",
+        target_column=state.target_column,
+        confidence=state.target_detection_confidence or 0.0,
+        ambiguity_reason=state.ambiguity_reason,
     )
 
 
@@ -1037,3 +1172,157 @@ async def train_async(
         )
     await _run_stages_async(ml, _STAGES_TRAIN)
     return _build_train_result(ml)
+
+
+# ── Unsupervised API: clustering ──────────────────────────────────
+
+
+def cluster(
+    path: str,
+    *,
+    engine: str | None = None,
+    null_strategy: str = "drop",
+) -> ClusteringResult:
+    """Run clustering analysis on a dataset.
+
+    Executes upload through clustering evaluation. Automatically
+    selects the best clustering algorithm (KMeans, DBSCAN,
+    Agglomerative) based on silhouette score.
+
+    Args:
+        path: Path to a data file.
+        engine: Force a specific engine. ``None`` for auto-selection.
+        null_strategy: Null handling strategy. Default ``"drop"``.
+
+    Returns:
+        A ``ClusteringResult`` with algorithm, scores, and labels.
+
+    Example::
+
+        from phronesisml import cluster
+
+        result = cluster("data.csv")
+        print(f"Algorithm: {result.algorithm}, Clusters: {result.n_clusters}")
+    """
+    return _run_sync(cluster_async(path, engine=engine, null_strategy=null_strategy))
+
+
+async def cluster_async(
+    path: str,
+    *,
+    engine: str | None = None,
+    null_strategy: str = "drop",
+) -> ClusteringResult:
+    """Async variant of :func:`cluster`."""
+    from phronesisml.sdk import Phronesis
+
+    config = _build_config(engine=engine, null_strategy=null_strategy)
+    ml = Phronesis(path, config=config)
+    await _run_stages_async(ml, _STAGES_CLUSTER)
+    return _build_clustering_result(ml)
+
+
+# ── Unsupervised API: anomaly detection ───────────────────────────
+
+
+def detect_anomalies(
+    path: str,
+    *,
+    engine: str | None = None,
+    null_strategy: str = "drop",
+    contamination: float = 0.1,
+) -> AnomalyResult:
+    """Run anomaly detection on a dataset.
+
+    Executes upload through anomaly evaluation. Automatically
+    selects the best algorithm (Isolation Forest, LOF).
+
+    Args:
+        path: Path to a data file.
+        engine: Force a specific engine. ``None`` for auto-selection.
+        null_strategy: Null handling strategy. Default ``"drop"``.
+        contamination: Expected fraction of anomalies.
+
+    Returns:
+        An ``AnomalyResult`` with labels, scores, and metadata.
+
+    Example::
+
+        from phronesisml import detect_anomalies
+
+        result = detect_anomalies("data.csv")
+        print(f"Anomalies: {result.n_anomalies} of {result.n_total}")
+    """
+    return _run_sync(
+        detect_anomalies_async(
+            path,
+            engine=engine,
+            null_strategy=null_strategy,
+            contamination=contamination,
+        )
+    )
+
+
+async def detect_anomalies_async(
+    path: str,
+    *,
+    engine: str | None = None,
+    null_strategy: str = "drop",
+    contamination: float = 0.1,
+) -> AnomalyResult:
+    """Async variant of :func:`detect_anomalies`."""
+    from phronesisml.sdk import Phronesis
+
+    config = _build_config(engine=engine, null_strategy=null_strategy)
+    ml = Phronesis(path, config=config)
+    await _run_stages_async(ml, _STAGES_ANOMALY)
+    return _build_anomaly_result(ml)
+
+
+# ── Unsupervised API: task detection ──────────────────────────────
+
+
+def detect_task(
+    path: str,
+    *,
+    engine: str | None = None,
+    null_strategy: str = "drop",
+) -> TaskDetectionResult:
+    """Detect the ML task type for a dataset.
+
+    Determines whether the dataset is suited for supervised learning
+    (classification/regression), unsupervised learning (clustering),
+    anomaly detection, or analytics-only exploration.
+
+    Args:
+        path: Path to a data file.
+        engine: Force a specific engine. ``None`` for auto-selection.
+        null_strategy: Null handling strategy. Default ``"drop"``.
+
+    Returns:
+        A ``TaskDetectionResult`` with task_type, confidence, and
+        target_column (if supervised).
+
+    Example::
+
+        from phronesisml import detect_task
+
+        result = detect_task("data.csv")
+        print(f"Task: {result.task_type} (confidence: {result.confidence:.2f})")
+    """
+    return _run_sync(detect_task_async(path, engine=engine, null_strategy=null_strategy))
+
+
+async def detect_task_async(
+    path: str,
+    *,
+    engine: str | None = None,
+    null_strategy: str = "drop",
+) -> TaskDetectionResult:
+    """Async variant of :func:`detect_task`."""
+    from phronesisml.sdk import Phronesis
+
+    config = _build_config(engine=engine, null_strategy=null_strategy)
+    ml = Phronesis(path, config=config)
+    await _run_stages_async(ml, _STAGES_DETECT_TASK)
+    return _build_task_detection_result(ml)
