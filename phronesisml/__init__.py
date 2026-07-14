@@ -217,7 +217,7 @@ async def run_pipeline(
     if config is None:
         config = PhronesisConfig()
     if engine_preference is not None:
-        config.engine.preferred = engine_preference
+        config.engine.preferred = engine_preference  # type: ignore[assignment]
     if stages is None:
         stages = list(_FULL_PIPELINE_STAGES)
 

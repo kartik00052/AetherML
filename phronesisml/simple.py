@@ -176,7 +176,7 @@ def _build_config(
     )
 
     return PhronesisConfig(
-        engine=EngineConfig(preferred=engine),
+        engine=EngineConfig(preferred=engine),  # type: ignore[arg-type]
         feature_selection=FeatureSelectionConfig(
             variance_threshold=variance_threshold,
             correlation_threshold=correlation_threshold,

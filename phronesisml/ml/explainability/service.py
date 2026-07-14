@@ -417,7 +417,7 @@ def _select_explainer(
                     entry.name,
                     model_info.class_name,
                 )
-                return entry.factory(model, X, shap)
+                return entry.factory(model, X, shap)  # type: ignore[no-any-return]
         except Exception as exc:
             logger.debug(
                 "Explainability: %s routing failed for %s: %s",
