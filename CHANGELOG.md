@@ -31,6 +31,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.2.2] - 2026-07-15
+
+### Fixed
+
+- **Mypy type annotation errors** — Resolved all 7 mypy errors across 3 files with
+  annotation-only changes (zero runtime behavior changes):
+  - `memory.py`: Added `float()` cast for psutil memory detection return type
+  - `sampler.py`: Added type ignore for `dict.get()` with `str | None` key
+  - `polars_engine.py`: Added type ignore for Polars subscript/sampling returns
+
+### Changed
+
+- **Version bumped to 0.2.2** — Previous v0.2.1 was already published to PyPI
+
+---
+
 ## [0.2.1] - 2026-07-15
 
 ### Added

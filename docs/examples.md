@@ -277,7 +277,7 @@ phronesisml info
 
 ```bash
 # Pull and run
-docker run -p 8000:8000 ghcr.io/kartik00052/phronesisml:v0.2.1
+docker run -p 8000:8000 ghcr.io/kartik00052/phronesisml:v0.2.2
 
 # With volume mount for data
 docker run -p 8000:8000 -v $(pwd)/data:/app/data \

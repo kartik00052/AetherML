@@ -62,7 +62,7 @@ phronesisml info
 **Output:**
 
 ```
-PhronesisML v0.2.1
+PhronesisML v0.2.2
 Python 3.11.5
 Platform: win32
 
@@ -127,7 +127,7 @@ phronesisml run data.csv --engine spark
 ## Running via Docker
 
 ```bash
-docker run -p 8000:8000 ghcr.io/kartik00052/phronesisml:v0.2.1
+docker run -p 8000:8000 ghcr.io/kartik00052/phronesisml:v0.2.2
 ```
 
 This starts the **REST API server**, not the CLI. The CLI runs locally.
