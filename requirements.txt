@@ -15,7 +15,7 @@ openpyxl==3.1.5
 
 # CLI (optional: pip install phronesisml[cli])
 typer==0.26.7
-rich==13.9.4
+rich==15.0.0
 
 # Dev / Test
 pytest==8.4.2
