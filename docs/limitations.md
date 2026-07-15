@@ -9,7 +9,7 @@ PhronesisML is honest about what it does and does not support. This page lists t
 | Area | Limitation | Details | Workaround |
 |------|-----------|---------|------------|
 | **PDF Reports** | Not supported | `generate_report(format="pdf")` raises `NotImplementedError`. Only Markdown and HTML formats work. | Export Markdown, convert with pandoc or a Markdown-to-PDF tool. |
-| **Clustering** | Not supported | The pipeline is designed for **supervised learning** only (classification and regression). Unsupervised tasks — clustering, anomaly detection, dimensionality reduction — are not implemented. | Use scikit-learn directly after `engineer_features()`. |
+| **Clustering** | Limited | Clustering is supported via `cluster()` but lacks advanced options (e.g., custom distance metrics, density-based clustering). Anomaly detection and dimensionality reduction are also supported. | Use scikit-learn directly for advanced unsupervised needs. |
 | **Time-series** | Not supported | No special handling for temporal features, forecasting, seasonal decomposition, or time-based train/test splits. | Use dedicated time-series libraries (Prophet, statsmodels). |
 | **Plugin system** | Not implemented | The `plugins/` directory and entry-points-based discovery mechanism are planned but not built. | Extend the SDK via subclassing or use the OOP API. |
 | **Storage backends** | Local only | Only local filesystem storage is implemented. S3, GCS, and Azure Blob backends are planned. | Save artifacts locally, then upload manually. |

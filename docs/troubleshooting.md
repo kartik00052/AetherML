@@ -76,7 +76,7 @@ profile = analyze("data.csv", engine="pandas")  # Try pandas explicitly
 
 ### `EngineError: Expected Polars DataFrame, got DataFrame`
 
-**Cause:** Engine type mismatch. This was a known bug in v0.2.0 — Polars engine methods didn't handle Pandas DataFrames.
+**Cause:** Engine type mismatch. This was a known bug in v0.2.0 — Polars engine methods didn't handle Pandas DataFrames. **Fixed in v0.2.1.**
 
 **Solution:** Update to the latest version:
 

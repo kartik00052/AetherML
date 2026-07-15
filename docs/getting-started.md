@@ -19,7 +19,6 @@ This installs everything you need for CSV, Excel (.xlsx), Parquet, JSON, and Fea
 ```bash
 pip install phronesisml[api]       # FastAPI REST endpoints
 pip install phronesisml[cli]       # CLI commands
-pip install phronesisml[explain]   # SHAP explanations
 pip install phronesisml[all]       # everything
 ```
 
@@ -265,7 +264,7 @@ uvicorn phronesisml.interfaces.api.app:app --host 0.0.0.0 --port 8000
 Or with Docker:
 
 ```bash
-docker run -p 8000:8000 ghcr.io/kartik00052/phronesisml:v0.2.0
+docker run -p 8000:8000 ghcr.io/kartik00052/phronesisml:v0.2.1
 ```
 
 ### Test the API

@@ -28,7 +28,7 @@ What actually happened. Include full traceback if applicable.
 **Environment**
 - OS: [e.g., Windows 11, Ubuntu 22.04]
 - Python version: [e.g., 3.13.3]
-- PhronesisML version: [e.g., 0.2.0]
+- PhronesisML version: [e.g., 0.2.1]
 - Installation method: [e.g., pip, source]
 
 **Dataset info**

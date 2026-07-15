@@ -239,7 +239,7 @@ SHAP is the industry standard for model explainability. PhronesisML auto-selects
 
 ### Graceful Degradation
 
-If SHAP is not installed (`pip install phronesisml[explain]`), the explainability agent returns empty results and the pipeline continues. No crash, no error — just missing explanations.
+SHAP is included as a core dependency (`shap>=0.43,<1.0`). The explainability agent uses it to generate feature importance explanations automatically — no extra install needed.
 
 ---
 

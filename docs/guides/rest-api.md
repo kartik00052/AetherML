@@ -18,7 +18,7 @@ uvicorn phronesisml.interfaces.api.app:app --host 0.0.0.0 --port 8000
 ### With Docker
 
 ```bash
-docker run -p 8000:8000 ghcr.io/kartik00052/phronesisml:v0.2.0
+docker run -p 8000:8000 ghcr.io/kartik00052/phronesisml:v0.2.1
 ```
 
 ### Programmatic
@@ -95,7 +95,7 @@ curl http://localhost:8000/health
 ```json
 {
   "status": "healthy",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "engines": ["pandas", "polars"]
 }
 ```
@@ -248,7 +248,7 @@ The Swagger UI lets you:
 ### Basic
 
 ```bash
-docker run -p 8000:8000 ghcr.io/kartik00052/phronesisml:v0.2.0
+docker run -p 8000:8000 ghcr.io/kartik00052/phronesisml:v0.2.1
 ```
 
 ### With Volume Mount
@@ -256,7 +256,7 @@ docker run -p 8000:8000 ghcr.io/kartik00052/phronesisml:v0.2.0
 ```bash
 docker run -p 8000:8000 \
   -v $(pwd)/data:/app/data \
-  ghcr.io/kartik00052/phronesisml:v0.2.0
+  ghcr.io/kartik00052/phronesisml:v0.2.1
 ```
 
 ### Docker Compose

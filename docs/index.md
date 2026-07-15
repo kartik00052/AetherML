@@ -105,7 +105,6 @@ pip install phronesisml
 # With extras
 pip install phronesisml[api]       # FastAPI REST endpoints
 pip install phronesisml[cli]       # CLI commands
-pip install phronesisml[explain]   # SHAP explanations
 pip install phronesisml[all]       # everything
 ```
 
