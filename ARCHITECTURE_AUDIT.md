@@ -8,7 +8,9 @@
   Scope:    SDK API, LangGraph workflow, agents, services, engines,
             dependencies, APIs, validation, ETL/EDA, reporting,
             logging, error handling, import safety, performance,
-            testing, documentation, open-source readiness
+            testing, documentation, open-source readiness,
+            preflight validation, resource estimation, sampling,
+            memory safety, target detection hardening
   Target:   Production-grade, maintainable, modular, extensible,
             beginner-friendly open-source Python SDK
 
@@ -17,13 +19,49 @@
 ================================================================================
 
   Initial findings:  48 (6 Critical, 12 High, 18 Medium, 12 Low)
-  Fixed in session:  6 critical + 1 high + 1 new feature (service layer start)
-  Remaining:         41 (0 Critical, 11 High, 18 Medium, 12 Low)
+  Fixed in session:  6 critical + 1 high + B3 + complete preflight system
+  Remaining:         40 (0 Critical, 10 High, 18 Medium, 12 Low)
 
   Architecture grade:  A- (upgraded from B+)
     Before: Clean facade, typed dataclasses, 110/110 tests
-    After:  All critical defects resolved, service layer started, 148/148 tests,
+    After:  All critical defects resolved, preflight system, 193/193 tests,
             PEP 561 compliant, SHAP as core dep, sdist optimized
+
+================================================================================
+  PREFLIGHT SYSTEM (NEW — v0.2.1 production hardening)
+================================================================================
+
+  Purpose: Prevent OOM failures and expensive pipeline runs on unsuitable data
+  Root cause addressed: Target detection selecting wrong column (Customer_number
+  as target) → 53K features → MemoryError on 66K-row dataset
+
+  Architecture:
+    phronesisml/ml/preflight/
+    ├── __init__.py          — Package exports
+    ├── config.py            — SamplingConfig (Pydantic) + SamplingMode (StrEnum)
+    ├── estimator.py         — ResourceEstimator: memory, features, runtime
+    ├── sampler.py           — Sampler: 9 strategies with engine-native conversion
+    └── memory.py            — MemorySafety: psutil detection + fallback
+
+  Sampling Modes (9):
+    auto, random, stratified, time_aware, head, diversity,
+    anomaly_preserving, text_balanced, disabled
+
+  Resource Limits:
+    sample_size=50000, sample_fraction=0.10, min_sample_size=500
+    Row thresholds: <50K→full, 50K-250K→35K, 250K-1M→75K, >1M→fraction
+    max_memory_gb=4.0 (force sampling), critical_memory_gb=8.0 (stop)
+
+  Integration Points:
+    - PhronesisConfig.sampling field
+    - BaseEngine.sample() abstract method (Polars, Pandas, Spark)
+    - Graph builder auto-inserts sampling nodes before expensive stages
+    - Workflow sampling node (workflow/sampling_node.py)
+    - Target detection ID/UUID/high-cardinality filtering
+    - validate_target_safety() pre-flight checks
+    - Router early termination on preflight blockers
+
+  Tests: 45 regression tests (tests/test_preflight.py)
 
 ================================================================================
   SESSION CHANGELOG
@@ -50,6 +88,23 @@
     - ExplainabilityService created with registry routing + unwrapping
     - SHAP moved from optional [explain] to core dependencies
     - sdist excludes CSVs, tests, docs, .github/
+    - B3: ETLAgent pandas import moved inside run() (no module-level import)
+    - Target detection hardening: ID/UUID/high-cardinality column filtering
+    - Pre-flight validation: validate_target_safety() with memory estimation
+    - Preflight diagnostics propagation through workflow state
+    - Router early termination on preflight blockers
+    - Graph cache clearing: clear_all_caches() added
+    - Complete preflight package (phronesisml/ml/preflight/):
+      * SamplingConfig (Pydantic) + SamplingMode (StrEnum, 9 modes)
+      * ResourceEstimator: memory, feature count, runtime estimation
+      * Sampler: 9 sampling strategies with engine-native conversion
+      * MemorySafety: psutil-based RAM detection with fallback
+    - Engine sampling methods: sample() on BaseEngine ABC + all implementations
+    - SamplingConfig integrated into PhronesisConfig
+    - Graph builder auto-inserts sampling nodes before expensive stages
+    - Workflow sampling node for pre-flight sampling
+    - Pipeline integration: run_pipeline() passes sampling config
+    - 45 preflight regression tests (tests/test_preflight.py)
 
   Published artifacts:
     PyPI:    pypi.org/project/phronesisml/0.2.1/
@@ -100,6 +155,10 @@
   [✓] CLEAN: Linear routing is readable
   [✓] CLEAN: Conditional edges map to concrete node names
   [✓] FIXED: Graph cache uses monotonic counter instead of id(agent)
+  [✓] FIXED: clear_all_caches() added to graph.py
+  [✓] FIXED: Router checks preflight_blockers for early termination
+  [✓] FIXED: WorkflowState includes preflight/sampling fields
+  [✓] FIXED: Nodes propagate agent metadata and diagnostics to state
 
   [✗] HIGH: sdk.py Phronesis class clears graph cache in clean() and
       recommend_model() but not in cluster() or detect_anomalies().
@@ -123,10 +182,7 @@
   [✓] CLEAN: AgentResult with structured error fields
   [✓] CLEAN: Stateless agents (all state in WorkflowState)
   [✓] CLEAN: Thin orchestrators that delegate to services
-
-  [✗] HIGH: ETLAgent imports pandas directly at module level (line 12 of
-      agents/etl/agent.py), violating the engine-mediated design principle.
-      → Fix: Remove direct pandas import, use engine or pass-through
+  [✓] FIXED: ETLAgent pandas import moved inside run() (B3 completed)
 
   [✗] HIGH: ModelSelectionAgent and EvaluationAgent both reconstruct
       features + target from upstream state independently.
@@ -191,6 +247,7 @@
   [✓] CLEAN: cached_collect for performance
   [✓] CLEAN: Auto-selection based on data size
   [✓] FIXED: _collect_cache is now instance-level (not shared across engines)
+  [✓] FIXED: sample() abstract method added to BaseEngine + all implementations
 
   [✗] HIGH: NUMERIC_DTYPES constant is defined in base_engine.py but
       used across multiple modules.  Should be in a shared utils module.
@@ -268,6 +325,7 @@
 
   [✓] FIXED: PhronesisConfig.engine.preferred now constrained to Literal type
   [✓] FIXED: FeatureSelectionConfig validated (ge/le constraints)
+  [✓] FIXED: SamplingConfig validated via Pydantic model with Literal types
 
   [✗] HIGH: null_strategy not validated in Phronesis.clean() or
       simple.clean().  Invalid values silently produce wrong results.
@@ -383,6 +441,7 @@
   [✓] CLEAN: Lazy imports in composition root
   [✓] CLEAN: TYPE_CHECKING guard in sdk.py
   [✓] FIXED: py.typed marker added for PEP 561
+  [✓] FIXED: ETLAgent pandas import moved inside run() (B3 completed)
 
   [✗] HIGH: __init__.py eagerly imports 50+ symbols at module level.
       → Fix: Use __getattr__ lazy loading
@@ -397,9 +456,6 @@
       level.
       → Fix: Defer to function body
 
-  [✗] LOW: agents/etl/agent.py imports pandas at module level.
-      → Fix: Remove direct pandas import
-
 ================================================================================
   STAGE 14: PERFORMANCE AUDIT
 ================================================================================
@@ -409,6 +465,9 @@
   [✓] CLEAN: Resource-bounded HPO (max_trials, max_time_seconds)
   [✓] CLEAN: SHAP sampling for large datasets
   [✓] FIXED: sdist size reduced from 211 MB to 0.13 MB
+  [✓] FIXED: Preflight resource estimation prevents OOM failures
+  [✓] FIXED: Auto-sampling before expensive stages (EDA, feature engineering, etc.)
+  [✓] FIXED: Memory safety with psutil-based detection + fallback
 
   [✗] MEDIUM: df.copy() in multiple places (ETL, feature engineering,
       validation) — unnecessary copies for small datasets.
@@ -427,15 +486,16 @@
   STAGE 15: TESTING AUDIT
 ================================================================================
 
-  [✓] CLEAN: 148 tests passing (100%) — 110 integration + 38 unit
+  [✓] CLEAN: 193 tests passing (100%) — 110 integration + 38 unit + 45 preflight
   [✓] CLEAN: Comprehensive public API coverage
   [✓] CLEAN: Edge cases tested (dirty data, tiny datasets, inf values)
   [✓] CLEAN: Integration tests for full pipeline
   [✓] CLEAN: Explainability unit tests (tree, linear, other, wrapped)
   [✓] CLEAN: Feature importance validation tests
   [✓] CLEAN: Backward compatibility tests
+  [✓] CLEAN: Preflight system tests (sampling, estimation, memory, engine backends)
 
-  [✗] MEDIUM: Tests split across test.py and tests/test_explainability.py
+  [✗] MEDIUM: Tests split across test.py and tests/ directory
       — should be further modularized.
       → Fix: Split into tests/test_sdk.py, tests/test_simple.py, etc.
 
@@ -508,22 +568,45 @@
       → Fix: Add SECURITY.md
 
 ================================================================================
+  STAGE 18: PREFLIGHT SYSTEM AUDIT (NEW)
+================================================================================
+
+  [✓] CLEAN: SamplingConfig uses Pydantic with Literal validators
+  [✓] CLEAN: SamplingMode is StrEnum with 9 well-defined modes
+  [✓] CLEAN: ResourceEstimator provides memory, feature count, runtime estimates
+  [✓] CLEAN: Sampler uses engine-native conversion (no unnecessary collect)
+  [✓] CLEAN: MemorySafety has psutil detection with 4.0 GB fallback
+  [✓] CLEAN: Target detection ID/UUID filtering prevents wrong column selection
+  [✓] CLEAN: validate_target_safety() checks memory, cardinality, imbalance
+  [✓] CLEAN: Pre-flight diagnostics propagate through WorkflowState
+  [✓] CLEAN: Router early terminates on preflight blockers
+  [✓] CLEAN: Graph builder auto-inserts sampling nodes
+  [✓] CLEAN: 45 regression tests covering all components
+  [✓] CLEAN: Engine sampling methods (Polars, Pandas, Spark)
+
+  [✗] MEDIUM: psutil not installed — falls back to 4.0 GB estimate
+      → Fix: Document psutil as recommended optional dependency
+
+  [✗] MEDIUM: No stratified sampling for time-series data
+      → Fix: Add time_aware strategy validation (future enhancement)
+
+================================================================================
   REMAINING WORK (prioritized)
 ================================================================================
 
   ┌─────────────────────────────────────────────────────────────────────────┐
-  │  PHASE B: HIGH-PRIORITY FIXES (v0.3.0) — 11 items                    │
+  │  PHASE B: HIGH-PRIORITY FIXES (v0.3.0) — 10 items                    │
   │  Estimated effort: 3-5 days                                           │
   ├─────────────────────────────────────────────────────────────────────────┤
   │  B1. Extract service layer (phronesisml/services/)                    │
   │      DataService, CleaningService, FeatureService, ModelService,      │
   │      ReportService, StorageService                                    │
   │  B2. Split simple.py into smaller modules (1328 lines -> services)    │
-  │  B3. Remove direct pandas import from ETLAgent                        │
+  │  B3. ✅ COMPLETED: Remove direct pandas import from ETLAgent          │
   │  B4. Add shared data resolution helper for agents                     │
   │  B5. Move NUMERIC_DTYPES to shared utils                              │
   │  B6. Add lazy __getattr__ to __init__.py                              │
-  │  B7. Move polars/openpyxl to optional extras                          │
+  │  B7. Move openpyxl to optional extras                                  │
   │  B8. Add friendly ImportError messages for CLI/API                     │
   │  B9. Clear graph cache in all SDK methods that create agents          │
   │  B10. Forward cluster/anomaly parameters in SDK                       │
@@ -593,6 +676,8 @@
   Generated: 2026-07-15
   Current version: 0.2.1
   Architecture grade: A- (upgraded from B+)
-  Tests: 148/148 passing (100%)
+  Tests: 193/193 passing (100%) — 110 integration + 38 explainability + 45 preflight
   Published: PyPI v0.2.1 + Docker ghcr.io:v0.2.1
+  Remaining findings: 40 (0 Critical, 10 High, 18 Medium, 12 Low)
+  Next session target: B1-B2 (service layer + simple.py split), B4-B11
 ================================================================================

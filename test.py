@@ -248,7 +248,7 @@ def _make_inf_values_csv(path: str | None = None) -> str:
 def test_imports() -> None:
     import phronesisml
 
-    assert phronesisml.__version__ == "0.2.0"
+    assert phronesisml.__version__ == "0.2.1"
     return {"version": phronesisml.__version__, "all_exports": len(phronesisml.__all__)}
 
 

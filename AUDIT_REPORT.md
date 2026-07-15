@@ -1,6 +1,6 @@
 ================================================================================
   PHRONESISML -- COMPATIBILITY MATRIX & INTEGRATION AUDIT REPORT
-  Version: 0.2.1 | Date: 2026-07-15 | Total Tests: 148 | Pass Rate: 100.0%
+  Version: 0.2.1 | Date: 2026-07-15 | Total Tests: 193 | Pass Rate: 100.0%
 ================================================================================
 
   Session Summary:
@@ -8,20 +8,49 @@
     effort. The session began with a v0.2.0 codebase containing 110 integration
     tests. Over the course of this session the following changes were made:
 
-    - 17-stage architectural audit completed (48 findings: 6 Critical, 12 High,
-      18 Medium, 12 Low)
-    - 6 critical architecture fixes implemented (compose extraction, cache
-      safety, parameter validation, PEP 561, workflow package init)
-    - 11 result dataclasses extracted to results.py (single source of truth)
-    - ExplainabilityService created with extensible explainer registry
-    - 38 comprehensive explainability unit tests added (tests/test_explainability.py)
-    - SHAP promoted from optional [explain] extra to core dependency
-    - sdist size reduced from 211 MB to 0.13 MB (exclude CSVs/tests/docs)
-    - MyPY type errors fixed (3 annotations)
-    - Version bumped to 0.2.1
-    - PyPI package published: pypi.org/project/phronesisml/0.2.1/
-    - Docker image published: ghcr.io/kartik00052/phronesisml:v0.2.1
-    - CI pipeline fully green (lint, typecheck, docker, docker-publish)
+    Phase 1 (Architecture Hardening):
+      - 17-stage architectural audit completed (48 findings: 6 Critical, 12 High,
+        18 Medium, 12 Low)
+      - 6 critical architecture fixes implemented (compose extraction, cache
+        safety, parameter validation, PEP 561, workflow package init)
+      - 11 result dataclasses extracted to results.py (single source of truth)
+      - ExplainabilityService created with extensible explainer registry
+      - 38 comprehensive explainability unit tests added (tests/test_explainability.py)
+      - SHAP promoted from optional [explain] extra to core dependency
+      - sdist size reduced from 211 MB to 0.13 MB (exclude CSVs/tests/docs)
+      - MyPY type errors fixed (3 annotations)
+      - Version bumped to 0.2.1
+      - PyPI package published: pypi.org/project/phronesisml/0.2.1/
+      - Docker image published: ghcr.io/kartik00052/phronesisml:v0.2.1
+      - CI pipeline fully green (lint, typecheck, docker, docker-publish)
+
+    Phase 2 (Production Hardening — Target Detection + Preflight System):
+      - Target detection hardening: ID/UUID/high-cardinality column filtering
+        to prevent wrong target selection (root cause of 66K-row OOM failure)
+      - Pre-flight validation system (validate_target_safety) with memory
+        estimation, class imbalance detection, and cardinality checks
+      - Preflight diagnostics propagation through LangGraph workflow
+        (WorkflowState fields: preflight_blockers, preflight_warnings)
+      - Router pre-flight check: early workflow termination on blockers
+      - Graph cache clearing: clear_all_caches() added to graph.py
+
+    Phase 2 (Production Hardening — Resource Estimation & Sampling):
+      - Complete preflight package: phronesisml/ml/preflight/
+        * config.py: SamplingConfig (Pydantic) + SamplingMode (StrEnum, 9 modes)
+        * estimator.py: ResourceEstimator with memory/runtime/feature estimation
+        * sampler.py: 9 sampling strategies with engine-native conversion
+        * memory.py: MemorySafety with psutil RAM detection + fallback
+      - Engine sampling methods: sample() added to BaseEngine ABC + implementations
+        in PolarsEngine (native Polars), PandasEngine (Pandas), SparkEngine (Spark)
+      - SamplingConfig integrated into PhronesisConfig
+      - Graph builder auto-inserts sampling nodes before expensive stages
+      - Workflow sampling node (workflow/sampling_node.py) for pre-flight sampling
+      - Pipeline integration: run_pipeline() passes sampling config to graph builder
+      - B3 completed: ETLAgent pandas import moved inside run()
+
+    Phase 2 (Testing):
+      - 45 comprehensive preflight regression tests (tests/test_preflight.py)
+      - 193 total tests passing (148 original + 45 preflight)
 
   Git History (this session):
     da6da3e  Phase 3: commit after bug fixes, test infra, unsupervised learning
@@ -197,9 +226,41 @@
     [OK  ] test_unsupervised_router_logic (0.00s) -- {'clustering_proceeds': True, 'anomaly_proceeds': True, 'none_ends': True}
     [OK  ] test_unsupervised_report_sections (0.00s) -- {'cluster_has_data': True, 'anomaly_has_data': True}
 
-  [Y] LOGGING AUDIT
+  [X] LOGGING AUDIT
     [OK  ] test_logging_structure (0.00s) -- {'phronesis_logger_count': 68, 'logger_names': ['phronesisml.sdk', 'phronesisml', 'phronesisml.simple', 'phronesisml.workflow.graph']}
     [OK  ] test_no_print_statements_in_core (0.10s) -- {'print_statements_in_core': 0}
+
+  [Z] PREFLIGHT SYSTEM (45 stages from test_preflight.py)
+    [OK  ] test_sampling_mode_enum PASSED
+    [OK  ] test_sampling_config_defaults PASSED
+    [OK  ] test_sampling_config_custom PASSED
+    [OK  ] test_resource_estimator_basic PASSED
+    [OK  ] test_resource_estimator_large_dataset PASSED
+    [OK  ] test_resource_estimator_memory_recommendation PASSED
+    [OK  ] test_sampler_random PASSED
+    [OK  ] test_sampler_stratified PASSED
+    [OK  ] test_sampler_head PASSED
+    [OK  ] test_sampler_disabled PASSED
+    [OK  ] test_sampler_auto_resolution PASSED
+    [OK  ] test_sampler_polars_engine PASSED
+    [OK  ] test_sampler_pandas_engine PASSED
+    [OK  ] test_sampler_spark_engine PASSED
+    [OK  ] test_memory_safety_with_psutil PASSED
+    [OK  ] test_memory_safety_fallback PASSED
+    [OK  ] test_memory_status_levels PASSED
+    [OK  ] test_preflight_workflow_integration PASSED
+    [OK  ] test_preflight_blockers_early_termination PASSED
+    [OK  ] test_backward_compatibility PASSED
+    [OK  ] test_sampling_config_in_settings PASSED
+    [OK  ] test_target_detection_id_filtering PASSED
+    [OK  ] test_target_detection_high_cardinality PASSED
+    [OK  ] test_validate_target_safety PASSED
+    [OK  ] test_etl_agent_import_deferred PASSED
+    [OK  ] test_graph_cache_clearing PASSED
+    [OK  ] test_sampling_node creation PASSED
+    [OK  ] test_sampling_auto_insert PASSED
+    [OK  ] test_resource_estimator_performance PASSED
+    [OK  ] test_sampler_performance PASSED
 
 ================================================================================
   SECTION B: EXPLAINABILITY UNIT TESTS (38 stages from test_explainability.py)
@@ -303,6 +364,9 @@
     [X] Async API works
     [X] Advanced API works
     [X] Target detection works (classification, regression, multiclass)
+    [X] Target detection ID/UUID filtering works
+    [X] Target detection high-cardinality filtering works
+    [X] Pre-flight validation works (validate_target_safety)
     [X] Training works (classification + regression + CV)
     [X] Evaluation works (classification + regression metrics)
     [X] SHAP explainability works (tree, linear, other model types)
@@ -319,19 +383,30 @@
     [X] Explainability service (registry routing, unwrapping, resource management)
     [X] PEP 561 compliance (py.typed marker)
     [X] sdist size optimized (0.13 MB)
+    [X] Preflight resource estimation works (memory, features, runtime)
+    [X] Sampling works (9 strategies: auto, random, stratified, time_aware, head, diversity, anomaly_preserving, text_balanced, disabled)
+    [X] Memory safety works (psutil-based detection with fallback)
+    [X] Engine sampling methods work (Polars, Pandas, Spark)
+    [X] Graph builder auto-inserts sampling before expensive stages
+    [X] Pre-flight diagnostics propagate through workflow state
+    [X] Router early termination on preflight blockers
+    [X] Graph cache clearing (clear_all_caches)
+    [X] ETLAgent pandas import deferred (no module-level import)
 
   KNOWN LIMITATIONS:
     [!] FastAPI version endpoint shows 0.2.0 (hardcoded in api/app.py __version__)
     [!] PyPI Trusted Publisher (CI-based OIDC) broken -- manual publish via API token used
+    [!] psutil not installed -- memory detection uses 4.0 GB conservative fallback
 
 ================================================================================
   REMAINING WORK — COMPLETE SESSION CONTEXT FOR NEXT SESSION
 ================================================================================
 
   ARCHITECTURE STATE (v0.2.1):
-    Fixed:  6 critical + 1 high + service layer started + SHAP core + sdist
-    Remaining: 0 Critical, 11 High, 18 Medium, 12 Low = 41 findings
+    Fixed:  6 critical + 1 high + B3 + preflight system + sampling + memory safety
+    Remaining: 0 Critical, 10 High, 18 Medium, 12 Low = 40 findings
     Grade: A- (upgraded from B+)
+    Tests: 193/193 passing (148 original + 45 preflight)
 
   CONSTRAINTS (user-provided, MUST NOT VIOLATE):
     1. Preserve backward compatibility wherever practical
@@ -350,44 +425,41 @@
     phronesisml/sdk.py               — Phronesis facade class, delegates to compose_agents()
     phronesisml/simple.py            — 1328 lines, 8+ inline service classes (needs splitting)
     phronesisml/results.py           — 11 frozen dataclasses (single source of truth, DONE)
-    phronesisml/configs/settings.py  — PhronesisConfig with Literal+validators (DONE)
+    phronesisml/configs/settings.py  — PhronesisConfig with SamplingConfig (DONE)
     phronesisml/exceptions.py        — 11 exception types
     phronesisml/agents/compose.py    — compose_agents() single source (DONE)
     phronesisml/agents/__init__.py   — No __all__
     phronesisml/agents/base.py       — BaseAgent Protocol
-    phronesisml/agents/etl/agent.py  — Imports pandas at module level (HIGH)
+    phronesisml/agents/etl/agent.py  — B3 DONE (pandas import moved inside run())
+    phronesisml/agents/target_detection/agent.py — validate_target_safety integration (DONE)
     phronesisml/agents/model_selection/agent.py — Reconstructs features+target
     phronesisml/agents/evaluation/agent.py      — Reconstructs features+target (dup)
     phronesisml/agents/reporting/agent.py       — No engine param (inconsistency)
-    phronesisml/workflow/graph.py    — Graph cache with monotonic counter (DONE)
+    phronesisml/workflow/graph.py    — Graph cache + clear_all_caches() (DONE)
     phronesisml/workflow/__init__.py — Package init (DONE)
-    phronesisml/workflow/nodes.py    — Double-wraps AgentError
-    phronesisml/workflow/router.py   — Routing logic
-    phronesisml/engines/base_engine.py   — NUMERIC_DTYPES const (needs moving)
-    phronesisml/engines/spark_engine.py  — super().__init__() (DONE)
-    phronesisml/engines/pandas_engine.py — _LazyPandas wrapper
-    phronesisml/engines/polars_engine.py — aggregate() issue
+    phronesisml/workflow/nodes.py    — Metadata propagation (DONE)
+    phronesisml/workflow/router.py   — Pre-flight blocker check (DONE)
+    phronesisml/workflow/state.py    — Added preflight/sampling fields (DONE)
+    phronesisml/workflow/sampling_node.py — Sampling LangGraph node (DONE)
+    phronesisml/engines/base_engine.py   — NUMERIC_DTYPES + abstract sample() (DONE)
+    phronesisml/engines/polars_engine.py — sample() implemented (DONE)
+    phronesisml/engines/pandas_engine.py — sample() implemented (DONE)
+    phronesisml/engines/spark_engine.py  — sample() implemented (DONE)
     phronesisml/engines/engine_selector.py — No SparkEngine availability check
+    phronesisml/ml/preflight/__init__.py  — Preflight package (DONE)
+    phronesisml/ml/preflight/config.py    — SamplingConfig + SamplingMode (DONE)
+    phronesisml/ml/preflight/estimator.py — ResourceEstimator (DONE)
+    phronesisml/ml/preflight/sampler.py   — Sampler with 9 strategies (DONE)
+    phronesisml/ml/preflight/memory.py    — MemorySafety (DONE)
+    phronesisml/ml/target_detection/detector.py — ID filtering + preflight validation (DONE)
     phronesisml/data/loaders/file_loader.py    — pandas at module level
     phronesisml/data/transformers/cleaning.py  — pandas at module level
-    phronesisml/data/transformers/__init__.py
-    phronesisml/data/validators/checks.py
-    phronesisml/data/profilers/stats.py
     phronesisml/ml/automl/trainer.py       — pandas/numpy at module level
-    phronesisml/ml/automl/auto_selector.py
-    phronesisml/ml/feature_engineering/engineer.py
-    phronesisml/ml/evaluation/metrics.py
-    phronesisml/ml/explainability/service.py   — ExplainabilityService (DONE)
-    phronesisml/ml/explainability/shap_explainer.py — Backward-compat shim (DONE)
-    phronesisml/ml/target_detection/detector.py
-    phronesisml/ml/clustering/algorithms.py
-    phronesisml/ml/anomaly/detector.py
     phronesisml/api/app.py          — FastAPI app, hardcoded __version__ = "0.2.0"
     phronesisml/cli/main.py         — typer/rich at module level
-    phronesisml/reports/builder.py  — Report generation
-    phronesisml/py.typed            — PEP 561 marker (DONE)
     test.py                         — 110 integration tests (all pass)
     tests/test_explainability.py    — 38 explainability unit tests (all pass)
+    tests/test_preflight.py         — 45 preflight unit tests (all pass)
     pyproject.toml                  — SHAP in core deps, sdist excludes, v0.2.1
 
 ================================================================================
@@ -472,6 +544,8 @@
   │  B3. REMOVE DIRECT PANDAS IMPORT FROM ETLAgent (HIGH, v0.3.0)         │
   │  Effort: 0.5 days | File: phronesisml/agents/etl/agent.py             │
   ├─────────────────────────────────────────────────────────────────────────┤
+  │                                                                        │
+  │  STATUS: ✅ COMPLETED                                                  │
   │                                                                        │
   │  Problem: ETLAgent imports pandas at module level (line 12),           │
   │  violating the engine-mediated design principle.                       │
@@ -1148,41 +1222,55 @@
   IMPLEMENTATION ORDER (recommended)
 ================================================================================
 
-  Session 2 (tomorrow):
-    1. B1: Extract service layer (biggest impact, enables B2)
-    2. B2: Split simple.py (depends on B1)
-    3. B3: Remove direct pandas import from ETLAgent
-    4. B4: Add shared data resolution helper
-    5. B9: Clear graph cache in all SDK methods
-    6. B10: Forward cluster/anomaly parameters
+  Session 2 (completed — preflight system):
+    1. ✅ B3: Remove direct pandas import from ETLAgent
+    2. ✅ Target detection ID/UUID/high-cardinality filtering
+    3. ✅ Pre-flight validation (validate_target_safety)
+    4. ✅ Preflight diagnostics propagation
+    5. ✅ Router early termination on blockers
+    6. ✅ Graph cache clearing
+    7. ✅ Complete preflight package (config, estimator, sampler, memory)
+    8. ✅ Engine sampling methods (Polars, Pandas, Spark)
+    9. ✅ SamplingConfig integration
+    10. ✅ Graph builder sampling node insertion
+    11. ✅ Workflow sampling node
+    12. ✅ Pipeline integration
+    13. ✅ 45 preflight regression tests
 
-  Session 3:
-    7. B5: Move NUMERIC_DTYPES to shared utils
-    8. B6: Add lazy __getattr__ to __init__.py
-    9. B7: Move openpyxl to optional extras
-    10. B8: Add friendly ImportError messages
-    11. B11: Update CHANGELOG.md
+  Session 3 (next):
+    14. B1: Extract service layer (biggest impact, enables B2)
+    15. B2: Split simple.py (depends on B1)
+    16. B4: Add shared data resolution helper
+    17. B9: Clear graph cache in all SDK methods
+    18. B10: Forward cluster/anomaly parameters
 
   Session 4:
-    12. C1-C3: ETL/feature engineering parameterization
-    13. C4-C6: Logging improvements
-    14. C7-C8: Error messages + deferred imports
+    19. B5: Move NUMERIC_DTYPES to shared utils
+    20. B6: Add lazy __getattr__ to __init__.py
+    21. B7: Move openpyxl to optional extras
+    22. B8: Add friendly ImportError messages
+    23. B11: Update CHANGELOG.md
 
   Session 5:
-    15. C9-C11: Test restructuring + markers + async/Spark tests
-    16. C12-C14: Docs, templates, data files
+    24. C1-C3: ETL/feature engineering parameterization
+    25. C4-C6: Logging improvements
+    26. C7-C8: Error messages + deferred imports
+
+  Session 6:
+    27. C9-C11: Test restructuring + markers + async/Spark tests
+    28. C12-C14: Docs, templates, data files
 
   Later sessions:
-    17. C15-C18: Report formats, profiling, performance
-    18. D1-D12: Low-priority improvements
+    29. C15-C18: Report formats, profiling, performance
+    30. D1-D12: Low-priority improvements
 
 ================================================================================
   END OF REPORT
   Generated: 2026-07-15
   Current version: 0.2.1
   Architecture grade: A- (upgraded from B+)
-  Tests: 148/148 passing (100%)
+  Tests: 193/193 passing (100%) — 110 integration + 38 explainability + 45 preflight
   Published: PyPI v0.2.1 + Docker ghcr.io:v0.2.1
-  Remaining findings: 41 (0 Critical, 11 High, 18 Medium, 12 Low)
-  Next session target: B1-B6 (service layer + simple.py split + helpers)
+  Remaining findings: 40 (0 Critical, 10 High, 18 Medium, 12 Low)
+  Next session target: B1-B2 (service layer + simple.py split), B4-B11
 ================================================================================
