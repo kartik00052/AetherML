@@ -230,7 +230,6 @@ PhronesisError (base)
 
 The system is designed for **graceful degradation**:
 
-- If SHAP is not installed, explainability returns empty results — the pipeline continues.
 - If an agent raises `AgentNotImplementedError`, the node logs a warning and returns `{}`.
 - If MLflow is unreachable, training continues without logging.
 - Partial results are always available even if later stages fail.
