@@ -300,8 +300,8 @@ def test_exception_hierarchy() -> None:
 def test_workflow_state() -> None:
     from phronesisml.workflow.state import WorkflowState
 
-    ws = WorkflowState()
-    fields = list(ws.model_fields.keys())
+    WorkflowState()
+    fields = list(WorkflowState.model_fields.keys())
     return {"state_fields": len(fields), "sample_fields": fields[:5]}
 
 
@@ -1782,8 +1782,8 @@ def test_unsupervised_auto_selector_candidates() -> None:
 def test_unsupervised_workflow_state_fields() -> None:
     from phronesisml.workflow.state import WorkflowState
 
-    state = WorkflowState()
-    fields = list(state.model_fields.keys())
+    WorkflowState()
+    fields = list(WorkflowState.model_fields.keys())
     unsupervised = [
         "cluster_labels",
         "cluster_metrics",
@@ -1954,19 +1954,40 @@ def generate_report() -> str:
     lines.append("")
     lines.append("  Dataset Category        | Target Detect | Train | Eval | SHAP | Report")
     lines.append("  " + "-" * 70)
-    for name, status in [
-        ("Classification", "test_target_detection_classification"),
-        ("Regression", "test_target_detection_regression"),
-        ("Multiclass", "test_target_detection_multiclass"),
-        ("No Target", "test_target_detection_no_target"),
-        ("Constant Target", "test_target_detection_constant_target"),
-        ("Tiny Dataset", "test_tiny_dataset_target_detection"),
-        ("Dirty Data", "test_dirty_data_full_pipeline"),
-        ("Inf Values", "test_inf_values_handling"),
+    _STATUS_MAP = {"passed": "passed", "failed": "FAILED", "skipped": "skipped", "warning": "warn"}
+    for name, det_name, train_name, eval_name in [
+        (
+            "Classification",
+            "test_target_detection_classification",
+            "test_train_classification",
+            "test_evaluate_classification",
+        ),
+        (
+            "Regression",
+            "test_target_detection_regression",
+            "test_train_regression",
+            "test_evaluate_regression",
+        ),
+        ("Multiclass", "test_target_detection_multiclass", None, None),
+        ("No Target", "test_target_detection_no_target", None, None),
+        ("Constant Target", "test_target_detection_constant_target", None, None),
+        ("Tiny Dataset", "test_tiny_dataset_target_detection", None, None),
+        ("Dirty Data", "test_dirty_data_full_pipeline", None, None),
+        ("Inf Values", "test_inf_values_handling", None, None),
     ]:
-        r = next((r for r in RESULTS if r.name == status), None)
-        s = r.status if r else "N/A"
-        lines.append(f"  {name:24s} | {s:13s} | {'?':5s} | {'?':4s} | {'?':4s} | {'?':6s}")
+        r_det = next((r for r in RESULTS if r.name == det_name), None)
+        r_train = next((r for r in RESULTS if r.name == train_name), None) if train_name else None
+        r_eval = next((r for r in RESULTS if r.name == eval_name), None) if eval_name else None
+        r_shap = next((r for r in RESULTS if r.name == "test_shap_explainability"), None)
+        r_report = next((r for r in RESULTS if r.name == "test_report_generation"), None)
+        s_det = _STATUS_MAP.get(r_det.status, "N/A") if r_det else "N/A"
+        s_train = _STATUS_MAP.get(r_train.status, "N/A") if r_train else "--"
+        s_eval = _STATUS_MAP.get(r_eval.status, "N/A") if r_eval else "--"
+        s_shap = _STATUS_MAP.get(r_shap.status, "N/A") if r_shap else "--"
+        s_report = _STATUS_MAP.get(r_report.status, "N/A") if r_report else "--"
+        lines.append(
+            f"  {name:24s} | {s_det:13s} | {s_train:5s} | {s_eval:4s} | {s_shap:4s} | {s_report:6s}"
+        )
 
     lines.append("")
     lines.append("-" * 80)
